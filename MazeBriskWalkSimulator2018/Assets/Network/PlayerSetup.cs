@@ -43,7 +43,10 @@ public class PlayerSetup : NetworkBehaviour {
     {
         for (int i = 0; i < componentsToDisable.Length; i++)
         {
-            componentsToDisable[i].enabled = false;
+            if(componentsToDisable[i] != null)
+            {
+                componentsToDisable[i].enabled = false;
+            }
         }
     }
 }
