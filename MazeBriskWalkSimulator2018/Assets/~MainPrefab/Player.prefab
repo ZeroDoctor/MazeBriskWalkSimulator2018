@@ -911,7 +911,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4275976811504710}
-  - component: {fileID: 95519942593448108}
   - component: {fileID: 114371658088777888}
   - component: {fileID: 114477214812935402}
   - component: {fileID: 114298062417196300}
@@ -5490,24 +5489,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!95 &95519942593448108
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1384773884790600}
-  m_Enabled: 0
-  m_Avatar: {fileID: 9000000, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
-  m_Controller: {fileID: 9100000, guid: 87ae67f728dce4fb08385f4fe3aec5ef, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!95 &95711064147632674
 Animator:
   serializedVersion: 3
@@ -5542,9 +5523,9 @@ MonoBehaviour:
   - {fileID: 20109552370204456}
   - {fileID: 81339433559222126}
   - {fileID: 82918853532932548}
-  - {fileID: 114286904542930134}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 114371658088777888}
+  - {fileID: 114477214812935402}
+  - {fileID: 114298062417196300}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -5575,7 +5556,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Animator: {fileID: 95711064147632674}
-  m_ParameterSendBits: 64
+  m_ParameterSendBits: 4194303
   param0: 
   param1: 
   param2: 
@@ -5671,10 +5652,11 @@ MonoBehaviour:
   ClimbOffset: {x: 0, y: 0, z: 0.6}
   ClimbRotationOffset: {x: 0, y: 0, z: 0}
   ShowDebugObjects: 0
+  net_Animator: {fileID: 114189981732817022}
   EyeOffset: {x: 0, y: -0.08, z: -0.1}
   LookDownZoomFactor: 15
   ShowUnarmedArms: 1
-  InvisibleMaterial: {fileID: 0}
+  InvisibleMaterial: {fileID: 2100000, guid: 79493f8f538fb764b989fc1cc9c818f7, type: 2}
 --- !u!114 &114477214812935402
 MonoBehaviour:
   m_ObjectHideFlags: 1

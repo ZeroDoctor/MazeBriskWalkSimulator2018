@@ -25,10 +25,11 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(NetworkAnimator))]
 
 public class vp_BodyAnimator : MonoBehaviour
 {
@@ -182,14 +183,14 @@ public class vp_BodyAnimator : MonoBehaviour
 		}
 	}
 
-	protected Animator m_Animator;
-	protected Animator Animator
+	public NetworkAnimator net_Animator;
+	protected NetworkAnimator netAnimator 
 	{
 		get
 		{
-			if (m_Animator == null)
-				m_Animator = GetComponent<Animator>();
-			return m_Animator;
+			if (net_Animator == null)
+				net_Animator = GetComponent<NetworkAnimator>();
+			return net_Animator;
 		}
 	}
 
@@ -429,34 +430,34 @@ public class vp_BodyAnimator : MonoBehaviour
 		// --- booleans used to transition between blend states ---
 		// TODO: these should be moved to event callbacks on the next optimization run
 
-		Animator.SetBool(IsRunning, Player.Run.Active && GetIsMoving());
-		Animator.SetBool(IsCrouching, Player.Crouch.Active);
-		Animator.SetInteger(WeaponTypeIndex, Player.CurrentWeaponType.Get());
-		Animator.SetInteger(WeaponGripIndex, Player.CurrentWeaponGrip.Get());
-		Animator.SetBool(IsSettingWeapon, Player.SetWeapon.Active);
-		Animator.SetBool(IsReloading, Player.Reload.Active);
-		Animator.SetBool(IsOutOfControl, Player.OutOfControl.Active);
-		Animator.SetBool(IsClimbing, Player.Climb.Active);
-		Animator.SetBool(IsZooming, Player.Zoom.Active);
-		Animator.SetBool(IsGrounded, m_Grounded);
-		Animator.SetBool(IsMoving, GetIsMoving());
-		Animator.SetBool(IsFirstPerson, Player.IsFirstPerson.Get());
+		netAnimator.animator.SetBool(IsRunning, Player.Run.Active && GetIsMoving());
+		netAnimator.animator.SetBool(IsCrouching, Player.Crouch.Active);
+		netAnimator.animator.SetInteger(WeaponTypeIndex, Player.CurrentWeaponType.Get());
+		netAnimator.animator.SetInteger(WeaponGripIndex, Player.CurrentWeaponGrip.Get());
+		netAnimator.animator.SetBool(IsSettingWeapon, Player.SetWeapon.Active);
+		netAnimator.animator.SetBool(IsReloading, Player.Reload.Active);
+		netAnimator.animator.SetBool(IsOutOfControl, Player.OutOfControl.Active);
+		netAnimator.animator.SetBool(IsClimbing, Player.Climb.Active);
+		netAnimator.animator.SetBool(IsZooming, Player.Zoom.Active);
+		netAnimator.animator.SetBool(IsGrounded, m_Grounded);
+		netAnimator.animator.SetBool(IsMoving, GetIsMoving());
+		netAnimator.animator.SetBool(IsFirstPerson, Player.IsFirstPerson.Get());
 
 		// --- floats used inside blend states to blend between animations ---
 
-		Animator.SetFloat(TurnAmount, m_CurrentTurn);
-		Animator.SetFloat(ForwardAmount, m_CurrentForward);
-		Animator.SetFloat(StrafeAmount, m_CurrentStrafe);
-		Animator.SetFloat(PitchAmount, (-Player.Rotation.Get().x) / 90.0f);
+		netAnimator.animator.SetFloat(TurnAmount, m_CurrentTurn);
+		netAnimator.animator.SetFloat(ForwardAmount, m_CurrentForward);
+		netAnimator.animator.SetFloat(StrafeAmount, m_CurrentStrafe);
+		netAnimator.animator.SetFloat(PitchAmount, (-Player.Rotation.Get().x) / 90.0f);
 
 		if (m_Grounded)
-			Animator.SetFloat(VerticalMoveAmount, 0.0f);
+			netAnimator.animator.SetFloat(VerticalMoveAmount, 0.0f);
 		else
 		{
 			if (Player.Velocity.Get().y < 0.0f)
-				Animator.SetFloat(VerticalMoveAmount, Mathf.Lerp(Animator.GetFloat(VerticalMoveAmount), -1.0f, Time.deltaTime * 3));
+				netAnimator.animator.SetFloat(VerticalMoveAmount, Mathf.Lerp(netAnimator.animator.GetFloat(VerticalMoveAmount), -1.0f, Time.deltaTime * 3));
 			else
-				Animator.SetFloat(VerticalMoveAmount, Player.MotorThrottle.Get().y * 10.0f);
+				netAnimator.animator.SetFloat(VerticalMoveAmount, Player.MotorThrottle.Get().y * 10.0f);
 		}
 
 	}
@@ -612,9 +613,9 @@ public class vp_BodyAnimator : MonoBehaviour
 				// when standing still and unarmed (but beware: stiffer, and glitchy in crouch mode)
 				 //&& ((Player.CurrentWeaponType.Get() > 0) || Player.Crouch.Active)
 				)
-				|| Animator.GetBool(IsAttacking)
-				|| Animator.GetBool(IsZooming))
-				&& !Animator.GetBool(IsCrouching)	// always focus headlook on neck while crouching
+				|| netAnimator.animator.GetBool(IsAttacking)
+				|| netAnimator.animator.GetBool(IsZooming))
+				&& !netAnimator.animator.GetBool(IsCrouching)	// always focus headlook on neck while crouching
 				)
 				m_HeadLookTargetFalloffs[v] = m_HeadLookFalloffs[(m_HeadLookFalloffs.Count - 1) - v];
 
@@ -624,7 +625,7 @@ public class vp_BodyAnimator : MonoBehaviour
 				m_HeadLookTargetFalloffs[v] = m_HeadLookFalloffs[v];
 
 			// if was moving and stopped, snap to target falloff
-			if (m_WasMoving && !(Animator.GetBool(IsMoving)))
+			if (m_WasMoving && !(netAnimator.animator.GetBool(IsMoving)))
 				m_HeadLookCurrentFalloffs[v] = m_HeadLookTargetFalloffs[v];
 
 			// lerp bones toward the new target angle
@@ -690,7 +691,7 @@ public class vp_BodyAnimator : MonoBehaviour
 
 		}
 
-		m_WasMoving = Animator.GetBool(IsMoving);
+		m_WasMoving = netAnimator.animator.GetBool(IsMoving);
 
 	}
 
@@ -994,10 +995,10 @@ public class vp_BodyAnimator : MonoBehaviour
 			{
 				vp_Timer.In(WeaponHandler.CurrentShooter.ProjectileSpawnDelay * 0.7f, () =>
 					{
-						if ((this != null) && (Animator != null))
+						if ((this != null) && (netAnimator.animator != null))
 						{
 							m_AttackDoneTimer.Cancel();
-							Animator.SetBool(IsAttacking, true);
+							netAnimator.animator.SetBool(IsAttacking, true);
 							OnStop_Attack();
 						}
 					});
@@ -1005,7 +1006,7 @@ public class vp_BodyAnimator : MonoBehaviour
 		}
 		else
 		// ---
-		Animator.SetBool(IsAttacking, true);
+		netAnimator.animator.SetBool(IsAttacking, true);
 
 	}
 
@@ -1019,9 +1020,9 @@ public class vp_BodyAnimator : MonoBehaviour
 		// for 'RefreshWeaponStates'
 		vp_Timer.In(0.5f, delegate()
 		{
-			if ((this != null) && (Animator != null))
+			if ((this != null) && (netAnimator.animator != null))
 			{
-				Animator.SetBool(IsAttacking, false);
+				netAnimator.animator.SetBool(IsAttacking, false);
 				RefreshWeaponStates();
 			}
 		}, m_AttackDoneTimer);
@@ -1042,8 +1043,8 @@ public class vp_BodyAnimator : MonoBehaviour
 			{
 				if (!Player.Attack.Active)
 				{
-					if(Animator != null)
-						Animator.SetBool(IsAttacking, false);
+					if(netAnimator.animator != null)
+						netAnimator.animator.SetBool(IsAttacking, false);
 				}
 				RefreshWeaponStates();
 			}
@@ -1057,7 +1058,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	/// </summary>
 	protected virtual void OnStart_Reload()
 	{
-		Animator.SetTrigger(StartReload);
+		netAnimator.animator.SetTrigger(StartReload);
 	}
 
 
@@ -1066,7 +1067,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	/// </summary>
 	protected virtual void OnStart_OutOfControl()
 	{
-		Animator.SetTrigger(StartOutOfControl);
+		netAnimator.animator.SetTrigger(StartOutOfControl);
 	}
 
 
@@ -1076,7 +1077,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	protected virtual void OnStart_Climb()
 	{
 
-		Animator.SetTrigger(StartClimb);
+		netAnimator.animator.SetTrigger(StartClimb);
 
 	}
 
