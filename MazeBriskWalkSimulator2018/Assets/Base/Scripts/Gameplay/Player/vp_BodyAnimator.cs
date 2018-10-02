@@ -30,7 +30,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(NetworkAnimator))]
-
 public class vp_BodyAnimator : NetworkBehaviour
 {
 
@@ -200,12 +199,12 @@ public class vp_BodyAnimator : NetworkBehaviour
 	}
 
 	public NetworkAnimator net_Animator;
-	protected NetworkAnimator netAnimator 
+	protected NetworkAnimator netAnimator
 	{
 		get
 		{
 			if (net_Animator == null)
-				net_Animator = GetComponent<NetworkAnimator>();
+				net_Animator = GetComponentInParent<NetworkAnimator>();
 			return net_Animator;
 		}
 	}

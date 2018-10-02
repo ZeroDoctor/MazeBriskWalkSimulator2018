@@ -226,8 +226,8 @@ public class vp_FPCamera : vp_Component
 		// TEST: removed for multiplayer. please report if this causes trouble
 		//foreach (Transform b in Parent)
 		//{
-		//	if (b.gameObject.layer != vp_Layer.RemotePlayer)
-		//		b.gameObject.layer = vp_Layer.LocalPlayer;
+			//if (b.gameObject.layer != vp_Layer.RemotePlayer)
+				//b.gameObject.layer = vp_Layer.LocalPlayer;
 		//}
 	
 		// main camera initialization

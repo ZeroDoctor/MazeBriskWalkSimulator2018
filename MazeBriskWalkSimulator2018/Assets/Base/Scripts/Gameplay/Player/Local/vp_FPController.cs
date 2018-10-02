@@ -26,7 +26,7 @@ public class vp_FPController : vp_CharacterController
 	protected Vector3 m_SmoothPosition = Vector3.zero;		// smooth position. updates as often as possible and is only used for the camera
 	public Vector3 SmoothPosition { get { return m_SmoothPosition; } }	// a version of the controller position calculated in 'Update' to get smooth camera motion
 	public Vector3 Velocity { get { return CharacterController.velocity; } }
-	protected bool m_IsFirstPerson = true;
+	protected bool m_IsFirstPerson = false;
 
 	// collision
 	public bool HeadContact { get { return m_HeadContact; } }
