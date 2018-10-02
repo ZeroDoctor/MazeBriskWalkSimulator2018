@@ -29,7 +29,7 @@ public class vp_Component : MonoBehaviour
 		get
 		{
 			if (m_EventHandler == null)
-				m_EventHandler = (vp_EventHandler)Transform.root.GetComponentInChildren(typeof(vp_EventHandler));
+				m_EventHandler = (vp_EventHandler)Transform.root.GetComponentInParent(typeof(vp_EventHandler));
 			return m_EventHandler;
 		}
 	}

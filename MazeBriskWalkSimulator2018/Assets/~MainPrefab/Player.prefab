@@ -2241,6 +2241,7 @@ GameObject:
   - component: {fileID: 114051482684295580}
   - component: {fileID: 114921989311494774}
   - component: {fileID: 114746855125760888}
+  - component: {fileID: 114012203336504590}
   - component: {fileID: 114937166750994312}
   - component: {fileID: 95711064147632674}
   - component: {fileID: 114189981732817022}
@@ -2250,7 +2251,7 @@ GameObject:
   - component: {fileID: 114609953322726432}
   - component: {fileID: 114969569431997654}
   - component: {fileID: 82918853532932548}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5492,6 +5493,7 @@ AudioSource:
 --- !u!95 &95711064147632674
 Animator:
   serializedVersion: 3
+<<<<<<< HEAD
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -5507,6 +5509,27 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &114012203336504590
+MonoBehaviour:
+=======
+>>>>>>> master
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1817609385690384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1267208747, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Target: {fileID: 4275976811504710}
+  m_ChildIndex: 0
+  m_SendInterval: 0.0625
+  m_SyncRotationAxis: 1
+  m_RotationSyncCompression: 0
+  m_MovementThreshold: 0.001
+  m_InterpolateRotation: 0.5
+  m_InterpolateMovement: 0.5
 --- !u!114 &114051482684295580
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -5524,10 +5547,17 @@ MonoBehaviour:
   - {fileID: 81339433559222126}
   - {fileID: 82918853532932548}
   - {fileID: 114371658088777888}
+<<<<<<< HEAD
+  - {fileID: 114545711172776504}
+  - {fileID: 114969569431997654}
+  - {fileID: 114648282634238864}
+  - {fileID: 114477214812935402}
+=======
   - {fileID: 114477214812935402}
   - {fileID: 114298062417196300}
   - {fileID: 0}
   - {fileID: 0}
+>>>>>>> master
   - {fileID: 0}
   enemyLayerName: Enemy
 --- !u!114 &114067170361891938
@@ -5556,7 +5586,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Animator: {fileID: 95711064147632674}
+<<<<<<< HEAD
+  m_ParameterSendBits: 2096127
+=======
   m_ParameterSendBits: 4194303
+>>>>>>> master
   param0: 
   param1: 
   param2: 
@@ -5915,7 +5949,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Target: {fileID: 4324876009634986}
-  m_ChildIndex: 0
+  m_ChildIndex: 1
   m_SendInterval: 0.0625
   m_SyncRotationAxis: 1
   m_RotationSyncCompression: 0

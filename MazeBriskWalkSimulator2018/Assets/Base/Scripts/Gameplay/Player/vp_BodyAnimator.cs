@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
 //	vp_BodyAnimator.cs
-//	© Opsive. All Rights Reserved.
+//	ï¿½ Opsive. All Rights Reserved.
 //	https://twitter.com/Opsive
 //	http://www.opsive.com
 //
@@ -30,8 +30,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(NetworkAnimator))]
-
-public class vp_BodyAnimator : MonoBehaviour
+public class vp_BodyAnimator : NetworkBehaviour
 {
 
 	protected bool m_IsValid = true;
@@ -184,12 +183,12 @@ public class vp_BodyAnimator : MonoBehaviour
 	}
 
 	public NetworkAnimator net_Animator;
-	protected NetworkAnimator netAnimator 
+	protected NetworkAnimator netAnimator
 	{
 		get
 		{
 			if (net_Animator == null)
-				net_Animator = GetComponent<NetworkAnimator>();
+				net_Animator = GetComponentInParent<NetworkAnimator>();
 			return net_Animator;
 		}
 	}
@@ -1058,7 +1057,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	/// </summary>
 	protected virtual void OnStart_Reload()
 	{
-		netAnimator.animator.SetTrigger(StartReload);
+		netAnimator.SetTrigger(StartReload);
 	}
 
 
@@ -1067,7 +1066,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	/// </summary>
 	protected virtual void OnStart_OutOfControl()
 	{
-		netAnimator.animator.SetTrigger(StartOutOfControl);
+		netAnimator.SetTrigger(StartOutOfControl);
 	}
 
 
@@ -1077,7 +1076,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	protected virtual void OnStart_Climb()
 	{
 
-		netAnimator.animator.SetTrigger(StartClimb);
+		netAnimator.SetTrigger(StartClimb);
 
 	}
 
