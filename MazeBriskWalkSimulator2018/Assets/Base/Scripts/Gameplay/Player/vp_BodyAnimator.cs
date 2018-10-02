@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
 //	vp_BodyAnimator.cs
-//	© Opsive. All Rights Reserved.
+//	ï¿½ Opsive. All Rights Reserved.
 //	https://twitter.com/Opsive
 //	http://www.opsive.com
 //
@@ -31,7 +31,7 @@ using System.Collections.Generic;
 
 [RequireComponent(typeof(NetworkAnimator))]
 
-public class vp_BodyAnimator : MonoBehaviour
+public class vp_BodyAnimator : NetworkBehaviour
 {
 
 	protected bool m_IsValid = true;
@@ -41,7 +41,8 @@ public class vp_BodyAnimator : MonoBehaviour
 
 	// head look rotation
 	public GameObject HeadBone;			// the bone closest to the center of the head should be assigned here. all bones between this and 'LowestSpineBone' will be used for headlook
-	public GameObject LowestSpineBone;	// the lowest spine bone above the hip should be assigned here. all bones between this and 'HeadBone' will be used for headlook 
+	public GameObject LowestSpineBone;	// the lowest spine bone above the hip should be assigned here. all bones between this and 'HeadBone' will be used for headlook
+	
 	[Range(0, 90)]
 	public float HeadPitchCap = 45.0f;	// how far up and down can the character bend its head. too high values may have the character bend over backwards or put its chin through its chest
 
@@ -180,6 +181,21 @@ public class vp_BodyAnimator : MonoBehaviour
 			if (m_Renderer == null)
 				m_Renderer = transform.root.GetComponentInChildren<SkinnedMeshRenderer>();
 			return m_Renderer;
+		}
+	}
+
+	public Animator m_Animator;
+	protected Animator Animator 
+	{
+		get
+		{
+
+			Debug.Log(m_Animator);
+
+			if (m_Animator == null)
+				m_Animator = GetComponent<Animator>();
+
+			return m_Animator;
 		}
 	}
 
@@ -1058,7 +1074,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	/// </summary>
 	protected virtual void OnStart_Reload()
 	{
-		netAnimator.animator.SetTrigger(StartReload);
+		netAnimator.SetTrigger(StartReload);
 	}
 
 
@@ -1067,7 +1083,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	/// </summary>
 	protected virtual void OnStart_OutOfControl()
 	{
-		netAnimator.animator.SetTrigger(StartOutOfControl);
+		netAnimator.SetTrigger(StartOutOfControl);
 	}
 
 
@@ -1077,7 +1093,7 @@ public class vp_BodyAnimator : MonoBehaviour
 	protected virtual void OnStart_Climb()
 	{
 
-		netAnimator.animator.SetTrigger(StartClimb);
+		netAnimator.SetTrigger(StartClimb);
 
 	}
 

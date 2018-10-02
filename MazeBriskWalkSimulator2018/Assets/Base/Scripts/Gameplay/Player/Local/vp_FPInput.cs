@@ -17,14 +17,18 @@ public class vp_FPInput : vp_Component
 {
 
 	// mouse look
+	// TODO: make this multiplayer ready
 	public Vector2 MouseLookSensitivity = new Vector2(5.0f, 5.0f);
+	
 	public bool MouseLookMutePitch = false;             // use this to make the 'InputSmoothLook' and 'InputRawLook' events always return zero pitch / yaw , regardless of sensitivity
 	public bool MouseLookMuteYaw = false;				// -		"	-
+
 	public int MouseLookSmoothSteps = 10;				// allowed range: 1-20
 	public float MouseLookSmoothWeight = 0.5f;			// allowed range: 0.0f - 1.0f
 	public bool MouseLookAcceleration = false;
 	public float MouseLookAccelerationThreshold = 0.4f;
 	public bool MouseLookInvert = false;
+	
 	protected Vector2 m_MouseLookSmoothMove = Vector2.zero;		// distance moved since last frame (smoothed and accelerated)
 	protected Vector2 m_MouseLookRawMove = Vector2.zero;		// distance moved since last frame (raw unity input)
 	protected List<Vector2> m_MouseLookSmoothBuffer = new List<Vector2>();

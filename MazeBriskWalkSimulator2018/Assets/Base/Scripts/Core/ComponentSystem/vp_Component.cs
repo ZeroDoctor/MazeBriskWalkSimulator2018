@@ -14,10 +14,11 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections.Generic;
 using System;
 
-public class vp_Component : MonoBehaviour
+public class vp_Component : NetworkBehaviour
 {
 
 	public bool Persist = false;

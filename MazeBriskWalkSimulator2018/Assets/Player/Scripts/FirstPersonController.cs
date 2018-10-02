@@ -230,7 +230,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
             }
 
-            anim.SetFloat("speed", Mathf.Abs(vertical) + Mathf.Abs(horizontal));
+            //anim.SetFloat("speed", Mathf.Abs(vertical) + Mathf.Abs(horizontal));
         }
 
 

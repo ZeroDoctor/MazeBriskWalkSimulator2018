@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////// 
 
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections.Generic;
 using System.Collections;
 
@@ -70,7 +71,9 @@ public class vp_FPCamera : vp_Component
 	public float RotationStrafeRoll = 0.01f;
 	public float RotationEarthQuakeFactor = 0.0f;
 	public Vector3 LookPoint = Vector3.zero;
+	[SyncVar]
 	protected float m_Pitch = 0.0f;
+	[SyncVar]
 	protected float m_Yaw = 0.0f;
 	protected vp_Spring m_RotationSpring = null;
 	protected RaycastHit m_LookPointHit;

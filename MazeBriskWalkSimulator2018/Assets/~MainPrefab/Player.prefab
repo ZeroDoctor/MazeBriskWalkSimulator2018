@@ -4191,7 +4191,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1817609385690384}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 432.31598, y: 0.184, z: 157.16684}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -5498,7 +5498,7 @@ Animator:
   m_GameObject: {fileID: 1817609385690384}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
-  m_Controller: {fileID: 9100000, guid: 87ae67f728dce4fb08385f4fe3aec5ef, type: 2}
+  m_Controller: {fileID: 9100000, guid: 3ad524886476ec34da3a04ada9c34083, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -5526,8 +5526,8 @@ MonoBehaviour:
   - {fileID: 114371658088777888}
   - {fileID: 114477214812935402}
   - {fileID: 114298062417196300}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 114969569431997654}
+  - {fileID: 114545711172776504}
   - {fileID: 0}
   enemyLayerName: Enemy
 --- !u!114 &114067170361891938
@@ -5652,6 +5652,7 @@ MonoBehaviour:
   ClimbOffset: {x: 0, y: 0, z: 0.6}
   ClimbRotationOffset: {x: 0, y: 0, z: 0}
   ShowDebugObjects: 0
+  m_Animator: {fileID: 95711064147632674}
   net_Animator: {fileID: 114189981732817022}
   EyeOffset: {x: 0, y: -0.08, z: -0.1}
   LookDownZoomFactor: 15
@@ -5863,7 +5864,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_TransformSyncMode: 4
   m_SendInterval: 0.1
-  m_SyncRotationAxis: 2
+  m_SyncRotationAxis: 1
   m_RotationSyncCompression: 0
   m_SyncSpin: 0
   m_MovementTheshold: 0.001
@@ -5914,10 +5915,10 @@ MonoBehaviour:
   m_Script: {fileID: -1267208747, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Target: {fileID: 4324876009634986}
+  m_Target: {fileID: 4275976811504710}
   m_ChildIndex: 0
   m_SendInterval: 0.0625
-  m_SyncRotationAxis: 1
+  m_SyncRotationAxis: 2
   m_RotationSyncCompression: 0
   m_MovementThreshold: 0.001
   m_InterpolateRotation: 0.3
