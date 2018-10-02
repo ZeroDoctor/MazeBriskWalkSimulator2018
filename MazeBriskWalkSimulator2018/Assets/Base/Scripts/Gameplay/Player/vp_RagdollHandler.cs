@@ -144,7 +144,7 @@ public class vp_RagdollHandler : MonoBehaviour
 		get
 		{
 			if (m_Animator == null)
-				m_Animator = GetComponent<Animator>();
+				m_Animator = GetComponentInParent<Animator>();
 			return m_Animator;
 		}
 	}
