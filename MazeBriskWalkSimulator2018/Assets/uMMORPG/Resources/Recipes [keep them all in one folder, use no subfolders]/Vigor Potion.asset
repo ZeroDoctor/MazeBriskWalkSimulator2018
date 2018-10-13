@@ -19,4 +19,5 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   result: {fileID: 11400000, guid: 23bf22ba24d3447968ce8b813ab51fb4, type: 2}
+  craftingTime: 2
   probability: 0.5

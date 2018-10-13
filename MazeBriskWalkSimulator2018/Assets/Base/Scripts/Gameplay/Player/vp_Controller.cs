@@ -437,6 +437,7 @@ public abstract class vp_Controller : vp_Component
 			// just standing on a new surface (important to detect even if
 			// not falling, e.g. if walking onto a moving platform)
 			m_OnNewGround = true;
+			//Debug.Log("On new surface");
 
 			// if we were falling, transmit fall impact to the player. fall impact
 			// is based on the distance from the impact position to the start point

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 //
 //	vp_FPBodyAnimator.cs
-//	© Opsive. All Rights Reserved.
+//	ï¿½ Opsive. All Rights Reserved.
 //	https://twitter.com/Opsive
 //	http://www.opsive.com
 //
@@ -193,7 +193,7 @@ public class vp_FPBodyAnimator : vp_BodyAnimator
 	/// </summary>
 	public void RefreshMaterials()
 	{
-		StartCoroutine(RefreshMaterialsOnEndOfFrame());
+		//StartCoroutine(RefreshMaterialsOnEndOfFrame());
 	}
 
 

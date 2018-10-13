@@ -25,6 +25,9 @@ public class PetItem : UsableItem
 
     public override void Use(Player player, int inventoryIndex)
     {
+        // always call base function too
+        base.Use(player, inventoryIndex);
+
         // summon right next to the player
         ItemSlot slot = player.inventory[inventoryIndex];
         GameObject go = Instantiate(petPrefab.gameObject, player.petDestination, Quaternion.identity);

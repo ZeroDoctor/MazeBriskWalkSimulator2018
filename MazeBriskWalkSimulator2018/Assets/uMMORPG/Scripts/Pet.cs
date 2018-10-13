@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(NetworkNavMeshAgent))]
 public partial class Pet : Entity
 {
     [SyncVar] GameObject _owner;
@@ -73,7 +74,7 @@ public partial class Pet : Entity
 
     [Header("Death")]
     public float deathTime = 2; // enough for animation
-    float deathTimeEnd;
+    double deathTimeEnd; // double for long term precision
     public long revivePrice = 10;
 
     [Header("Behaviour")]
@@ -158,6 +159,7 @@ public partial class Pet : Entity
         {
             animator.SetBool("MOVING", state == "MOVING" && agent.velocity != Vector3.zero);
             animator.SetBool("CASTING", state == "CASTING");
+            animator.SetBool("STUNNED", state == "STUNNED");
             animator.SetBool("DEAD", state == "DEAD");
             foreach (Skill skill in skills)
                 animator.SetBool(skill.name, skill.CastTimeRemaining() > 0);
@@ -213,7 +215,7 @@ public partial class Pet : Entity
 
     bool EventDeathTimeElapsed()
     {
-        return state == "DEAD" && Time.time >= deathTimeEnd;
+        return state == "DEAD" && NetworkTime.time >= deathTimeEnd;
     }
 
     bool EventTargetDisappeared()
@@ -271,6 +273,11 @@ public partial class Pet : Entity
         return state == "MOVING" && !IsMoving();
     }
 
+    bool EventStunned()
+    {
+        return NetworkTime.time <= stunTimeEnd;
+    }
+
     // finite state machine - server ///////////////////////////////////////////
     [Server]
     string UpdateServer_IDLE()
@@ -286,8 +293,12 @@ public partial class Pet : Entity
         {
             // we died.
             OnDeath();
-            currentSkill = -1; // in case we died while trying to cast
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            agent.ResetMovement();
+            return "STUNNED";
         }
         if (EventTargetDied())
         {
@@ -376,9 +387,13 @@ public partial class Pet : Entity
         {
             // we died.
             OnDeath();
-            currentSkill = -1; // in case we died while trying to cast
-            agent.ResetPath();
+            agent.ResetMovement();
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            agent.ResetMovement();
+            return "STUNNED";
         }
         if (EventMoveEnd())
         {
@@ -390,7 +405,7 @@ public partial class Pet : Entity
             // we had a target before, but it died now. clear it.
             target = null;
             currentSkill = -1;
-            agent.ResetPath();
+            agent.ResetMovement();
             return "IDLE";
         }
         if (EventNeedTeleportToOwner())
@@ -422,7 +437,7 @@ public partial class Pet : Entity
             // (we may get a target while randomly wandering around)
             if (skills.Count > 0) currentSkill = NextSkill();
             else Debug.LogError(name + " has no skills to attack with.");
-            agent.ResetPath();
+            agent.ResetMovement();
             return "IDLE";
         }
         if (EventNeedReturnToOwner()) {} // don't care
@@ -451,8 +466,13 @@ public partial class Pet : Entity
         {
             // we died.
             OnDeath();
-            currentSkill = -1; // in case we died while trying to cast
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            currentSkill = -1;
+            agent.ResetMovement();
+            return "STUNNED";
         }
         if (EventTargetDisappeared())
         {
@@ -501,6 +521,33 @@ public partial class Pet : Entity
     }
 
     [Server]
+    string UpdateServer_STUNNED()
+    {
+        // events sorted by priority (e.g. target doesn't matter if we died)
+        if (EventOwnerDisappeared())
+        {
+            // owner might disconnect or get destroyed for some reason
+            NetworkServer.Destroy(gameObject);
+            return "IDLE";
+        }
+        if (EventDied())
+        {
+            // we died.
+            OnDeath();
+            currentSkill = -1; // in case we died while trying to cast
+            return "DEAD";
+        }
+        if (EventStunned())
+        {
+            return "STUNNED";
+        }
+
+        // go back to idle if we aren't stunned anymore and process all new
+        // events there too
+        return "IDLE";
+    }
+
+    [Server]
     string UpdateServer_DEAD()
     {
         // events sorted by priority (e.g. target doesn't matter if we died)
@@ -538,6 +585,7 @@ public partial class Pet : Entity
         if (state == "IDLE")    return UpdateServer_IDLE();
         if (state == "MOVING")  return UpdateServer_MOVING();
         if (state == "CASTING") return UpdateServer_CASTING();
+        if (state == "STUNNED") return UpdateServer_STUNNED();
         if (state == "DEAD")    return UpdateServer_DEAD();
         Debug.LogError("invalid state:" + state);
         return "IDLE";
@@ -587,10 +635,10 @@ public partial class Pet : Entity
     // custom DealDamageAt function that also rewards experience if we killed
     // the monster
     [Server]
-    public override void DealDamageAt(Entity entity, int amount)
+    public override void DealDamageAt(Entity entity, int amount, float stunChance=0, float stunTime=0)
     {
         // deal damage with the default function
-        base.DealDamageAt(entity, amount);
+        base.DealDamageAt(entity, amount, stunChance, stunTime);
 
         // a monster?
         if (entity is Monster)
@@ -663,7 +711,7 @@ public partial class Pet : Entity
         // fine even if a pet isn't updated for a while. so as soon as it's
         // updated again, the death/respawn will happen immediately if current
         // time > end time.
-        deathTimeEnd = Time.time + deathTime;
+        deathTimeEnd = NetworkTime.time + deathTime;
 
         // keep player's pet item up to date
         SyncToOwnerPetItem();
@@ -680,9 +728,7 @@ public partial class Pet : Entity
     // we use 'is' instead of 'GetType' so that it works for inherited types too
     public override bool CanAttack(Entity entity)
     {
-        return health > 0 &&
-               entity.health > 0 &&
-               entity != this &&
+        return base.CanAttack(entity) &&
                (entity is Monster ||
                 (entity is Player && entity != owner) ||
                 (entity is Pet && ((Pet)entity).owner != owner));

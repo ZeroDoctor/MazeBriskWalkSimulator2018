@@ -72,7 +72,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
             {
-                StartCoroutine(m_JumpBob.DoBobCycle());
+                //StartCoroutine(m_JumpBob.DoBobCycle());
                 //PlayLandingSound();
                 m_MoveDir.y = 0f;
                 m_Jumping = false;
@@ -227,7 +227,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (m_IsWalking != waswalking && m_UseFovKick && m_CharacterController.velocity.sqrMagnitude > 0)
             {
                 StopAllCoroutines();
-                StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
+                //StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
             }
 
             //anim.SetFloat("speed", Mathf.Abs(vertical) + Mathf.Abs(horizontal));

@@ -345,8 +345,10 @@ public class vp_FPController : vp_CharacterController
 	{
 
 		// abort all jumping activity for 1 second if head touches a ceiling
-		if (m_HeadContact)
+		if (m_HeadContact) {
 			Player.Jump.Stop(1.0f);
+		}
+			
 
 		if (!MotorFreeFly)
 			UpdateJumpForceWalk();
@@ -930,6 +932,7 @@ public class vp_FPController : vp_CharacterController
 		if (GroundAngle > 85)
 		{
 			m_MotorThrottle += (vp_3DUtility.HorizontalVector((GroundNormal * m_FallImpact)));
+			Debug.Log("This is Happening: vp_FPC.cs line 936");
 			m_Grounded = false;
 		}
 

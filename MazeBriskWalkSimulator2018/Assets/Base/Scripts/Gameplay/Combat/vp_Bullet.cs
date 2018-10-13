@@ -105,7 +105,7 @@ public class vp_Bullet : MonoBehaviour
 	
 		m_Initialized = true;
 
-		StartCoroutine(TryHitOnEndOfFrame());
+		//StartCoroutine(TryHitOnEndOfFrame());
 
 	}
 
@@ -120,7 +120,7 @@ public class vp_Bullet : MonoBehaviour
 		if(!m_Initialized)
 			return;
 
-		StartCoroutine(TryHitOnEndOfFrame());
+		//StartCoroutine(TryHitOnEndOfFrame());
 
 	}
 
@@ -337,8 +337,8 @@ public class vp_Bullet : MonoBehaviour
 	protected IEnumerator TryHitOnEndOfFrame()
 	{
 		yield return new WaitForEndOfFrame();
-		if (!TryHit())
-			StartCoroutine(DestroyOnNextFrame());
+		//if (!TryHit())
+			//StartCoroutine(DestroyOnNextFrame());
 	}
 
 

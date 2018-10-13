@@ -221,7 +221,6 @@ public class vp_FileDialog : EditorWindow
 			Cancel();
 
 		GUILayout.EndArea();
-
 	}
 
 

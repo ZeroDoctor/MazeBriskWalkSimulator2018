@@ -34,9 +34,8 @@ public enum DamageType {Normal, Block, Crit};
 
 // note: no animator required, towers, dummies etc. may not have one
 [RequireComponent(typeof(Rigidbody))] // kinematic, only needed for OnTrigger
-[RequireComponent(typeof(NetworkProximityCheckerCustom))]
-[RequireComponent(typeof(NavMeshAgent))]
-[RequireComponent(typeof(NetworkNavMeshAgent))]
+[RequireComponent(typeof(NetworkProximityChecker))]
+[RequireComponent(typeof(AudioSource))]
 public abstract partial class Entity : NetworkBehaviour
 {
     [Header("Components")]
@@ -198,8 +197,20 @@ public abstract partial class Entity : NetworkBehaviour
         }
     }
 
-    // speed wrapper
-    public float speed { get { return agent.speed; } }
+    [Header("Speed")]
+    [SerializeField] protected LevelBasedFloat _speed = new LevelBasedFloat{baseValue=5};
+    public virtual float speed
+    {
+        get
+        {
+            // base + passives + buffs
+            float passiveBonus = (from skill in skills
+                                where skill.level > 0 && skill.data is PassiveSkill
+                                select ((PassiveSkill)skill.data).bonusSpeed.Get(skill.level)).Sum();
+            float buffBonus = buffs.Sum(buff => buff.bonusSpeed);
+            return _speed.Get(level) + passiveBonus + buffBonus;
+        }
+    }
 
     [Header("Damage Popup")]
     public GameObject damagePopupPrefab;
@@ -236,6 +247,14 @@ public abstract partial class Entity : NetworkBehaviour
     // 3D text mesh for name above the entity's head
     [Header("Text Meshes")]
     public TextMesh nameOverlay;
+    public TextMesh stunnedOverlay;
+
+    // every entity can be stunned by setting stunEndTime
+    protected double stunTimeEnd;
+
+    // safe zone flag
+    // -> needs to be in Entity because both player and pet need it
+    [HideInInspector] public bool inSafeZone;
 
     // networkbehaviour ////////////////////////////////////////////////////////
     protected virtual void Awake()
@@ -297,10 +316,14 @@ public abstract partial class Entity : NetworkBehaviour
         //    as target again when they are shown again
         if (IsWorthUpdating())
         {
+            // always apply speed to agent
+            //agent.speed = speed;
+
             if (isClient)
             {
                 UpdateClient();
                 if (nameOverlay != null) nameOverlay.text = name;
+                if (stunnedOverlay != null) stunnedOverlay.gameObject.SetActive(state == "STUNNED");
             }
             if (isServer)
             {
@@ -358,19 +381,19 @@ public abstract partial class Entity : NetworkBehaviour
         transform.LookAt(new Vector3(position.x, transform.position.y, position.z));
     }
 
-    // note: client can find out if moving by simply checking the state!
-    [Server] // server is the only one who has up-to-date NavMeshAgent
     public bool IsMoving()
     {
         // -> agent.hasPath will be true if stopping distance > 0, so we can't
         //    really rely on that.
         // -> pathPending is true while calculating the path, which is good
         // -> remainingDistance is the distance to the last path point, so it
-        //    also works when clicking somewhere onto a obstacle that isn'
+        //    also works when clicking somewhere onto a obstacle that isn't
         //    directly reachable.
-        return agent.pathPending ||
-               agent.remainingDistance > agent.stoppingDistance ||
-               agent.velocity != Vector3.zero;
+        // -> velocity is the best way to detect WASD movement
+        /* return agent.pathPending ||
+               agent.remainigDistance > agent.stoppingDistance ||
+               agent.velocity != Vector3.zero; */
+               return false; //temp return value 
     }
 
     // health & mana ///////////////////////////////////////////////////////////
@@ -394,7 +417,7 @@ public abstract partial class Entity : NetworkBehaviour
     // deal damage at another entity
     // (can be overwritten for players etc. that need custom functionality)
     [Server]
-    public virtual void DealDamageAt(Entity entity, int amount)
+    public virtual void DealDamageAt(Entity entity, int amount, float stunChance=0, float stunTime=0)
     {
         int damageDealt = 0;
         DamageType damageType = DamageType.Normal;
@@ -423,6 +446,12 @@ public abstract partial class Entity : NetworkBehaviour
 
                 // deal the damage
                 entity.health -= damageDealt;
+
+                // stun?
+                if (UnityEngine.Random.value < stunChance)
+                {
+                    entity.stunTimeEnd = NetworkTime.time + stunTime;
+                }
             }
         }
 
@@ -498,6 +527,12 @@ public abstract partial class Entity : NetworkBehaviour
         return skills.FindIndex(skill => skill.name == skillName);
     }
 
+    // helper function to find a buff index
+    public int GetBuffIndexByName(string buffName)
+    {
+        return buffs.FindIndex(buff => buff.name == buffName);
+    }
+
     // fist fights are virtually pointless because they overcomplicate the code
     // and they don't add any value to the game. so we need a check to find out
     // if the entity currently has a weapon equipped, otherwise casting a skill
@@ -505,11 +540,16 @@ public abstract partial class Entity : NetworkBehaviour
     // etc.
     public abstract bool HasCastWeapon();
 
-    // we need an abstract function to check if an entity can attack another,
-    // e.g. if player can attack monster / pet / npc, ...
-    // => we don't just compare the type because other things like 'is own pet'
-    //    etc. matter too
-    public abstract bool CanAttack(Entity entity);
+    // we need an abstract function to check if an entity can attack another.
+    // => overwrite to add more cases like 'monsters can only attack players'
+    //    or 'player can attack pets but not own pet' etc.
+    public virtual bool CanAttack(Entity entity)
+    {
+        return health > 0 &&
+               entity.health > 0 &&
+               entity != this &&
+               !inSafeZone && !entity.inSafeZone;
+    }
 
     // the first check validates the caster
     // (the skill won't be ready if we check self while casting it. so the
@@ -545,7 +585,7 @@ public abstract partial class Entity : NetworkBehaviour
     public void StartCastSkill(Skill skill)
     {
         // start casting and set the casting end time
-        skill.castTimeEnd = Time.time + skill.castTime;
+        skill.castTimeEnd = NetworkTime.time + skill.castTime;
 
         // save modifications
         skills[currentSkill] = skill;
@@ -568,13 +608,15 @@ public abstract partial class Entity : NetworkBehaviour
             skill.Apply(this);
 
             // rpc for client sided effects
-            RpcSkillCastFinished();
+            // -> pass that skill because skillIndex might be reset in the mean
+            //    time, we never know
+            RpcSkillCastFinished(skill);
 
             // decrease mana in any case
             mana -= skill.manaCosts;
 
             // start the cooldown (and save it in the struct)
-            skill.cooldownEnd = Time.time + skill.cooldown;
+            skill.cooldownEnd = NetworkTime.time + skill.cooldown;
 
             // save any skill modifications in any case
             skills[currentSkill] = skill;
@@ -623,12 +665,16 @@ public abstract partial class Entity : NetworkBehaviour
     // skill cast finished rpc for client sided effects
     // note: no need to pass skillIndex, currentSkill is synced anyway
     [ClientRpc]
-    public void RpcSkillCastFinished()
+    public void RpcSkillCastFinished(Skill skill)
     {
-        // validate: still alive and valid skill?
-        if (health > 0 && 0 <= currentSkill && currentSkill < skills.Count)
+        // validate: still alive?
+        if (health > 0)
         {
-            skills[currentSkill].data.OnCastFinished(this);
+            // call scriptableskill event
+            skill.data.OnCastFinished(this);
+
+            // maybe some other component needs to know about it too
+            SendMessage("OnSkillCastFinished", skill, SendMessageOptions.DontRequireReceiver);
         }
     }
 
@@ -759,12 +805,28 @@ public abstract partial class Entity : NetworkBehaviour
     [Server]
     protected virtual void OnDeath()
     {
-        // stop any movement and buffs, clear target
-        agent.ResetPath();
+        // clear movement/buffs/target/cast
+        // agent.ResetMovement();
         buffs.Clear();
         target = null;
+        currentSkill = -1;
 
         // addon system hooks
         Utils.InvokeMany(typeof(Entity), this, "OnDeath_");
+    }
+
+    // ontrigger ///////////////////////////////////////////////////////////////
+    void OnTriggerEnter(Collider col)
+    {
+        // check if trigger first to avoid GetComponent tests for environment
+        if (col.isTrigger && col.GetComponent<SafeZone>())
+            inSafeZone = true;
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        // check if trigger first to avoid GetComponent tests for environment
+        if (col.isTrigger && col.GetComponent<SafeZone>())
+            inSafeZone = false;
     }
 }

@@ -39,13 +39,15 @@ public partial class UISkillbar : MonoBehaviour
                     !UIUtils.AnyInputActive() &&
                     player.CastCheckSelf(skill)) // checks mana, cooldowns, etc.) {
                 {
-                    player.CmdUseSkill(skillIndex);
+                    // try use the skill or walk closer if needed
+                    player.TryUseSkill(skillIndex);
                 }
 
                 // refresh skill slot
                 slot.button.interactable = player.CastCheckSelf(skill); // check mana, cooldowns, etc.
                 slot.button.onClick.SetListener(() => {
-                    player.CmdUseSkill(skillIndex);
+                    // try use the skill or walk closer if needed
+                    player.TryUseSkill(skillIndex);
                 });
                 slot.tooltip.enabled = true;
                 slot.tooltip.text = skill.ToolTip();

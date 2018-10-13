@@ -22,6 +22,9 @@ public class MonsterScrollItem : UsableItem
 
     public override void Use(Player player, int inventoryIndex)
     {
+        // always call base function too
+        base.Use(player, inventoryIndex);
+
         foreach (SpawnInfo spawn in spawns)
         {
             if (spawn.monster != null)

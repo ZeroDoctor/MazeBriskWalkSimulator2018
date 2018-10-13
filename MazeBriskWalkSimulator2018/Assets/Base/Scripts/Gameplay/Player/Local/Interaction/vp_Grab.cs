@@ -386,7 +386,7 @@ public class vp_Grab : vp_Interactable
 		if (m_LastWeaponEquipped != 0)
 			m_Player.SetWeapon.TryStart(0);
 		else if (!m_IsFetching)
-			StartCoroutine("Fetch");
+			//StartCoroutine("Fetch");
 
 		// alter this object's physics to allow proper carrying motion
 		if (Rigidbody != null)
@@ -667,8 +667,8 @@ public class vp_Grab : vp_Interactable
 
 		// if we are supposed to be grabbing something but don't
 		// have a running 'Fetch' coroutine, start one now
-		if (m_IsGrabbed && !m_IsFetching)
-			StartCoroutine("Fetch");
+		//if (m_IsGrabbed && !m_IsFetching)
+			//StartCoroutine("Fetch");
 
 	}
 

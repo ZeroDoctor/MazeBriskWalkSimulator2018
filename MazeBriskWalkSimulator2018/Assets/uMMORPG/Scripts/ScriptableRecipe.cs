@@ -28,6 +28,9 @@ public class ScriptableRecipe : ScriptableObject
     public List<ScriptableItem> ingredients = new List<ScriptableItem>(6);
     public ScriptableItem result;
 
+    // crafting time in seconds
+    public float craftingTime = 1;
+
     // probability of success
     [Range(0, 1)] public float probability = 1;
 

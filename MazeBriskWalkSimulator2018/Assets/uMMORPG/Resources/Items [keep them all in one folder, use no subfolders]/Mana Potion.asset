@@ -20,7 +20,7 @@ MonoBehaviour:
   destroyable: 1
   toolTip: '<b>{NAME}</b>
 
-    Restores some mana.
+    Restores some Mana.
 
 
     Restores {USAGEMANA} Mana on use.
@@ -45,3 +45,4 @@ MonoBehaviour:
   usageMana: 20
   usageExperience: 0
   usagePetHealth: 0
+  cooldownBuff: {fileID: 11400000, guid: 42687364833164a899350537f185eb8f, type: 2}

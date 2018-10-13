@@ -103,7 +103,7 @@ public partial class NetworkManagerMMO : NetworkManager
     void Update()
     {
         // any valid local player? then set state to world
-        if (ClientScene.localPlayers.Any(pc => pc.gameObject != null))
+        if (ClientScene.localPlayer != null)
             state = NetworkState.World;
     }
 
@@ -325,7 +325,7 @@ public partial class NetworkManagerMMO : NetworkManager
     }
 
     // called after the client calls ClientScene.AddPlayer with a msg parameter
-    public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId, NetworkReader extraMsg)
+    public override void OnServerAddPlayer(NetworkConnection conn, NetworkReader extraMsg)
     {
         print("OnServerAddPlayer extra");
         if (extraMsg != null)
@@ -349,7 +349,7 @@ public partial class NetworkManagerMMO : NetworkManager
                     GameObject go = Database.CharacterLoad(characters[message.index], GetPlayerClasses());
 
                     // add to client
-                    NetworkServer.AddPlayerForConnection(conn, go, playerControllerId);
+                    NetworkServer.AddPlayerForConnection(conn, go);
 
                     // addon system hooks
                     Utils.InvokeMany(typeof(NetworkManagerMMO), this, "OnServerAddPlayer_", account, go, conn, message);
@@ -547,11 +547,10 @@ public partial class NetworkManagerMMO : NetworkManager
         print("OnServerDisconnect " + conn);
 
         // save player (if any)
-        GameObject go = Utils.GetGameObjectFromPlayerControllers(conn.playerControllers);
-        if (go != null)
+        if (conn.playerController != null)
         {
-            Database.CharacterSave(go.GetComponent<Player>(), false);
-            print("saved:" + go.name);
+            Database.CharacterSave(conn.playerController.GetComponent<Player>(), false);
+            print("saved:" + conn.playerController.name);
         }
         else print("no player to save for: " + conn);
 

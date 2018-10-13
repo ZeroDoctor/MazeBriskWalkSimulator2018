@@ -5,6 +5,7 @@
 //
 // Quests have to be structs in order to work with SyncLists.
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Mirror;
 
@@ -29,7 +30,19 @@ public partial struct Quest
     }
 
     // wrappers for easier access
-    public ScriptableQuest data { get { return ScriptableQuest.dict[hash]; } }
+    public ScriptableQuest data
+    {
+        get
+        {
+            // show a useful error message if the key can't be found
+            // note: ScriptableQuest.OnValidate 'is in resource folder' check
+            //       causes Unity SendMessage warnings and false positives.
+            //       this solution is a lot better.
+            if (!ScriptableQuest.dict.ContainsKey(hash))
+                throw new KeyNotFoundException("There is no ScriptableQuest with hash=" + hash + ". Make sure that all ScriptableQuests are in the Resources folder so they are loaded properly.");
+            return ScriptableQuest.dict[hash];
+        }
+    }
     public string name { get { return data.name; } }
     public int requiredLevel { get { return data.requiredLevel; } }
     public string predecessor { get { return data.predecessor != null ? data.predecessor.name : ""; } }

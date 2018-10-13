@@ -18,6 +18,7 @@ MonoBehaviour:
   showCastBar: 0
   cancelCastIfTargetDied: 1
   predecessor: {fileID: 0}
+  predecessorLevel: 1
   requiresWeapon: 1
   requiredLevel:
     baseValue: 0
@@ -39,5 +40,11 @@ MonoBehaviour:
     baseValue: 0.75
     bonusPerLevel: 0
   damage:
+    baseValue: 1
+    bonusPerLevel: 0
+  stunChance:
+    baseValue: 0.1
+    bonusPerLevel: 0
+  stunTime:
     baseValue: 1
     bonusPerLevel: 0

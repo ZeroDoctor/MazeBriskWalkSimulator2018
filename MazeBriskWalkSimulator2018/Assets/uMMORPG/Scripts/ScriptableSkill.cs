@@ -36,8 +36,9 @@ public abstract partial class ScriptableSkill : ScriptableObject
 
     [Header("Requirements")]
     public ScriptableSkill predecessor; // this skill has to be learned first
+    public int predecessorLevel = 1; // level of predecessor skill that is required
     public bool requiresWeapon; // some might need empty-handed casting
-    public LevelBasedInt requiredLevel;
+    public LevelBasedInt requiredLevel; // required player level
     public LevelBasedLong requiredSkillExperience;
 
     [Header("Properties")]
@@ -46,6 +47,9 @@ public abstract partial class ScriptableSkill : ScriptableObject
     public LevelBasedFloat castTime;
     public LevelBasedFloat cooldown;
     public LevelBasedFloat castRange;
+
+    [Header("Sound")]
+    public AudioClip castSound;
 
     // the skill casting process ///////////////////////////////////////////////
     // 1. self check: alive, enough mana, cooldown ready etc.?
@@ -72,7 +76,12 @@ public abstract partial class ScriptableSkill : ScriptableObject
 
     // events for client sided effects /////////////////////////////////////////
     // [Client]
-    public virtual void OnCastStarted(Entity caster) {}
+    public virtual void OnCastStarted(Entity caster)
+    {
+        AudioSource audioSource = caster.GetComponent<AudioSource>();
+        if (audioSource != null && castSound != null)
+            audioSource.PlayOneShot(castSound);
+    }
 
     // [Client]
     public virtual void OnCastFinished(Entity caster) {}
@@ -115,7 +124,7 @@ public abstract partial class ScriptableSkill : ScriptableObject
             tip.Append("\n<b><i>Required Level: " + requiredLevel.Get(1) + "</i></b>\n" +
                        "<b><i>Required Skill Exp.: " + requiredSkillExperience.Get(1) + "</i></b>\n");
             if (predecessor != null)
-                tip.Append("<b><i>Required Skill: " + predecessor.name + " </i></b>\n");
+                tip.Append("<b><i>Required Skill: " + predecessor.name + " Lv. " + predecessorLevel + " </i></b>\n");
         }
 
         return tip.ToString();

@@ -46,17 +46,17 @@ namespace UnityStandardAssets.Utility
                 switch (entry.action)
                 {
                     case Action.Activate:
-                        StartCoroutine(Activate(entry));
+                        //StartCoroutine(Activate(entry));
                         break;
                     case Action.Deactivate:
-                        StartCoroutine(Deactivate(entry));
+                        //StartCoroutine(Deactivate(entry));
                         break;
                     case Action.Destroy:
                         Destroy(entry.target, entry.delay);
                         break;
 
                     case Action.ReloadLevel:
-                        StartCoroutine(ReloadLevel(entry));
+                        //StartCoroutine(ReloadLevel(entry));
                         break;
                 }
             }

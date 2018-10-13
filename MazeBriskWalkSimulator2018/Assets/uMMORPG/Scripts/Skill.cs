@@ -7,10 +7,11 @@
 //
 // We implemented the cooldowns in a non-traditional way. Instead of counting
 // and increasing the elapsed time since the last cast, we simply set the
-// 'end' Time variable to Time.time + cooldown after casting each time. This
-// way we don't need an extra Update method that increases the elapsed time for
-// each skill all the time.
+// 'end' Time variable to NetworkTime.time + cooldown after casting each time.
+// This way we don't need an extra Update method that increases the elapsed time
+// for each skill all the time.
 using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Mirror;
@@ -25,8 +26,8 @@ public partial struct Skill
 
     // dynamic stats (cooldowns etc.)
     public int level; // 0 if not learned, >0 if learned
-    public float castTimeEnd; // server time
-    public float cooldownEnd; // server time
+    public double castTimeEnd; // server time. double for long term precision.
+    public double cooldownEnd; // server time. double for long term precision.
 
     // constructors
     public Skill(ScriptableSkill data)
@@ -37,11 +38,23 @@ public partial struct Skill
         level = data.learnDefault ? 1 : 0;
 
         // ready immediately
-        castTimeEnd = cooldownEnd = Time.time;
+        castTimeEnd = cooldownEnd = NetworkTime.time;
     }
 
     // wrappers for easier access
-    public ScriptableSkill data { get { return ScriptableSkill.dict[hash]; } }
+    public ScriptableSkill data
+    {
+        get
+        {
+            // show a useful error message if the key can't be found
+            // note: ScriptableSkill.OnValidate 'is in resource folder' check
+            //       causes Unity SendMessage warnings and false positives.
+            //       this solution is a lot better.
+            if (!ScriptableSkill.dict.ContainsKey(hash))
+                throw new KeyNotFoundException("There is no ScriptableSkill with hash=" + hash + ". Make sure that all ScriptableSkills are in the Resources folder so they are loaded properly.");
+            return ScriptableSkill.dict[hash];
+        }
+    }
     public string name { get { return data.name; } }
     public float castTime { get { return data.castTime.Get(level); } }
     public float cooldown { get { return data.cooldown.Get(level); } }
@@ -54,6 +67,7 @@ public partial struct Skill
     public bool cancelCastIfTargetDied { get { return data.cancelCastIfTargetDied; } }
     public int maxLevel { get { return data.maxLevel; } }
     public ScriptableSkill predecessor { get { return data.predecessor; } }
+    public int predecessorLevel { get { return data.predecessorLevel; } }
     public bool requiresWeapon { get { return data.requiresWeapon; } }
     public int upgradeRequiredLevel { get { return data.requiredLevel.Get(level+1); } }
     public long upgradeRequiredSkillExperience { get { return data.requiredSkillExperience.Get(level+1); } }
@@ -90,7 +104,7 @@ public partial struct Skill
     public float CastTimeRemaining()
     {
         // how much time remaining until the casttime ends? (using server time)
-        return NetworkTime.time >= castTimeEnd ? 0 : castTimeEnd - NetworkTime.time;
+        return NetworkTime.time >= castTimeEnd ? 0 : (float)(castTimeEnd - NetworkTime.time);
     }
 
     public bool IsCasting()
@@ -102,7 +116,7 @@ public partial struct Skill
     public float CooldownRemaining()
     {
         // how much time remaining until the cooldown ends? (using server time)
-        return NetworkTime.time >= cooldownEnd ? 0 : cooldownEnd - NetworkTime.time;
+        return NetworkTime.time >= cooldownEnd ? 0 : (float)(cooldownEnd - NetworkTime.time);
     }
 
     public bool IsReady()

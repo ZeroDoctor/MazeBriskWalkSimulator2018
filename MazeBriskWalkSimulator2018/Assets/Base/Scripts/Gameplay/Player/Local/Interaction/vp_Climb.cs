@@ -181,7 +181,7 @@ public class vp_Climb : vp_Interactable
         m_ReverseInput = Vector3.Dot(m_Player.transform.forward, m_Transform.forward) > 0;
 
         // start the initial mounting of the climbable object
-        StartCoroutine("LineUp");
+        //StartCoroutine("LineUp");
 		
 	}
 
@@ -316,7 +316,7 @@ public class vp_Climb : vp_Interactable
 		m_Player.SetState("Default"); // restore default state on all components
 
 		// interpolate camera pitch to look straight ahead
-		StartCoroutine("RestorePitch");
+		//StartCoroutine("RestorePitch");
 
 	}
 

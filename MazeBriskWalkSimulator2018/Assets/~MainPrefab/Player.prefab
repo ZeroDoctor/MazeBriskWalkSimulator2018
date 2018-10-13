@@ -5692,7 +5692,7 @@ MonoBehaviour:
   CameraFreezeDelay: 2.5
   VelocityMultiplier: 30
   HeadBone: {fileID: 1639334268022902}
-  helpbox: 51
+  helpbox: 62
 --- !u!114 &114545711172776504
 MonoBehaviour:
   m_ObjectHideFlags: 1

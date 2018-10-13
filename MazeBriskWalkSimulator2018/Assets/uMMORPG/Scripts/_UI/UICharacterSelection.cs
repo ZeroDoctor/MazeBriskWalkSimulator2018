@@ -48,11 +48,11 @@ public partial class UICharacterSelection : MonoBehaviour
                     //    which will happen sometimes at low-fps or high-latency
                     // -> internally ClientScene.AddPlayer adds to localPlayers
                     //    immediately, so let's check that first
-                    slot.selectButton.interactable = ClientScene.localPlayers.Count == 0;
+                    slot.selectButton.interactable = ClientScene.localPlayer == null;
                     int icopy = i; // needed for lambdas, otherwise i is Count
                     slot.selectButton.onClick.SetListener(() => {
                         CharacterSelectMsg message = new CharacterSelectMsg{index=icopy};
-                        ClientScene.AddPlayer(manager.client.connection, 0, message);
+                        ClientScene.AddPlayer(manager.client.connection, message);
 
                         // make sure we can't select twice and call AddPlayer twice
                         panel.SetActive(false);

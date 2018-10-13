@@ -88,7 +88,7 @@ public partial class ScriptableItem : ScriptableObject
         }
     }
 
-    // inspector validation ////////////////////////////////////////////////////
+    // validation //////////////////////////////////////////////////////////////
     void OnValidate()
     {
         // make sure that the sell price <= buy price to avoid exploitation
