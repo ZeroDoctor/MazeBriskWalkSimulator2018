@@ -364,7 +364,7 @@ public partial class Player : Entity
     [SerializeField] private float m_GravityMultiplier;
     [SerializeField] private UnityStandardAssets.Characters.FirstPerson.MouseLook m_MouseLook;
     [SerializeField] private bool m_UseFovKick;
-    [SerializeField] private FOVKick m_FovKick = new FOVKick();
+    [SerializeField] private FOVKick m_FovKick = new FOVKick(); 
     [SerializeField] private bool m_UseHeadBob;
     [SerializeField] private CurveControlledBob m_HeadBob = new CurveControlledBob();
     [SerializeField] private LerpControlledBob m_JumpBob = new LerpControlledBob();
@@ -373,7 +373,7 @@ public partial class Player : Entity
     [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
     [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
 
-    private Camera m_Camera;
+    private Camera m_Camera; //MouseLook
     private bool m_Jump;
     private float m_YRotation;
     private Vector2 m_Input;
@@ -399,19 +399,6 @@ public partial class Player : Entity
 
     public override void OnStartLocalPlayer()
     {
-
-        GameObject.Find("SceneCamera").SetActive(false);
-
-        m_CharacterController = GetComponent<CharacterController>();
-        m_Camera = GetComponentInChildren<Camera>();
-        m_OriginalCameraPosition = m_Camera.transform.localPosition;
-        m_FovKick.Setup(m_Camera);
-        m_HeadBob.Setup(m_Camera, m_StepInterval);
-        m_StepCycle = 0f;
-        m_NextStep = m_StepCycle / 2f;
-        m_Jumping = false;
-        m_AudioSource = GetComponent<AudioSource>();
-        m_MouseLook.Init(transform , m_Camera.transform);
         
         // setup camera targets
         //Camera.main.GetComponent<CameraMMO>().target = transform;
@@ -458,6 +445,24 @@ public partial class Player : Entity
     protected override void Start()
     {
         base.Start();
+
+        if(isLocalPlayer) {
+            GameObject originalGameObject = GameObject.Find(name);
+            GameObject child = originalGameObject.transform.GetChild(4).gameObject;
+            child.SetActive(true);
+            m_CharacterController = GetComponent<CharacterController>();
+            m_Camera = GetComponentInChildren<Camera>();
+            m_OriginalCameraPosition = m_Camera.transform.localPosition;
+            m_FovKick.Setup(m_Camera);
+            m_HeadBob.Setup(m_Camera, m_StepInterval);
+            m_StepCycle = 0f;
+            m_NextStep = m_StepCycle / 2f;
+            m_Jumping = false;
+            m_AudioSource = GetComponent<AudioSource>();
+            m_MouseLook.Init(transform , m_Camera.transform);
+        } else {
+            GameObject.Find("PlayerCam").SetActive(false);
+        }
 
         onlinePlayers[name] = this;
 
@@ -1268,6 +1273,36 @@ public partial class Player : Entity
     }
 
     [Client]
+    private void UpdateCameraPosition(float speed)
+    {
+        Vector3 newCameraPosition;
+        if (!m_UseHeadBob)
+        {
+            return;
+        }
+        if (m_CharacterController.velocity.magnitude > 0 && m_CharacterController.isGrounded)
+        {
+            m_Camera.transform.localPosition =
+                m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
+                                    (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
+            newCameraPosition = m_Camera.transform.localPosition;
+            newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
+        }
+        else
+        {
+            newCameraPosition = m_Camera.transform.localPosition;
+            newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset();
+        }
+        m_Camera.transform.localPosition = newCameraPosition;
+    }
+
+    [Client]
+    private void RotateView()
+    {
+        m_MouseLook.LookRotation(transform, m_Camera.transform);
+    }
+
+    [Client]
     private void PlayLandingSound()
     {
         m_AudioSource.clip = m_LandSound;
@@ -1318,29 +1353,7 @@ public partial class Player : Entity
         m_FootstepSounds[0] = m_AudioSource.clip;
     }
 
-    [Client]
-    private void UpdateCameraPosition(float speed)
-    {
-        Vector3 newCameraPosition;
-        if (!m_UseHeadBob)
-        {
-            return;
-        }
-        if (m_CharacterController.velocity.magnitude > 0 && m_CharacterController.isGrounded)
-        {
-            m_Camera.transform.localPosition =
-                m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
-                                    (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
-            newCameraPosition = m_Camera.transform.localPosition;
-            newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
-        }
-        else
-        {
-            newCameraPosition = m_Camera.transform.localPosition;
-            newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset();
-        }
-        m_Camera.transform.localPosition = newCameraPosition;
-    }
+    
 
     [Client]
     private void GetInput(out float speed)
@@ -1376,10 +1389,6 @@ public partial class Player : Entity
             StopAllCoroutines();
             StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
         }
-    }
-    private void RotateView()
-    {
-        m_MouseLook.LookRotation(transform, m_Camera.transform);
     }
 
     [Client]

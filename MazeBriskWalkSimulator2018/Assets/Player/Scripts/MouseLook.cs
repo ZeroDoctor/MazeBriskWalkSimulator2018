@@ -7,6 +7,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [Serializable]
     public class MouseLook
     {
+
+        public Transform target;
         public float XSensitivity = 2f;
         public float YSensitivity = 2f;
         public bool clampVerticalRotation = true;
@@ -23,14 +25,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         public void Init(Transform character, Transform camera)
         {
+            
+            if(character != target)
+                return;
 
             m_CharacterTargetRot = character.localRotation;
             m_CameraTargetRot = camera.localRotation;
         }
         public void LookRotation(Transform character, Transform camera)
         {
-
-            if(!character)
+            if(character != target)
                 return;
 
             float yRot = Input.GetAxis("Mouse X") * XSensitivity;

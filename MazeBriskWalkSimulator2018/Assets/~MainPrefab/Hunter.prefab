@@ -940,7 +940,7 @@ GameObject:
   - component: {fileID: 136358192413354090}
   m_Layer: 0
   m_Name: Hunter
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1045,14 +1045,13 @@ GameObject:
   - component: {fileID: 4929665019687866}
   - component: {fileID: 20671367976036362}
   - component: {fileID: 81160696258765318}
-  - component: {fileID: 114215627189508230}
   m_Layer: 0
   m_Name: PlayerCam
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1841893327676438
 GameObject:
   m_ObjectHideFlags: 1
@@ -2982,6 +2981,7 @@ MonoBehaviour:
   m_StickToGroundForce: 2
   m_GravityMultiplier: 3
   m_MouseLook:
+    target: {fileID: 4912601917670514}
     XSensitivity: 1
     YSensitivity: 1
     clampVerticalRotation: 1
@@ -3123,19 +3123,6 @@ MonoBehaviour:
     identifierIn: (Info)
     color: {r: 1, g: 0, b: 0, a: 1}
   maxLength: 70
---- !u!114 &114215627189508230
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1821989251682694}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c6965db6175d52468955ec2cea741f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sensitivity: 1
-  smoothing: 2
 --- !u!114 &114674561207071474
 MonoBehaviour:
   m_ObjectHideFlags: 1
