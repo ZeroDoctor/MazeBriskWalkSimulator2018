@@ -34,7 +34,6 @@ public enum DamageType {Normal, Block, Crit};
 
 // note: no animator required, towers, dummies etc. may not have one
 [RequireComponent(typeof(Rigidbody))] // kinematic, only needed for OnTrigger
-[RequireComponent(typeof(NetworkProximityChecker))]
 [RequireComponent(typeof(AudioSource))]
 public abstract partial class Entity : NetworkBehaviour
 {
@@ -336,6 +335,7 @@ public abstract partial class Entity : NetworkBehaviour
             Utils.InvokeMany(typeof(Entity), this, "Update_");
         }
     }
+
 
     // update for server. should return the new state.
     protected abstract string UpdateServer();
