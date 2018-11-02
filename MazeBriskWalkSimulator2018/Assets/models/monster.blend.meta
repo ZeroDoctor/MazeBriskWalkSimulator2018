@@ -1,0 +1,205 @@
+fileFormatVersion: 2
+guid: 043f9b7cd6b9c7b49bdbdd0182b56541
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: Armature
+    100002: Head
+    100004: Jaw
+    100006: Jaw_Bone
+    100008: L_BCollarbone
+    100010: L_BHand
+    100012: L_BLower_arm
+    100014: L_BShoulder
+    100016: L_BUpper_arm
+    100018: L_BWrist
+    100020: L_UCollarbone
+    100022: L_UHand
+    100024: L_ULower_arm
+    100026: L_UShoulder
+    100028: L_UUpper_arm
+    100030: Lower_Spine
+    100032: LP_BigBody
+    100034: LP_Horns
+    100036: LP_Mouth
+    100038: LP_Skull
+    100040: LP_Teeth_bottom
+    100042: LP_Teeth_top
+    100044: //RootNode
+    100046: R_BCollarbone
+    100048: R_BHand
+    100050: R_BLower_arm
+    100052: R_BShoulder
+    100054: R_BUpper_arm
+    100056: R_BWrist
+    100058: R_UCollarbone
+    100060: R_UHand
+    100062: R_ULower_arm
+    100064: R_UShoulder
+    100066: R_UUpper_arm
+    100068: Tail1
+    100070: Tail1_Vert
+    100072: Tail2
+    100074: Tail2_Vert
+    100076: Tail3
+    100078: Tail3_Vert
+    100080: Tail4
+    100082: Tail4_Vert
+    100084: Tail5
+    100086: Tail5_Vert
+    100088: Tail6
+    100090: Tail6_Vert
+    100092: Tail7
+    100094: Upper_Spine
+    400000: Armature
+    400002: Head
+    400004: Jaw
+    400006: Jaw_Bone
+    400008: L_BCollarbone
+    400010: L_BHand
+    400012: L_BLower_arm
+    400014: L_BShoulder
+    400016: L_BUpper_arm
+    400018: L_BWrist
+    400020: L_UCollarbone
+    400022: L_UHand
+    400024: L_ULower_arm
+    400026: L_UShoulder
+    400028: L_UUpper_arm
+    400030: Lower_Spine
+    400032: LP_BigBody
+    400034: LP_Horns
+    400036: LP_Mouth
+    400038: LP_Skull
+    400040: LP_Teeth_bottom
+    400042: LP_Teeth_top
+    400044: //RootNode
+    400046: R_BCollarbone
+    400048: R_BHand
+    400050: R_BLower_arm
+    400052: R_BShoulder
+    400054: R_BUpper_arm
+    400056: R_BWrist
+    400058: R_UCollarbone
+    400060: R_UHand
+    400062: R_ULower_arm
+    400064: R_UShoulder
+    400066: R_UUpper_arm
+    400068: Tail1
+    400070: Tail1_Vert
+    400072: Tail2
+    400074: Tail2_Vert
+    400076: Tail3
+    400078: Tail3_Vert
+    400080: Tail4
+    400082: Tail4_Vert
+    400084: Tail5
+    400086: Tail5_Vert
+    400088: Tail6
+    400090: Tail6_Vert
+    400092: Tail7
+    400094: Upper_Spine
+    2100000: Body__BodyNormal
+    2100002: BottomTeeth__NormalsTeethB
+    2100004: Mouth__NormalsMouth
+    2100006: TopTeeth__TextureTeethT
+    2100008: Horns__NormalsHorns
+    2100010: Skull__NormalsSkull
+    4300000: LP_BigBody
+    4300002: LP_Teeth_bottom
+    4300004: LP_Mouth
+    4300006: LP_Teeth_top
+    4300008: LP_Horns
+    4300010: LP_Skull
+    7400000: Default Take
+    9500000: //RootNode
+    13700000: LP_BigBody
+    13700002: LP_Horns
+    13700004: LP_Mouth
+    13700006: LP_Skull
+    13700008: LP_Teeth_bottom
+    13700010: LP_Teeth_top
+    2186277476908879412: ImportLogs
+  externalObjects: {}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 1
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
