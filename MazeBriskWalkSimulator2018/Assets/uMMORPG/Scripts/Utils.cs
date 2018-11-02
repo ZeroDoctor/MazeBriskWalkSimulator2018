@@ -167,22 +167,10 @@ public class Utils
         return 0;
     }
 
-    // find first valid gameobject from player controllers list
-    public static GameObject GetGameObjectFromPlayerControllers(List<PlayerController> controllers)
-    {
-        PlayerController controller = controllers.Find(pc => pc.gameObject != null);
-        return controller != null ? controller.gameObject : null;
-    }
-
     // find local player (clientsided)
     public static Player ClientLocalPlayer()
     {
-        // note: ClientScene.localPlayers.Count cant be used as check because
-        // nothing is removed from that list, even after disconnect. It still
-        // contains entries like: ID=0 NetworkIdentity NetID=null Player=null
-        // (which might be a UNET bug)
-        GameObject go = GetGameObjectFromPlayerControllers(ClientScene.localPlayers);
-        return go != null ? go.GetComponent<Player>() : null;
+        return ClientScene.localPlayer != null ? ClientScene.localPlayer.GetComponent<Player>() : null;
     }
 
     // parse first upper cased noun from a string, e.g.

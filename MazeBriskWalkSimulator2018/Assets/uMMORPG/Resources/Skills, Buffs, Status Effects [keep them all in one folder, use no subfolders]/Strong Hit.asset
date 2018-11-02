@@ -19,6 +19,10 @@ MonoBehaviour:
 
     Damage: {DAMAGE}
 
+    Stun Chance: {STUNCHANCE}%
+
+    Stun Time: {STUNTIME}s
+
     Cast Time: {CASTTIME}
 
     Cooldown: {COOLDOWN}
@@ -31,6 +35,7 @@ MonoBehaviour:
   showCastBar: 1
   cancelCastIfTargetDied: 1
   predecessor: {fileID: 0}
+  predecessorLevel: 1
   requiresWeapon: 1
   requiredLevel:
     baseValue: 2
@@ -54,3 +59,9 @@ MonoBehaviour:
   damage:
     baseValue: 25
     bonusPerLevel: 5
+  stunChance:
+    baseValue: 1
+    bonusPerLevel: 0
+  stunTime:
+    baseValue: 2
+    bonusPerLevel: 0

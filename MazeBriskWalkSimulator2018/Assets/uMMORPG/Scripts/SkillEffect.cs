@@ -23,7 +23,7 @@
 using UnityEngine;
 using Mirror;
 
-[RequireComponent(typeof(NetworkProximityCheckerCustom))] // only broadcast to observers
+[RequireComponent(typeof(NetworkProximityChecker))] // only broadcast to observers
 public abstract class SkillEffect : NetworkBehaviour
 {
     // [SyncVar] NetworkIdentity: errors when null

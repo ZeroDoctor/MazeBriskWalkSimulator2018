@@ -1,3 +1,4 @@
+using Mirror;
 using System;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [Serializable]
     public class MouseLook
     {
+
+        public Transform target;
         public float XSensitivity = 2f;
         public float YSensitivity = 2f;
         public bool clampVerticalRotation = true;
@@ -22,13 +25,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         public void Init(Transform character, Transform camera)
         {
+            
+            if(character != target)
+                return;
+
             m_CharacterTargetRot = character.localRotation;
             m_CameraTargetRot = camera.localRotation;
         }
-
-
         public void LookRotation(Transform character, Transform camera)
         {
+            if(character != target)
+                return;
+
             float yRot = Input.GetAxis("Mouse X") * XSensitivity;
             float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
 
@@ -53,7 +61,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             UpdateCursorLock();
         }
-
         public void SetCursorLock(bool value)
         {
             lockCursor = value;

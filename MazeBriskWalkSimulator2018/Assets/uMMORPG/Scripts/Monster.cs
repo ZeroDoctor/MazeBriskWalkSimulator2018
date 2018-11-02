@@ -31,6 +31,7 @@ using Mirror;
 using System.Linq;
 
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(NetworkNavMeshAgent))]
 public partial class Monster : Entity
 {
     [Header("Movement")]
@@ -57,10 +58,10 @@ public partial class Monster : Entity
 
     [Header("Respawn")]
     public float deathTime = 30f; // enough for animation & looting
-    float deathTimeEnd;
+    double deathTimeEnd; // double for long term precision
     public bool respawn = true;
     public float respawnTime = 10f;
-    float respawnTimeEnd;
+    double respawnTimeEnd; // double for long term precision
 
     // save the start position for random movement distance and respawning
     Vector3 startPosition;
@@ -123,6 +124,7 @@ public partial class Monster : Entity
         {
             animator.SetBool("MOVING", state == "MOVING" && agent.velocity != Vector3.zero);
             animator.SetBool("CASTING", state == "CASTING");
+            animator.SetBool("STUNNED", state == "STUNNED");
             animator.SetBool("DEAD", state == "DEAD");
             foreach (Skill skill in skills)
                 animator.SetBool(skill.name, skill.CastTimeRemaining() > 0);
@@ -154,12 +156,12 @@ public partial class Monster : Entity
 
     bool EventDeathTimeElapsed()
     {
-        return state == "DEAD" && Time.time >= deathTimeEnd;
+        return state == "DEAD" && NetworkTime.time >= deathTimeEnd;
     }
 
     bool EventRespawnTimeElapsed()
     {
-        return state == "DEAD" && respawn && Time.time >= respawnTimeEnd;
+        return state == "DEAD" && respawn && NetworkTime.time >= respawnTimeEnd;
     }
 
     bool EventTargetDisappeared()
@@ -184,6 +186,11 @@ public partial class Monster : Entity
     {
         return target != null &&
                Vector3.Distance(startPosition, target.collider.ClosestPointOnBounds(transform.position)) > followDistance;
+    }
+
+    bool EventTargetEnteredSafeZone()
+    {
+        return target != null && target.inSafeZone;
     }
 
     bool EventAggro()
@@ -212,6 +219,11 @@ public partial class Monster : Entity
         return Random.value <= moveProbability * Time.deltaTime;
     }
 
+    bool EventStunned()
+    {
+        return NetworkTime.time <= stunTimeEnd;
+    }
+
     // finite state machine - server ///////////////////////////////////////////
     [Server]
     string UpdateServer_IDLE()
@@ -221,8 +233,12 @@ public partial class Monster : Entity
         {
             // we died.
             OnDeath();
-            currentSkill = -1; // in case we died while trying to cast
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            agent.ResetMovement();
+            return "STUNNED";
         }
         if (EventTargetDied())
         {
@@ -248,6 +264,23 @@ public partial class Monster : Entity
             agent.stoppingDistance = CurrentCastRange() * attackToMoveRangeRatio;
             agent.destination = target.collider.ClosestPointOnBounds(transform.position);
             return "MOVING";
+        }
+        if (EventTargetEnteredSafeZone())
+        {
+            // if our target entered the safe zone, we need to be really careful
+            // to avoid kiting.
+            // -> players could pull a monster near a safe zone and then step in
+            //    and out of it before/after attacks without ever getting hit by
+            //    the monster
+            // -> running back to start won't help, can still kit while running
+            // -> warping back to start won't help, we might accidentally placed
+            //    a monster in attack range of a safe zone
+            // -> the 100% secure way is to die and hide it immediately. many
+            //    popular MMOs do it the same way to avoid exploits.
+            // => call Entity.OnDeath without rewards etc. and hide immediately
+            base.OnDeath(); // no looting
+            respawnTimeEnd = NetworkTime.time + respawnTime; // respawn in a while
+            return "DEAD";
         }
         if (EventSkillRequest())
         {
@@ -301,9 +334,13 @@ public partial class Monster : Entity
         {
             // we died.
             OnDeath();
-            currentSkill = -1; // in case we died while trying to cast
-            agent.ResetPath();
+            agent.ResetMovement();
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            agent.ResetMovement();
+            return "STUNNED";
         }
         if (EventMoveEnd())
         {
@@ -315,7 +352,7 @@ public partial class Monster : Entity
             // we had a target before, but it died now. clear it.
             target = null;
             currentSkill = -1;
-            agent.ResetPath();
+            agent.ResetMovement();
             return "IDLE";
         }
         if (EventTargetTooFarToFollow())
@@ -336,13 +373,30 @@ public partial class Monster : Entity
             agent.destination = target.collider.ClosestPointOnBounds(transform.position);
             return "MOVING";
         }
+        if (EventTargetEnteredSafeZone())
+        {
+            // if our target entered the safe zone, we need to be really careful
+            // to avoid kiting.
+            // -> players could pull a monster near a safe zone and then step in
+            //    and out of it before/after attacks without ever getting hit by
+            //    the monster
+            // -> running back to start won't help, can still kit while running
+            // -> warping back to start won't help, we might accidentally placed
+            //    a monster in attack range of a safe zone
+            // -> the 100% secure way is to die and hide it immediately. many
+            //    popular MMOs do it the same way to avoid exploits.
+            // => call Entity.OnDeath without rewards etc. and hide immediately
+            base.OnDeath(); // no looting
+            respawnTimeEnd = NetworkTime.time + respawnTime; // respawn in a while
+            return "DEAD";
+        }
         if (EventAggro())
         {
             // target in attack range. try to cast a first skill on it
             // (we may get a target while randomly wandering around)
             if (skills.Count > 0) currentSkill = NextSkill();
             else Debug.LogError(name + " has no skills to attack with.");
-            agent.ResetPath();
+            agent.ResetMovement();
             return "IDLE";
         }
         if (EventDeathTimeElapsed()) {} // don't care
@@ -366,13 +420,19 @@ public partial class Monster : Entity
         {
             // we died.
             OnDeath();
-            currentSkill = -1; // in case we died while trying to cast
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            currentSkill = -1;
+            agent.ResetMovement();
+            return "STUNNED";
         }
         if (EventTargetDisappeared())
         {
             // cancel if the target matters for this skill
-            if (skills[currentSkill].cancelCastIfTargetDied) {
+            if (skills[currentSkill].cancelCastIfTargetDied)
+            {
                 currentSkill = -1;
                 target = null;
                 return "IDLE";
@@ -381,10 +441,32 @@ public partial class Monster : Entity
         if (EventTargetDied())
         {
             // cancel if the target matters for this skill
-            if (skills[currentSkill].cancelCastIfTargetDied) {
+            if (skills[currentSkill].cancelCastIfTargetDied)
+            {
                 currentSkill = -1;
                 target = null;
                 return "IDLE";
+            }
+        }
+        if (EventTargetEnteredSafeZone())
+        {
+            // cancel if the target matters for this skill
+            if (skills[currentSkill].cancelCastIfTargetDied)
+            {
+                // if our target entered the safe zone, we need to be really careful
+                // to avoid kiting.
+                // -> players could pull a monster near a safe zone and then step in
+                //    and out of it before/after attacks without ever getting hit by
+                //    the monster
+                // -> running back to start won't help, can still kit while running
+                // -> warping back to start won't help, we might accidentally placed
+                //    a monster in attack range of a safe zone
+                // -> the 100% secure way is to die and hide it immediately. many
+                //    popular MMOs do it the same way to avoid exploits.
+                // => call Entity.OnDeath without rewards etc. and hide immediately
+                base.OnDeath(); // no looting
+                respawnTimeEnd = NetworkTime.time + respawnTime; // respawn in a while
+                return "DEAD";
             }
         }
         if (EventSkillFinished())
@@ -411,6 +493,26 @@ public partial class Monster : Entity
         if (EventMoveRandomly()) {} // don't care
 
         return "CASTING"; // nothing interesting happened
+    }
+
+    [Server]
+    string UpdateServer_STUNNED()
+    {
+        // events sorted by priority (e.g. target doesn't matter if we died)
+        if (EventDied())
+        {
+            // we died.
+            OnDeath();
+            return "DEAD";
+        }
+        if (EventStunned())
+        {
+            return "STUNNED";
+        }
+
+        // go back to idle if we aren't stunned anymore and process all new
+        // events there too
+        return "IDLE";
     }
 
     [Server]
@@ -442,8 +544,10 @@ public partial class Monster : Entity
         if (EventTargetDied()) {} // don't care
         if (EventTargetTooFarToFollow()) {} // don't care
         if (EventTargetTooFarToAttack()) {} // don't care
+        if (EventTargetEnteredSafeZone()) {} // don't care
         if (EventAggro()) {} // don't care
         if (EventMoveRandomly()) {} // don't care
+        if (EventStunned()) {} // don't care
         if (EventDied()) {} // don't care, of course we are dead
 
         return "DEAD"; // nothing interesting happened
@@ -455,6 +559,7 @@ public partial class Monster : Entity
         if (state == "IDLE")    return UpdateServer_IDLE();
         if (state == "MOVING")  return UpdateServer_MOVING();
         if (state == "CASTING") return UpdateServer_CASTING();
+        if (state == "STUNNED") return UpdateServer_STUNNED();
         if (state == "DEAD")    return UpdateServer_DEAD();
         Debug.LogError("invalid state:" + state);
         return "IDLE";
@@ -525,7 +630,7 @@ public partial class Monster : Entity
         // that everything works fine even if a monster isn't updated for a
         // while. so as soon as it's updated again, the death/respawn will
         // happen immediately if current time > end time.
-        deathTimeEnd = Time.time + deathTime;
+        deathTimeEnd = NetworkTime.time + deathTime;
         respawnTimeEnd = deathTimeEnd + respawnTime; // after death time ended
 
         // generate gold
@@ -548,9 +653,7 @@ public partial class Monster : Entity
     // we use 'is' instead of 'GetType' so that it works for inherited types too
     public override bool CanAttack(Entity entity)
     {
-        return health > 0 &&
-               entity.health > 0 &&
-               entity != this &&
+        return base.CanAttack(entity) &&
                (entity is Player ||
                 entity is Pet);
     }

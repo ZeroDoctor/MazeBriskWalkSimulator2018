@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+[RequireComponent(typeof(NetworkNavMeshAgent))]
 public partial class Npc : Entity
 {
     [Header("Text Meshes")]

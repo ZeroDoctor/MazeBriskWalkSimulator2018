@@ -11,15 +11,18 @@ public class PlayerSetup : NetworkBehaviour {
 
     private void Start()
     {
-
+        Debug.Log("Hey!");
         if (!isLocalPlayer)
         {
-            DisableComponents();
+            Debug.Log("This is not the local player!");
+            //DisableComponents();
             AssignEnemyLayer();
+            
         }
         else
         {
             GameObject.Find("SceneCamera").SetActive(false);
+            Debug.Log("SceneCamera has been deactived");
             /*sceneCamera = Camera.main;
             if(sceneCamera != null)
             {

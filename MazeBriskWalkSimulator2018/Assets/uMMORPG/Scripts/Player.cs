@@ -19,13 +19,14 @@
 // buggy and because it can't really react to movement stops fast enough, which
 // results in moonwalking. Not synchronizing animations over the network will
 // also save us bandwidth.
-//
 using UnityEngine;
-using Mirror;
 using UnityEngine.AI;
+using UnityStandardAssets.Utility;
+using Mirror;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
 
 public enum TradeStatus {Free, Locked, Accepted}
 public enum CraftingState {None, InProgress, Success, Failed}
@@ -60,6 +61,7 @@ public partial class Player : Entity
     [Header("Components")]
     public Chat chat;
     public Camera avatarCamera;
+    //public NetworkNavMeshAgentRubberbanding networkNavMeshAgent;
 
     [Header("Text Meshes")]
     public TextMesh guildOverlay;
@@ -281,6 +283,7 @@ public partial class Player : Entity
     [Header("Crafting")]
     public List<int> craftingIndices = Enumerable.Repeat(-1, ScriptableRecipe.recipeSize).ToList();
     [HideInInspector] public CraftingState craftingState = CraftingState.None; // // client sided
+    [SyncVar, HideInInspector] public double craftingTimeEnd; // double for long term precision
 
     [Header("Item Mall")]
     public ItemMallCategory[] itemMallCategories; // the items that can be purchased in the item mall
@@ -318,15 +321,18 @@ public partial class Player : Entity
         }
     }
 
+    // when moving into attack range of a target, we always want to move a
+    // little bit closer than necessary to tolerate for latency and other
+    // situations where the target might have moved away a little bit already.
+    [Header("Movement")]
+    [Range(0.1f, 1)] public float attackToMoveRangeRatio = 0.8f;
+
     [Header("Death")]
     public float deathExperienceLossPercent = 0.05f;
 
     // some commands should have delays to avoid DDOS, too much database usage
     // or brute forcing coupons etc. we use one riskyAction timer for all.
-    [SyncVar, HideInInspector] public float nextRiskyActionTime = 0;
-
-    // the next skill to be set if we try to set it while casting
-    int nextSkill = -1;
+    [SyncVar, HideInInspector] public double nextRiskyActionTime = 0; // double for long term precision
 
     // the next target to be set if we try to set it while casting
     // 'Entity' can't be SyncVar and NetworkIdentity causes errors when null,
@@ -344,6 +350,43 @@ public partial class Player : Entity
     // => on client: all observed players
     public static Dictionary<string, Player> onlinePlayers = new Dictionary<string, Player>();
 
+    // helper variable to remember which skill to use when we walked close enough
+    int useSkillWhenCloser = -1;
+    private CharacterController controller;
+
+    // FirstPersonController ///////////////////////////////////////////////////
+    [SerializeField] private bool m_IsWalking;
+    [SerializeField] private float m_WalkSpeed;
+    [SerializeField] private float m_RunSpeed;
+    [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
+    [SerializeField] private float m_JumpSpeed;
+    [SerializeField] private float m_StickToGroundForce;
+    [SerializeField] private float m_GravityMultiplier;
+    [SerializeField] private UnityStandardAssets.Characters.FirstPerson.MouseLook m_MouseLook;
+    [SerializeField] private bool m_UseFovKick;
+    [SerializeField] private FOVKick m_FovKick = new FOVKick(); 
+    [SerializeField] private bool m_UseHeadBob;
+    [SerializeField] private CurveControlledBob m_HeadBob = new CurveControlledBob();
+    [SerializeField] private LerpControlledBob m_JumpBob = new LerpControlledBob();
+    [SerializeField] private float m_StepInterval;
+    [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
+    [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
+    [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+
+    private Camera m_Camera; //MouseLook
+    private bool m_Jump;
+    private float m_YRotation;
+    private Vector2 m_Input;
+    private Vector3 m_MoveDir = Vector3.zero;
+    private CharacterController m_CharacterController;
+    private CollisionFlags m_CollisionFlags;
+    private bool m_PreviouslyGrounded;
+    private Vector3 m_OriginalCameraPosition;
+    private float m_StepCycle;
+    private float m_NextStep;
+    private bool m_Jumping;
+    private AudioSource m_AudioSource;
+
     // networkbehaviour ////////////////////////////////////////////////////////
     protected override void Awake()
     {
@@ -356,8 +399,9 @@ public partial class Player : Entity
 
     public override void OnStartLocalPlayer()
     {
+        
         // setup camera targets
-        Camera.main.GetComponent<CameraMMO>().target = transform;
+        //Camera.main.GetComponent<CameraMMO>().target = transform;
         GameObject.FindWithTag("MinimapCamera").GetComponent<CopyPosition>().target = transform;
         if (avatarCamera) avatarCamera.enabled = true; // avatar camera for local player
 
@@ -401,6 +445,27 @@ public partial class Player : Entity
     protected override void Start()
     {
         base.Start();
+
+        if(isLocalPlayer) {
+            GameObject originalGameObject = GameObject.Find(name);
+            GameObject child = originalGameObject.transform.GetChild(4).gameObject;
+            child.SetActive(true);
+            m_CharacterController = GetComponent<CharacterController>();
+            m_Camera = GetComponentInChildren<Camera>();
+            m_OriginalCameraPosition = m_Camera.transform.localPosition;
+            m_FovKick.Setup(m_Camera);
+            m_HeadBob.Setup(m_Camera, m_StepInterval);
+            m_StepCycle = 0f;
+            m_NextStep = m_StepCycle / 2f;
+            m_Jumping = false;
+            m_AudioSource = GetComponent<AudioSource>();
+            m_MouseLook.Init(transform , m_Camera.transform);
+        } else {
+            GameObject originalGameObject = GameObject.Find(name);
+            GameObject child = originalGameObject.transform.GetChild(4).gameObject;
+            child.SetActive(false);
+        }
+
         onlinePlayers[name] = this;
 
         // spawn effects for any buffs that might still be active after loading
@@ -430,9 +495,9 @@ public partial class Player : Entity
         // => make sure to import all looping animations like idle/run/attack
         //    with 'loop time' enabled, otherwise the client might only play it
         //    once
-        // => only play moving animation while the agent is actually moving. the
-        //    MOVING state might be delayed due to latency or we might be in
-        //    MOVING while a path is still pending, etc.
+        // => MOVING state is set to local IsMovement result directly. otherwise
+        //    we would see animation latencies for rubberband movement if we
+        //    have to wait for MOVING state to be received from the server
         // => skill names are assumed to be boolean parameters in animator
         //    so we don't need to worry about an animation number etc.
         if (isClient) // no need for animations on the server
@@ -440,8 +505,9 @@ public partial class Player : Entity
             // now pass parameters after any possible rebinds
             foreach (Animator anim in GetComponentsInChildren<Animator>())
             {
-                anim.SetBool("MOVING", state == "MOVING" && agent.velocity != Vector3.zero);
+                anim.SetBool("MOVING", IsMoving());
                 anim.SetBool("CASTING", state == "CASTING");
+                anim.SetBool("STUNNED", state == "STUNNED");
                 anim.SetBool("DEAD", state == "DEAD");
                 foreach (Skill skill in skills)
                     if (skill.level > 0 && !(skill.data is PassiveSkill))
@@ -485,8 +551,7 @@ public partial class Player : Entity
         Utils.InvokeMany(typeof(Player), this, "OnDestroy_");
     }
 
-    // finite state machine events - status based //////////////////////////////
-    // status based events
+    // finite state machine events /////////////////////////////////////////////
     bool EventDied()
     {
         return health == 0;
@@ -513,15 +578,14 @@ public partial class Player : Entity
                skills[currentSkill].CastTimeRemaining() == 0;
     }
 
-    // setting agent.velocity takes one frame to apply and is still Vector3.zero
-    // immediately after setting it. so we need a little helper to make sure
-    // that EventMoveEnd doesn't fire immediately after.
-    bool velocityPending;
+    bool EventMoveStart()
+    {
+        return state != "MOVING" && IsMoving(); // only fire when started moving
+    }
+
     bool EventMoveEnd()
     {
-        bool result = state == "MOVING" && !velocityPending && !IsMoving();
-        velocityPending = false; // always reset before returning
-        return result;
+        return state == "MOVING" && !IsMoving(); // only fire when stopped moving
     }
 
     bool EventTradeStarted()
@@ -537,38 +601,43 @@ public partial class Player : Entity
         return state == "TRADING" && tradeRequestFrom == "";
     }
 
-    // finite state machine events - command based /////////////////////////////
-    // client calls command, command sets a flag, event reads and resets it
-    // => we use a set so that we don't get ultra long queues etc.
-    // => we use set.Return to read and clear values
-    HashSet<string> cmdEvents = new HashSet<string>();
-
-    [Command]
-    public void CmdRespawn() { cmdEvents.Add("Respawn"); }
-    bool EventRespawn() { return cmdEvents.Remove("Respawn"); }
-
-    [Command]
-    public void CmdCancelAction() { cmdEvents.Add("CancelAction"); }
-    bool EventCancelAction() { return cmdEvents.Remove("CancelAction"); }
-
-    Vector3 navigatePosition = Vector3.zero;
-    float navigateStop = 0;
-    [Command]
-    void CmdNavigateDestination(Vector3 position, float stoppingDistance)
+    bool craftingRequested;
+    bool EventCraftingStarted()
     {
-        navigatePosition = position; navigateStop = stoppingDistance;
-        cmdEvents.Add("NavigateDestination");
+        bool result = craftingRequested;
+        craftingRequested = false;
+        return result;
     }
-    bool EventNavigateDestination() { return cmdEvents.Remove("NavigateDestination"); }
 
-    Vector3 navigateVelocity = Vector3.zero;
-    [Command]
-    void CmdNavigateVelocity(Vector3 velocity)
+    bool EventCraftingDone()
     {
-        navigateVelocity = velocity.magnitude > 1 ? velocity.normalized : velocity; // prevent speedhacks
-        cmdEvents.Add("NavigateVelocity");
+        return state == "CRAFTING" && NetworkTime.time > craftingTimeEnd;
     }
-    bool EventNavigateVelocity() { return cmdEvents.Remove("NavigateVelocity"); }
+
+    bool EventStunned()
+    {
+        return NetworkTime.time <= stunTimeEnd;
+    }
+
+    [Command]
+    public void CmdRespawn() { respawnRequested = true; }
+    bool respawnRequested;
+    bool EventRespawn()
+    {
+        bool result = respawnRequested;
+        respawnRequested = false; // reset
+        return result;
+    }
+
+    [Command]
+    public void CmdCancelAction() { cancelActionRequested = true; }
+    bool cancelActionRequested;
+    bool EventCancelAction()
+    {
+        bool result = cancelActionRequested;
+        cancelActionRequested = false; // reset
+        return result;
+    }
 
     // finite state machine - server ///////////////////////////////////////////
     [Server]
@@ -579,8 +648,12 @@ public partial class Player : Entity
         {
             // we died.
             OnDeath();
-            currentSkill = nextSkill = -1; // in case we died while trying to cast
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            //agent.ResetMovement();
+            return "STUNNED";
         }
         if (EventCancelAction())
         {
@@ -591,62 +664,49 @@ public partial class Player : Entity
         if (EventTradeStarted())
         {
             // cancel casting (if any), set target, go to trading
-            currentSkill = nextSkill = -1; // just in case
+            currentSkill = -1; // just in case
             target = FindPlayerFromTradeInvitation();
             return "TRADING";
         }
-        if (EventNavigateDestination())
+        if (EventCraftingStarted())
         {
-            // cancel casting (if any) and start moving
-            currentSkill = nextSkill = -1;
-            agent.stoppingDistance = navigateStop;
-            agent.destination = navigatePosition;
-            return "MOVING";
+            // cancel casting (if any), go to crafting
+            currentSkill = -1; // just in case
+            return "CRAFTING";
         }
-        if (EventNavigateVelocity())
+        if (EventMoveStart())
         {
-            // cancel casting (if any) and start moving
-            currentSkill = nextSkill = -1;
-            agent.ResetPath(); // needed after click movement before we can use .velocity
-            agent.velocity = navigateVelocity * agent.speed;
-            velocityPending = true; // takes 1 frame to apply velocity
+            // cancel casting (if any)
+            currentSkill = -1;
             return "MOVING";
         }
         if (EventSkillRequest())
         {
             // user wants to cast a skill.
-            // check self (alive, mana, weapon etc.) and target
+            // check self (alive, mana, weapon etc.) and target and distance
             Skill skill = skills[currentSkill];
             nextTarget = target; // return to this one after any corrections by CastCheckTarget
-            if (CastCheckSelf(skill) && CastCheckTarget(skill))
+            Vector3 destination;
+            if (CastCheckSelf(skill) && CastCheckTarget(skill) && CastCheckDistance(skill, out destination))
             {
-                // check distance between self and target
-                Vector3 destination;
-                if (CastCheckDistance(skill, out destination))
-                {
-                    // start casting
-                    StartCastSkill(skill);
-                    return "CASTING";
-                }
-                else
-                {
-                    // move to the target first
-                    // (use collider point(s) to also work with big entities)
-                    agent.stoppingDistance = skill.castRange;
-                    agent.destination = destination;
-                    return "MOVING";
-                }
+                // start casting and cancel movement in any case
+                // (player might move into attack range * 0.8 but as soon as we
+                //  are close enough to cast, we fully commit to the cast.)
+                //agent.ResetMovement();
+                StartCastSkill(skill);
+                return "CASTING";
             }
             else
             {
                 // checks failed. stop trying to cast.
-                currentSkill = nextSkill = -1;
+                currentSkill = -1;
                 return "IDLE";
             }
         }
         if (EventSkillFinished()) {} // don't care
         if (EventMoveEnd()) {} // don't care
         if (EventTradeDone()) {} // don't care
+        if (EventCraftingDone()) {} // don't care
         if (EventRespawn()) {} // don't care
         if (EventTargetDied()) {} // don't care
         if (EventTargetDisappeared()) {} // don't care
@@ -657,17 +717,17 @@ public partial class Player : Entity
     [Server]
     string UpdateServer_MOVING()
     {
-        // agent.velocity needs to be set constantly during wasd movement
-        if (navigateVelocity != Vector3.zero)
-            agent.velocity = navigateVelocity * agent.speed;
-
         // events sorted by priority (e.g. target doesn't matter if we died)
         if (EventDied())
         {
             // we died.
             OnDeath();
-            currentSkill = nextSkill = -1; // in case we died while trying to cast
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            //agent.ResetMovement();
+            return "STUNNED";
         }
         if (EventMoveEnd())
         {
@@ -677,34 +737,24 @@ public partial class Player : Entity
         if (EventCancelAction())
         {
             // cancel casting (if any) and stop moving
-            currentSkill = nextSkill = -1;
-            agent.ResetPath();
+            currentSkill = -1;
+            //agent.ResetMovement();
             return "IDLE";
         }
         if (EventTradeStarted())
         {
             // cancel casting (if any), stop moving, set target, go to trading
-            currentSkill = nextSkill = -1;
-            agent.ResetPath();
+            currentSkill = -1;
+            //agent.ResetMovement();
             target = FindPlayerFromTradeInvitation();
             return "TRADING";
         }
-        if (EventNavigateDestination())
+        if (EventCraftingStarted())
         {
-            // cancel casting (if any) and start moving
-            currentSkill = nextSkill = -1;
-            agent.stoppingDistance = navigateStop;
-            agent.destination = navigatePosition;
-            return "MOVING";
-        }
-        if (EventNavigateVelocity())
-        {
-            // cancel casting (if any) and start moving
-            currentSkill = nextSkill = -1;
-            agent.ResetPath(); // needed after click movement before we can use .velocity
-            agent.velocity = navigateVelocity * agent.speed;
-            velocityPending = true; // takes 1 frame to apply velocity
-            return "MOVING";
+            // cancel casting (if any), stop moving, go to crafting
+            currentSkill = -1;
+            //agent.ResetMovement();
+            return "CRAFTING";
         }
         if (EventSkillRequest())
         {
@@ -712,35 +762,25 @@ public partial class Player : Entity
             // check self (alive, mana, weapon etc.) and target
             Skill skill = skills[currentSkill];
             nextTarget = target; // return to this one after any corrections by CastCheckTarget
-            if (CastCheckSelf(skill) && CastCheckTarget(skill))
+            Vector3 destination;
+            if (CastCheckSelf(skill) && CastCheckTarget(skill) && CastCheckDistance(skill, out destination))
             {
-                // check distance between self and target
-                Vector3 destination;
-                if (CastCheckDistance(skill, out destination))
-                {
-                    // stop moving, start casting
-                    agent.ResetPath();
-                    StartCastSkill(skill);
-                    return "CASTING";
-                }
-                else
-                {
-                    // keep moving towards the target
-                    // (use collider point(s) to also work with big entities)
-                    agent.stoppingDistance = skill.castRange;
-                    agent.destination = destination;
-                    return "MOVING";
-                }
+                // start casting and cancel movement in any case
+                //agent.ResetMovement();
+                StartCastSkill(skill);
+                return "CASTING";
             }
             else
             {
                 // invalid target. stop trying to cast, but keep moving.
-                currentSkill = nextSkill = -1;
+                currentSkill = -1;
                 return "MOVING";
             }
         }
+        if (EventMoveStart()) {} // don't care
         if (EventSkillFinished()) {} // don't care
         if (EventTradeDone()) {} // don't care
+        if (EventCraftingDone()) {} // don't care
         if (EventRespawn()) {} // don't care
         if (EventTargetDied()) {} // don't care
         if (EventTargetDisappeared()) {} // don't care
@@ -778,41 +818,42 @@ public partial class Player : Entity
         {
             // we died.
             OnDeath();
-            currentSkill = nextSkill = -1; // in case we died while trying to cast
             UseNextTargetIfAny(); // if user selected a new target while casting
             return "DEAD";
         }
-        if (EventNavigateDestination())
+        if (EventStunned())
         {
-            // cancel casting and start moving
-            currentSkill = nextSkill = -1;
-            agent.stoppingDistance = navigateStop;
-            agent.destination = navigatePosition;
-            UseNextTargetIfAny(); // if user selected a new target while casting
-            return "MOVING";
+            currentSkill = -1;
+            //agent.ResetMovement();
+            return "STUNNED";
         }
-        if (EventNavigateVelocity())
+        if (EventMoveStart())
         {
-            // cancel casting (if any) and start moving
-            currentSkill = nextSkill = -1;
-            agent.ResetPath(); // needed after click movement before we can use .velocity
-            agent.velocity = navigateVelocity * agent.speed;
-            velocityPending = true; // takes 1 frame to apply velocity
-            UseNextTargetIfAny(); // if user selected a new target while casting
-            return "MOVING";
+            // we do NOT cancel the cast if the player moved, and here is why:
+            // * local player might move into cast range and then try to cast.
+            // * server then receives the Cmd, goes to CASTING state, then
+            //   receives one of the last movement updates from the local player
+            //   which would cause EventMoveStart and cancel the cast.
+            // * this is the price for rubberband movement.
+            // => if the player wants to cast and got close enough, then we have
+            //    to fully commit to it. there is no more way out except via
+            //    cancel action. any movement in here is to be rejected.
+            //    (many popular MMOs have the same behaviour too)
+            //agent.ResetMovement();
+            return "CASTING";
         }
         if (EventCancelAction())
         {
             // cancel casting
-            currentSkill = nextSkill = -1;
+            currentSkill = -1;
             UseNextTargetIfAny(); // if user selected a new target while casting
             return "IDLE";
         }
         if (EventTradeStarted())
         {
             // cancel casting (if any), stop moving, set target, go to trading
-            currentSkill = nextSkill = -1;
-            agent.ResetPath();
+            currentSkill = -1;
+            //agent.ResetMovement();
 
             // set target to trade target instead of next target (clear that)
             target = FindPlayerFromTradeInvitation();
@@ -824,7 +865,7 @@ public partial class Player : Entity
             // cancel if the target matters for this skill
             if (skills[currentSkill].cancelCastIfTargetDied)
             {
-                currentSkill = nextSkill = -1;
+                currentSkill = -1;
                 UseNextTargetIfAny(); // if user selected a new target while casting
                 return "IDLE";
             }
@@ -834,7 +875,7 @@ public partial class Player : Entity
             // cancel if the target matters for this skill
             if (skills[currentSkill].cancelCastIfTargetDied)
             {
-                currentSkill = nextSkill = -1;
+                currentSkill = -1;
                 UseNextTargetIfAny(); // if user selected a new target while casting
                 return "IDLE";
             }
@@ -849,14 +890,15 @@ public partial class Player : Entity
             // apply the skill on the target
             FinishCastSkill(skill);
 
-            // casting finished for now. user pressed another skill button?
-            if (nextSkill != -1)
-            {
-                currentSkill = nextSkill;
-                nextSkill = -1;
-            }
-            // skill should be followed with default attack? otherwise clear
-            else currentSkill = skill.followupDefaultAttack ? 0 : -1;
+            // clear current skill for now
+            currentSkill = -1;
+
+            // target-based skill and no more valid target? then clear
+            // (otherwise IDLE will get an unnecessary skill request and mess
+            //  with targeting)
+            bool validTarget = target != null && target.health > 0;
+            if (currentSkill != -1 && skills[currentSkill].cancelCastIfTargetDied && !validTarget)
+                currentSkill = -1;
 
             // use next target if the user tried to target another while casting
             UseNextTargetIfAny();
@@ -866,10 +908,32 @@ public partial class Player : Entity
         }
         if (EventMoveEnd()) {} // don't care
         if (EventTradeDone()) {} // don't care
+        if (EventCraftingStarted()) {} // don't care
+        if (EventCraftingDone()) {} // don't care
         if (EventRespawn()) {} // don't care
         if (EventSkillRequest()) {} // don't care
 
         return "CASTING"; // nothing interesting happened
+    }
+
+    [Server]
+    string UpdateServer_STUNNED()
+    {
+        // events sorted by priority (e.g. target doesn't matter if we died)
+        if (EventDied())
+        {
+            // we died.
+            OnDeath();
+            return "DEAD";
+        }
+        if (EventStunned())
+        {
+            return "STUNNED";
+        }
+
+        // go back to idle if we aren't stunned anymore and process all new
+        // events there too
+        return "IDLE";
     }
 
     [Server]
@@ -880,9 +944,22 @@ public partial class Player : Entity
         {
             // we died, stop trading. other guy will receive targetdied event.
             OnDeath();
-            currentSkill = nextSkill = -1; // in case we died while trying to cast
             TradeCleanup();
             return "DEAD";
+        }
+        if (EventStunned())
+        {
+            // stop trading
+            currentSkill = -1;
+            //agent.ResetMovement();
+            TradeCleanup();
+            return "STUNNED";
+        }
+        if (EventMoveStart())
+        {
+            // reject movement while trading
+            //agent.ResetMovement();
+            return "TRADING";
         }
         if (EventCancelAction())
         {
@@ -910,13 +987,55 @@ public partial class Player : Entity
         }
         if (EventMoveEnd()) {} // don't care
         if (EventSkillFinished()) {} // don't care
+        if (EventCraftingStarted()) {} // don't care
+        if (EventCraftingDone()) {} // don't care
         if (EventRespawn()) {} // don't care
         if (EventTradeStarted()) {} // don't care
-        if (EventNavigateDestination()) {} // don't care
-        if (EventNavigateVelocity()) {} // don't care
         if (EventSkillRequest()) {} // don't care
 
         return "TRADING"; // nothing interesting happened
+    }
+
+    [Server]
+    string UpdateServer_CRAFTING()
+    {
+        // events sorted by priority (e.g. target doesn't matter if we died)
+        if (EventDied())
+        {
+            // we died, stop crafting
+            OnDeath();
+            return "DEAD";
+        }
+        if (EventStunned())
+        {
+            // stop crafting
+            //agent.ResetMovement();
+            return "STUNNED";
+        }
+        if (EventMoveStart())
+        {
+            // reject movement while crafting
+            //agent.ResetMovement();
+            return "CRAFTING";
+        }
+        if (EventCraftingDone())
+        {
+            // finish crafting
+            Craft();
+            return "IDLE";
+        }
+        if (EventCancelAction()) {} // don't care. user pressed craft, we craft.
+        if (EventTargetDisappeared()) {} // don't care
+        if (EventTargetDied()) {} // don't care
+        if (EventMoveEnd()) {} // don't care
+        if (EventSkillFinished()) {} // don't care
+        if (EventRespawn()) {} // don't care
+        if (EventTradeStarted()) {} // don't care
+        if (EventTradeDone()) {} // don't care
+        if (EventCraftingStarted()) {} // don't care
+        if (EventSkillRequest()) {} // don't care
+
+        return "CRAFTING"; // nothing interesting happened
     }
 
     [Server]
@@ -927,9 +1046,16 @@ public partial class Player : Entity
         {
             // revive to closest spawn, with 50% health, then go to idle
             Transform start = NetworkManager.singleton.GetNearestStartPosition(transform.position);
-            agent.Warp(start.position); // recommended over transform.position
+            //agent.Warp(start.position); // recommended over transform.position
             Revive(0.5f);
             return "IDLE";
+        }
+        if (EventMoveStart())
+        {
+            // this should never happen, rubberband should prevent from moving
+            // while dead.
+            Debug.LogWarning("Player " + name + " moved while dead. This should not happen.");
+            return "DEAD";
         }
         if (EventMoveEnd()) {} // don't care
         if (EventSkillFinished()) {} // don't care
@@ -937,10 +1063,10 @@ public partial class Player : Entity
         if (EventCancelAction()) {} // don't care
         if (EventTradeStarted()) {} // don't care
         if (EventTradeDone()) {} // don't care
+        if (EventCraftingStarted()) {} // don't care
+        if (EventCraftingDone()) {} // don't care
         if (EventTargetDisappeared()) {} // don't care
         if (EventTargetDied()) {} // don't care
-        if (EventNavigateDestination()) {} // don't care
-        if (EventNavigateVelocity()) {} // don't care
         if (EventSkillRequest()) {} // don't care
 
         return "DEAD"; // nothing interesting happened
@@ -949,11 +1075,13 @@ public partial class Player : Entity
     [Server]
     protected override string UpdateServer()
     {
-        if (state == "IDLE")    return UpdateServer_IDLE();
-        if (state == "MOVING")  return UpdateServer_MOVING();
-        if (state == "CASTING") return UpdateServer_CASTING();
-        if (state == "TRADING") return UpdateServer_TRADING();
-        if (state == "DEAD")    return UpdateServer_DEAD();
+        if (state == "IDLE")     return UpdateServer_IDLE();
+        if (state == "MOVING")   return UpdateServer_MOVING();
+        if (state == "CASTING")  return UpdateServer_CASTING();
+        if (state == "STUNNED")  return UpdateServer_STUNNED();
+        if (state == "TRADING")  return UpdateServer_TRADING();
+        if (state == "CRAFTING") return UpdateServer_CRAFTING();
+        if (state == "DEAD")     return UpdateServer_DEAD();
         Debug.LogError("invalid state:" + state);
         return "IDLE";
     }
@@ -967,12 +1095,47 @@ public partial class Player : Entity
             if (isLocalPlayer)
             {
                 // simply accept input
-                SelectionHandling();
-                WSADHandling();
-                TargetNearest();
+                //SelectionHandling();
+                //WASDHandling();
+                UpdateJumping();
+                UpdateMovement();
+                //TargetNearest();
 
                 // canel action if escape key was pressed
-                if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
+                //if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
+
+                // trying to cast a skill on a monster that wasn't in range?
+                // then check if we walked into attack range by now
+                /* if (useSkillWhenCloser != -1)
+                {
+                    // can we still attack the target? maybe it was switched.
+                    if (CanAttack(target))
+                    {
+                        // in range already?
+                        // -> we don't use CastCheckDistance because we want to
+                        // move a bit closer (attackToMoveRangeRatio)
+                        float range = skills[useSkillWhenCloser].castRange * attackToMoveRangeRatio;
+                        if (Utils.ClosestDistance(collider, target.collider) <= range)
+                        {
+                            // then stop moving and start attacking
+                            CmdUseSkill(useSkillWhenCloser);
+
+                            // reset
+                            useSkillWhenCloser = -1;
+                        }
+                        // otherwise keep walking there. the target might move
+                        // around or run away, so we need to keep adjusting the
+                        // destination all the time
+                        else
+                        {
+                            //Debug.Log("walking closer to target...");
+                            //agent.stoppingDistance = range * attackToMoveRangeRatio;
+                            //agent.destination = target.collider.ClosestPointOnBounds(transform.position);
+                        }
+                    }
+                    // otherwise reset
+                    else useSkillWhenCloser = -1;
+                } */
             }
         }
         else if (state == "CASTING")
@@ -982,16 +1145,33 @@ public partial class Player : Entity
 
             if (isLocalPlayer)
             {
-                // simply accept input
-                SelectionHandling();
-                WSADHandling();
-                TargetNearest();
+                // simply accept input and reset any client sided movement
+                //SelectionHandling();
+                //WASDHandling(); // still call this to set pendingVelocity for after cast
+                UpdateJumping();
+                UpdateMovement();
+                //TargetNearest();
+                //agent.ResetMovement();
+
+                // canel action if escape key was pressed
+                //if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
+            }
+        }
+        else if (state == "STUNNED")
+        {
+            if (isLocalPlayer)
+            {
+                // simply accept input and reset any client sided movement
+                //SelectionHandling();
+                //TargetNearest();
+                //agent.ResetMovement();
 
                 // canel action if escape key was pressed
                 if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
             }
         }
         else if (state == "TRADING") {}
+        else if (state == "CRAFTING") {}
         else if (state == "DEAD") {}
         else Debug.LogError("invalid state:" + state);
 
@@ -1020,6 +1200,261 @@ public partial class Player : Entity
 
         // addon system hooks
         Utils.InvokeMany(typeof(Player), this, "UpdateClient_");
+    }
+
+    [Client]
+    void UpdateMovement() {
+
+        float speed;
+        GetInput(out speed);
+        // always move along the camera forward as it is the direction that it being aimed at
+        Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
+
+        // get a normal for the surface that is being touched to move along it
+        RaycastHit hitInfo;
+        Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
+                        m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+        desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
+
+        m_MoveDir.x = desiredMove.x*speed;
+        m_MoveDir.z = desiredMove.z*speed;
+
+
+        if (m_CharacterController.isGrounded)
+        {
+            m_MoveDir.y = -m_StickToGroundForce;
+
+            if (m_Jump)
+            {
+                m_MoveDir.y = m_JumpSpeed;
+                PlayJumpSound();
+                m_Jump = false;
+                m_Jumping = true;
+            }
+        }
+        else
+        {
+            m_MoveDir += Physics.gravity*m_GravityMultiplier*Time.fixedDeltaTime;
+        }
+        m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
+
+        ProgressStepCycle(speed);
+        UpdateCameraPosition(speed);
+
+        m_MouseLook.UpdateCursorLock();
+    }
+
+    void UpdateJumping() {
+
+        RotateView();
+        
+        if(UIUtils.AnyInputActive() && !isClient)
+            return;
+
+        
+        // the jump state needs to read here to make sure it is not missed
+        if (!m_Jump)
+        {
+            m_Jump = Input.GetKeyDown(KeyCode.Space);
+            
+        }
+
+        if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
+        {
+            StartCoroutine(m_JumpBob.DoBobCycle());
+            PlayLandingSound();
+            m_MoveDir.y = 0f;
+            m_Jumping = false;
+        }
+        if (!m_CharacterController.isGrounded && !m_Jumping && m_PreviouslyGrounded)
+        {
+            m_MoveDir.y = 0f;
+        }
+
+        m_PreviouslyGrounded = m_CharacterController.isGrounded;
+    }
+
+    [Client]
+    private void UpdateCameraPosition(float speed)
+    {
+        Vector3 newCameraPosition;
+        if (!m_UseHeadBob)
+        {
+            return;
+        }
+        if (m_CharacterController.velocity.magnitude > 0 && m_CharacterController.isGrounded)
+        {
+            m_Camera.transform.localPosition =
+                m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
+                                    (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
+            newCameraPosition = m_Camera.transform.localPosition;
+            newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
+        }
+        else
+        {
+            newCameraPosition = m_Camera.transform.localPosition;
+            newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset();
+        }
+        m_Camera.transform.localPosition = newCameraPosition;
+    }
+
+    [Client]
+    private void RotateView()
+    {
+        m_MouseLook.LookRotation(transform, m_Camera.transform);
+    }
+
+    [Client]
+    private void PlayLandingSound()
+    {
+        m_AudioSource.clip = m_LandSound;
+        m_AudioSource.Play();
+        m_NextStep = m_StepCycle + .5f;
+    }
+
+    [Client]
+    private void PlayJumpSound()
+    {
+        m_AudioSource.clip = m_JumpSound;
+        m_AudioSource.Play();
+    }
+
+    [Client]
+    private void ProgressStepCycle(float speed)
+    {
+        if (m_CharacterController.velocity.sqrMagnitude > 0 && (m_Input.x != 0 || m_Input.y != 0))
+        {
+            m_StepCycle += (m_CharacterController.velocity.magnitude + (speed*(m_IsWalking ? 1f : m_RunstepLenghten)))*
+                            Time.fixedDeltaTime;
+        }
+
+        if (!(m_StepCycle > m_NextStep))
+        {
+            return;
+        }
+
+        m_NextStep = m_StepCycle + m_StepInterval;
+
+        //PlayFootStepAudio();
+    }
+
+    [Client]
+    private void PlayFootStepAudio()
+    {
+        if (!m_CharacterController.isGrounded)
+        {
+            return;
+        }
+        // pick & play a random footstep sound from the array,
+        // excluding sound at index 0
+        int n = Random.Range(1, m_FootstepSounds.Length);
+        m_AudioSource.clip = m_FootstepSounds[n];
+        m_AudioSource.PlayOneShot(m_AudioSource.clip);
+        // move picked sound to index 0 so it's not picked next time
+        m_FootstepSounds[n] = m_FootstepSounds[0];
+        m_FootstepSounds[0] = m_AudioSource.clip;
+    }
+
+    
+
+    [Client]
+    private void GetInput(out float speed)
+    {   
+        speed = 0;
+        if(UIUtils.AnyInputActive())
+            return;
+        // Read input
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+
+        bool waswalking = m_IsWalking;
+
+#if !MOBILE_INPUT
+        // On standalone builds, walk/run speed is modified by a key press.
+        // keep track of whether or not the character is walking or running
+        m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
+#endif
+        // set the desired speed to be walking or running
+        speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
+        m_Input = new Vector2(horizontal, vertical);
+
+        // normalize input if it exceeds 1 in combined length:
+        if (m_Input.sqrMagnitude > 1)
+        {
+            m_Input.Normalize();
+        }
+
+        // handle speed change to give an fov kick
+        // only if the player is going to a run, is running and the fovkick is to be used
+        if (m_IsWalking != waswalking && m_UseFovKick && m_CharacterController.velocity.sqrMagnitude > 0)
+        {
+            StopAllCoroutines();
+            StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
+        }
+    }
+
+    [Client]
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        Rigidbody body = hit.collider.attachedRigidbody;
+        //dont move the rigidbody if the character is on top of it
+        if (m_CollisionFlags == CollisionFlags.Below)
+        {
+            return;
+        }
+
+        if (body == null || body.isKinematic)
+        {
+            return;
+        }
+        body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+    }
+
+
+    // skill finished event & pending actions //////////////////////////////////
+    // pending actions while casting. to be applied after cast.
+    int pendingSkill = -1;
+    Vector3 pendingDestination;
+    bool pendingDestinationValid;
+    Vector3 pendingVelocity;
+    bool pendingVelocityValid;
+
+    // client event when skill cast finished on server
+    // -> useful for follow up attacks etc.
+    //    (doing those on server won't really work because the target might have
+    //     moved, in which case we need to follow, which we need to do on the
+    //     client)
+    [Client]
+    void OnSkillCastFinished(Skill skill)
+    {
+        if (!isLocalPlayer) return;
+
+        // tried to click move somewhere?
+        if (pendingDestinationValid)
+        {
+            //agent.stoppingDistance = 0;
+            //agent.destination = pendingDestination;
+        }
+        // tried to wasd move somewhere?
+        else if (pendingVelocityValid)
+        {
+            //agent.velocity = pendingVelocity;
+        }
+        // user pressed another skill button?
+        else if (pendingSkill != -1)
+        {
+            TryUseSkill(pendingSkill, true);
+        }
+        // otherwise do follow up attack if no interruptions happened
+        else if (skill.followupDefaultAttack)
+        {
+            TryUseSkill(0, true);
+        }
+
+        // clear pending actions in any case
+        pendingSkill = -1;
+        pendingDestinationValid = false;
+        pendingVelocityValid = false;
     }
 
     // attributes //////////////////////////////////////////////////////////////
@@ -1158,10 +1593,10 @@ public partial class Player : Entity
     // custom DealDamageAt function that also rewards experience if we killed
     // the monster
     [Server]
-    public override void DealDamageAt(Entity entity, int amount)
+    public override void DealDamageAt(Entity entity, int amount, float stunChance=0, float stunTime=0)
     {
         // deal damage with the default function
-        base.DealDamageAt(entity, amount);
+        base.DealDamageAt(entity, amount, stunChance, stunTime);
 
         // a monster?
         if (entity is Monster)
@@ -1559,9 +1994,7 @@ public partial class Player : Entity
     // we use 'is' instead of 'GetType' so that it works for inherited types too
     public override bool CanAttack(Entity entity)
     {
-        return health > 0 &&
-               entity.health > 0 &&
-               entity != this &&
+        return base.CanAttack(entity) &&
                (entity is Monster ||
                 entity is Player ||
                 (entity is Pet && entity != activePet));
@@ -1577,24 +2010,56 @@ public partial class Player : Entity
             // skill learned and can be casted?
             if (skills[skillIndex].level > 0 && skills[skillIndex].IsReady())
             {
-                // add as current or next skill, unless casting same one already
-                // (some players might hammer the key multiple times, which
-                //  doesn't mean that they want to cast it afterwards again)
-                // => also: always set currentSkill when moving or idle or whatever
-                //  so that the last skill that the player tried to cast while
-                //  moving is the first skill that will be casted when attacking
-                //  the enemy.
-                if (currentSkill == -1 || state != "CASTING")
-                    currentSkill = skillIndex;
-                else if (currentSkill != skillIndex)
-                    nextSkill = skillIndex;
+                currentSkill = skillIndex;
             }
+        }
+    }
+
+    // helper function: try to use a skill and walk into range if necessary
+    [Client]
+    public void TryUseSkill(int skillIndex, bool ignoreState=false)
+    {
+        // only if not casting already
+        // (might need to ignore that when coming from pending skill where
+        //  CASTING is still true)
+        if (state != "CASTING" || ignoreState)
+        {
+            Skill skill = skills[skillIndex];
+            if (CastCheckSelf(skill) && CastCheckTarget(skill))
+            {
+                // check distance between self and target
+                Vector3 destination;
+                if (CastCheckDistance(skill, out destination))
+                {
+                    // cast
+                    CmdUseSkill(skillIndex);
+                }
+                else
+                {
+                    // move to the target first
+                    // (use collider point(s) to also work with big entities)
+                    //agent.stoppingDistance = skill.castRange * attackToMoveRangeRatio;
+                    //agent.destination = destination;
+
+                    // use skill when there
+                    useSkillWhenCloser = skillIndex;
+                }
+            }
+        }
+        else
+        {
+            pendingSkill = skillIndex;
         }
     }
 
     public bool HasLearnedSkill(string skillName)
     {
         return skills.Any(skill => skill.name == skillName && skill.level > 0);
+    }
+
+    public bool HasLearnedSkillWithLevel(string skillName, int skillLevel)
+    {
+        return skills.Any(skill => skill.name == skillName && skill.level >= skillLevel);
     }
 
     // helper function for command and UI
@@ -1604,7 +2069,7 @@ public partial class Player : Entity
         return skill.level < skill.maxLevel &&
                level >= skill.upgradeRequiredLevel &&
                skillExperience >= skill.upgradeRequiredSkillExperience &&
-               (skill.predecessor == null || HasLearnedSkill(skill.predecessor.name));
+               (skill.predecessor == null || (HasLearnedSkillWithLevel(skill.predecessor.name, skill.predecessorLevel)));
     }
 
     // -> this is for learning and upgrading!
@@ -1869,7 +2334,7 @@ public partial class Player : Entity
         {
             // using agent.Warp is recommended over transform.position
             // (the latter can cause weird bugs when using it with an agent)
-            agent.Warp(((Npc)target).teleportTo.position);
+            //agent.Warp(((Npc)target).teleportTo.position);
         }
     }
 
@@ -2149,13 +2614,50 @@ public partial class Player : Entity
     public void CmdCraft(int[] indices)
     {
         // validate: between 1 and 6, all valid, no duplicates?
+        // -> can be IDLE or MOVING (in which case we reset the movement)
         if ((state == "IDLE" || state == "MOVING") &&
-            0 < indices.Length && indices.Length <= ScriptableRecipe.recipeSize &&
-            indices.All(index => 0 <= index && index < inventory.Count && inventory[index].amount > 0) &&
-            !indices.ToList().HasDuplicates())
+            indices.Length == ScriptableRecipe.recipeSize)
+        {
+            // find valid indices that are not '-1' and make sure there are no
+            // duplicates
+            List<int> validIndices = indices.Where(index => 0 <= index && index < inventory.Count && inventory[index].amount > 0).ToList();
+            if (validIndices.Count > 0 && !validIndices.HasDuplicates())
+            {
+                // build list of item templates from valid indices
+                List<ScriptableItem> items = validIndices.Select(index => inventory[index].item.data).ToList();
+
+                // find recipe
+                ScriptableRecipe recipe = ScriptableRecipe.dict.Values.ToList().Find(r => r.CanCraftWith(items)); // good enough for now
+                if (recipe != null && recipe.result != null)
+                {
+                    // enough space?
+                    Item result = new Item(recipe.result);
+                    if (InventoryCanAdd(result, 1))
+                    {
+                        // store the crafting indices on the server. no need for
+                        // a SyncList and unnecessary broadcasting.
+                        // we already have a 'craftingIndices' variable anyway.
+                        craftingIndices = indices.ToList();
+
+                        // start crafting
+                        craftingRequested = true;
+                        craftingTimeEnd = NetworkTime.time + recipe.craftingTime;
+                    }
+                }
+            }
+        }
+    }
+
+    // finish the crafting
+    void Craft()
+    {
+        // should only be called while CRAFTING
+        // -> we already validated everything in CmdCraft. let's just craft.
+        if (state == "CRAFTING")
         {
             // build list of item templates from indices
-            List<ScriptableItem> items = indices.Select(index => inventory[index].item.data).ToList();
+            List<int> validIndices = craftingIndices.Where(index => 0 <= index && index < inventory.Count && inventory[index].amount > 0).ToList();
+            List<ScriptableItem> items = validIndices.Select(index => inventory[index].item.data).ToList();
 
             // find recipe
             ScriptableRecipe recipe = ScriptableRecipe.dict.Values.ToList().Find(r => r.CanCraftWith(items)); // good enough for now
@@ -2166,7 +2668,7 @@ public partial class Player : Entity
                 if (InventoryCanAdd(result, 1))
                 {
                     // remove the ingredients from inventory in any case
-                    foreach (int index in indices)
+                    foreach (int index in validIndices)
                     {
                         // decrease item amount
                         ItemSlot slot = inventory[index];
@@ -2192,6 +2694,12 @@ public partial class Player : Entity
                     {
                         TargetCraftingFailed(connectionToClient);
                     }
+
+                    // clear indices afterwards
+                    // note: we set all to -1 instead of calling .Clear because
+                    //       that would clear all the slots in host mode.
+                    for (int i = 0; i < ScriptableRecipe.recipeSize; ++i)
+                        craftingIndices[i] = -1;
                 }
             }
         }
@@ -2244,12 +2752,12 @@ public partial class Player : Entity
     public void CmdEnterCoupon(string coupon)
     {
         // only allow entering one coupon every few seconds to avoid brute force
-        if (Time.time >= nextRiskyActionTime)
+        if (NetworkTime.time >= nextRiskyActionTime)
         {
             // YOUR COUPON VALIDATION CODE HERE
             // coins += ParseCoupon(coupon);
-            Debug.Log("coupon: " + coupon + " => " + name + "@" + Time.time);
-            nextRiskyActionTime = Time.time + couponWaitSeconds;
+            Debug.Log("coupon: " + coupon + " => " + name + "@" + NetworkTime.time);
+            nextRiskyActionTime = NetworkTime.time + couponWaitSeconds;
         }
     }
 
@@ -2357,12 +2865,12 @@ public partial class Player : Entity
         if (target != null && target is Player &&
             InGuild() && !((Player)target).InGuild() &&
             guild.CanInvite(name, target.name) &&
-            Time.time >= nextRiskyActionTime &&
+            NetworkTime.time >= nextRiskyActionTime &&
             Utils.ClosestDistance(collider, target.collider) <= interactionRange)
         {
             // send a invite and reset risky time
             ((Player)target).guildInviteFrom = name;
-            nextRiskyActionTime = Time.time + guildInviteWaitSeconds;
+            nextRiskyActionTime = NetworkTime.time + guildInviteWaitSeconds;
             print(name + " invited " + target.name + " to guild");
         }
     }
@@ -2454,11 +2962,11 @@ public partial class Player : Entity
         // (only allow changes every few seconds to avoid bandwidth issues)
         if (InGuild() && guild.CanNotify(name) &&
             notice.Length < Guild.NoticeMaxLength &&
-            Time.time >= nextRiskyActionTime)
+            NetworkTime.time >= nextRiskyActionTime)
         {
             // set notice and reset next time
             guild.notice = notice;
-            nextRiskyActionTime = Time.time + Guild.NoticeWaitSeconds;
+            nextRiskyActionTime = NetworkTime.time + Guild.NoticeWaitSeconds;
 
             // broadcast and save changes
             BroadcastGuildChanges(guildName, guild);
@@ -2579,7 +3087,7 @@ public partial class Player : Entity
     {
         if (InParty())
         {
-            return netIdentity.observers.Select(conn => Utils.GetGameObjectFromPlayerControllers(conn.playerControllers).GetComponent<Player>())
+            return netIdentity.observers.Select(conn => conn.playerController.GetComponent<Player>())
                                         .Where(p => party.GetMemberIndex(p.name) != -1)
                                         .ToList();
         }
@@ -2593,7 +3101,7 @@ public partial class Player : Entity
     {
         // validate: is there someone with that name, and not self?
         if (otherName != name && onlinePlayers.ContainsKey(otherName) &&
-            Time.time >= nextRiskyActionTime)
+            NetworkTime.time >= nextRiskyActionTime)
         {
             Player other = onlinePlayers[otherName];
 
@@ -2603,7 +3111,7 @@ public partial class Player : Entity
             {
                 // send a invite and reset risky time
                 other.partyInviteFrom = name;
-                nextRiskyActionTime = Time.time + partyInviteWaitSeconds;
+                nextRiskyActionTime = NetworkTime.time + partyInviteWaitSeconds;
                 print(name + " invited " + other.name + " to party");
             }
         }
@@ -2847,7 +3355,7 @@ public partial class Player : Entity
         if (ni != null)
         {
             // can directly change it, or change it after casting?
-            if (state == "IDLE" || state == "MOVING")
+            if (state == "IDLE" || state == "MOVING" || state == "STUNNED")
                 target = ni.GetComponent<Entity>();
             else if (state == "CASTING")
                 nextTarget = ni.GetComponent<Entity>();
@@ -2868,6 +3376,10 @@ public partial class Player : Entity
             bool cast = localPlayerClickThrough ? Utils.RaycastWithout(ray, out hit, gameObject) : Physics.Raycast(ray, out hit);
             if (cast)
             {
+                // clear requested skill in any case because if we clicked
+                // somewhere else then we don't care about it anymore
+                useSkillWhenCloser = -1;
+
                 // valid target?
                 Entity entity = hit.transform.GetComponent<Entity>();
                 if (entity)
@@ -2881,13 +3393,19 @@ public partial class Player : Entity
                         // attackable? => attack
                         if (CanAttack(entity))
                         {
-                            // cast the first skill (if any, and if ready)
-                            if (skills.Count > 0 && skills[0].IsReady())
-                                CmdUseSkill(0);
-                            // otherwise walk there if still on cooldown etc
+                            // do we have at least one skill to use here?
+                            if (skills.Count > 0)
+                            {
+                                // then try to use that one
+                                TryUseSkill(0);
+                            }
+                            // otherwise just walk there
                             // use collider point(s) to also work with big entities
                             else
-                                CmdNavigateDestination(entity.collider.ClosestPointOnBounds(transform.position), skills.Count > 0 ? skills[0].castRange : 0f);
+                            {
+                                //agent.stoppingDistance = 0;
+                                //agent.destination = entity.collider.ClosestPointOnBounds(transform.position);
+                            }
                         }
                         // npc & alive => talk
                         else if (entity is Npc && entity.health > 0)
@@ -2895,11 +3413,16 @@ public partial class Player : Entity
                             // close enough to talk?
                             // use collider point(s) to also work with big entities
                             if (Utils.ClosestDistance(collider, entity.collider) <= interactionRange)
+                            {
                                 FindObjectOfType<UINpcDialogue>().Show();
+                            }
                             // otherwise walk there
                             // use collider point(s) to also work with big entities
                             else
-                                CmdNavigateDestination(entity.collider.ClosestPointOnBounds(transform.position), interactionRange);
+                            {
+                                //agent.stoppingDistance = interactionRange;
+                                //agent.destination = entity.collider.ClosestPointOnBounds(transform.position);
+                            }
                         }
                         // monster & dead => loot
                         else if (entity is Monster && entity.health == 0)
@@ -2908,11 +3431,16 @@ public partial class Player : Entity
                             // use collider point(s) to also work with big entities
                             if (((Monster)entity).HasLoot() &&
                                 Utils.ClosestDistance(collider, entity.collider) <= interactionRange)
+                            {
                                 FindObjectOfType<UILoot>().Show();
+                            }
                             // otherwise walk there
                             // use collider point(s) to also work with big entities
                             else
-                                CmdNavigateDestination(entity.collider.ClosestPointOnBounds(transform.position), interactionRange);
+                            {
+                                //agent.stoppingDistance = interactionRange;
+                                //agent.destination = entity.collider.ClosestPointOnBounds(transform.position);
+                            }
                         }
 
                         // addon system hooks
@@ -2931,18 +3459,27 @@ public partial class Player : Entity
                     // set indicator and navigate to the nearest walkable
                     // destination. this prevents twitching when destination is
                     // accidentally in a room without a door etc.
-                    Vector3 bestDestination = agent.NearestValidDestination(hit.point);
-                    SetIndicatorViaPosition(bestDestination);
-                    CmdNavigateDestination(bestDestination, 0);
+                    //Vector3 bestDestination = agent.NearestValidDestination(hit.point);
+                    //SetIndicatorViaPosition(bestDestination);
+
+                    // casting? then set pending destination
+                    if (state == "CASTING")
+                    {
+                        //pendingDestination = bestDestination;
+                        pendingDestinationValid = true;
+                    }
+                    else
+                    {
+                        //agent.stoppingDistance = 0;
+                        //agent.destination = bestDestination;
+                    }
                 }
             }
         }
     }
 
-    // simple WSAD movement without prediction
-    Vector3 lastDirection;
     [Client]
-    void WSADHandling()
+    void WASDHandling()
     {
         // don't move if currently typing in an input
         // we check this after checking h and v to save computations
@@ -2950,38 +3487,26 @@ public partial class Player : Entity
         {
             // get horizontal and vertical input
             // note: no != 0 check because it's 0 when we stop moving rapidly
-            float horizontal = Input.GetAxis("Horizontal");
+           /*  float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
+            bool jump = Input.GetKey(KeyCode.Space);
+            float jumpSpeed = 0;
 
-            // create input vector, normalize in case of diagonal movement
-            Vector3 input = new Vector3(horizontal, 0, vertical);
-            if (input.magnitude > 1) input = input.normalized;
-
-            // get camera rotation without up/down angle, only left/right
-            Vector3 angles = Camera.main.transform.rotation.eulerAngles;
-            angles.x = 0;
-            Quaternion rotation = Quaternion.Euler(angles); // back to quaternion
-
-            // calculate input direction relative to camera rotation
-            Vector3 direction = rotation * input;
-
-            // draw direction for debugging
-            Debug.DrawLine(transform.position, transform.position + direction, Color.green, 0, false);
-
-            // clear indicator if there is one, and if it's not on a target
-            // (simply looks better)
-            if (direction != Vector3.zero && indicator != null && indicator.transform.parent == null)
-                Destroy(indicator);
-
-            // moving with velocity doesn't look at the direction, do it manually
-            LookAtY(transform.position + direction);
-
-            // send to server - if changed since last time to save bandwidth
-            if (direction != lastDirection)
+            if (horizontal != 0 || vertical != 0)
             {
-                CmdNavigateVelocity(direction);
-                lastDirection = direction;
-            }
+                horizontal *= movementSpeed;
+                vertical *= movementSpeed;
+
+                if(jump) {
+                    jumpSpeed = 5;
+                }
+
+                Vector3 moveDir = new Vector3(horizontal, jumpSpeed, vertical);
+                transform.rotation = Quaternion.LookRotation(moveDir);
+
+                moveDir.y -= gravity * Time.deltaTime;
+                controller.Move(moveDir * Time.deltaTime);
+            } */
         }
     }
 
@@ -3160,5 +3685,19 @@ public partial class Player : Entity
     void OnDragAndClear_NpcPetReviveSlot(int slotIndex)
     {
         FindObjectOfType<UINpcPetRevive>().itemIndex = -1;
+    }
+
+    // validation //////////////////////////////////////////////////////////////
+    void OnValidate()
+    {
+        // make sure that the NetworkNavMeshAgentRubberbanding2D component is
+        // ABOVE the player component, so that it gets updated before Player.cs.
+        // -> otherwise it overwrites player's WASD velocity for local player
+        //    hosts
+        // -> there might be away around it, but a warning is good for now
+/*         Component[] components = GetComponents<Component>();
+        if (Array.IndexOf(components, GetComponent<NetworkNavMeshAgentRubberbanding>()) >
+            Array.IndexOf(components, this))
+            Debug.LogWarning(name + "'s NetworkNavMeshAgentRubberbanding component is below the Player component. Please drag it above the Player component in the Inspector, otherwise there might be WASD movement issues due to the Update order."); */
     }
 }

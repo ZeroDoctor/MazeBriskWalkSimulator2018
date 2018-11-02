@@ -354,16 +354,21 @@ public partial class Database
         {
             string itemName = (string)row[0];
             int slot = Convert.ToInt32((long)row[1]);
-            ScriptableItem itemData;
-            if (slot < player.inventorySize && ScriptableItem.dict.TryGetValue(itemName.GetStableHashCode(), out itemData))
+            if (slot < player.inventorySize)
             {
-                Item item = new Item(itemData);
-                int amount = Convert.ToInt32((long)row[2]);
-                item.petHealth = Convert.ToInt32((long)row[3]);
-                item.petLevel = Convert.ToInt32((long)row[4]);
-                item.petExperience = (long)row[5];
-                player.inventory[slot] = new ItemSlot(item, amount);;
+                ScriptableItem itemData;
+                if (ScriptableItem.dict.TryGetValue(itemName.GetStableHashCode(), out itemData))
+                {
+                    Item item = new Item(itemData);
+                    int amount = Convert.ToInt32((long)row[2]);
+                    item.petHealth = Convert.ToInt32((long)row[3]);
+                    item.petLevel = Convert.ToInt32((long)row[4]);
+                    item.petExperience = (long)row[5];
+                    player.inventory[slot] = new ItemSlot(item, amount);;
+                }
+                else Debug.LogWarning("LoadInventory: skipped item " + itemName + " for " + player.name + " because it doesn't exist anymore. If it wasn't removed intentionally then make sure it's in the Resources folder.");
             }
+            else Debug.LogWarning("LoadInventory: skipped slot " + slot + " for " + player.name + " because it's bigger than size " + player.inventorySize);
         }
     }
 
@@ -381,12 +386,17 @@ public partial class Database
             string itemName = (string)row[0];
             int slot = Convert.ToInt32((long)row[1]);
             ScriptableItem itemData;
-            if (slot < player.equipmentInfo.Length && ScriptableItem.dict.TryGetValue(itemName.GetStableHashCode(), out itemData))
+            if (slot < player.equipmentInfo.Length)
             {
-                Item item = new Item(itemData);
-                int amount = Convert.ToInt32((long)row[2]);
-                player.equipment[slot] = new ItemSlot(item, amount);
+                if (ScriptableItem.dict.TryGetValue(itemName.GetStableHashCode(), out itemData))
+                {
+                    Item item = new Item(itemData);
+                    int amount = Convert.ToInt32((long)row[2]);
+                    player.equipment[slot] = new ItemSlot(item, amount);
+                }
+                else Debug.LogWarning("LoadEquipment: skipped item " + itemName + " for " + player.name + " because it doesn't exist anymore. If it wasn't removed intentionally then make sure it's in the Resources folder.");
             }
+            else Debug.LogWarning("LoadEquipment: skipped slot " + slot + " for " + player.name + " because it's bigger than size " + player.inventorySize);
         }
     }
 
@@ -416,12 +426,12 @@ public partial class Database
                 skill.level = Mathf.Clamp(Convert.ToInt32((long)row[1]), 1, skill.maxLevel);
                 // make sure that 1 <= level <= maxlevel (in case we removed a skill
                 // level etc)
-                // castTimeEnd and cooldownEnd are based on Time.time, which
-                // will be different when restarting a server, hence why we
-                // saved them as just the remaining times. so let's convert them
-                // back again.
-                skill.castTimeEnd = (float)row[2] + Time.time;
-                skill.cooldownEnd = (float)row[3] + Time.time;
+                // castTimeEnd and cooldownEnd are based on NetworkTime.time
+                // which will be different when restarting a server, hence why
+                // we saved them as just the remaining times. so let's convert
+                // them back again.
+                skill.castTimeEnd = (float)row[2] + NetworkTime.time;
+                skill.cooldownEnd = (float)row[3] + NetworkTime.time;
 
                 player.skills[index] = skill;
             }
@@ -444,13 +454,14 @@ public partial class Database
                 // level etc)
                 int level = Mathf.Clamp(Convert.ToInt32((long)row[1]), 1, skillData.maxLevel);
                 Buff buff = new Buff((BuffSkill)skillData, level);
-                // buffTimeEnd is based on Time.time, which will be
+                // buffTimeEnd is based on NetworkTime.time, which will be
                 // different when restarting a server, hence why we saved
                 // them as just the remaining times. so let's convert them
                 // back again.
-                buff.buffTimeEnd = (float)row[2] + Time.time;
+                buff.buffTimeEnd = (float)row[2] + NetworkTime.time;
                 player.buffs.Add(buff);
             }
+            else Debug.LogWarning("LoadBuffs: skipped buff " + skillData.name + " for " + player.name + " because it doesn't exist anymore. If it wasn't removed intentionally then make sure it's in the Resources folder.");
         }
     }
 
@@ -469,6 +480,7 @@ public partial class Database
                 quest.completed = ((long)row[2]) != 0; // sqlite has no bool
                 player.quests.Add(quest);
             }
+            else Debug.LogWarning("LoadQuests: skipped quest " + questData.name + " for " + player.name + " because it doesn't exist anymore. If it wasn't removed intentionally then make sure it's in the Resources folder.");
         }
     }
 
@@ -509,7 +521,8 @@ public partial class Database
         }
     }
 
-    public static GameObject CharacterLoad(string characterName, List<Player> prefabs) {
+    public static GameObject CharacterLoad(string characterName, List<Player> prefabs)
+    {
         List< List<object> > table = ExecuteReader("SELECT * FROM characters WHERE name=@name AND deleted=0", new SqliteParameter("@name", characterName));
         if (table.Count == 1)
         {
@@ -545,13 +558,13 @@ public partial class Database
                 //    avoids all kinds of weird bugs
                 // => warping might fail if we changed the world since last save
                 //    so we reset to start position if not on navmesh
-                player.agent.Warp(position);
-                if (!player.agent.isOnNavMesh)
+                //player.agent.Warp(position);
+                /* if (!player.agent.isOnNavMesh)
                 {
                     Transform start = NetworkManager.singleton.GetNearestStartPosition(position);
                     player.agent.Warp(start.position);
                     Debug.Log(player.name + " invalid position was reset");
-                }
+                } */
 
                 LoadInventory(player);
                 LoadEquipment(player);
@@ -620,11 +633,12 @@ public partial class Database
         ExecuteNonQuery("DELETE FROM character_skills WHERE character=@character", new SqliteParameter("@character", player.name));
         foreach (Skill skill in player.skills)
             if (skill.level > 0) // only learned skills to save queries/storage/time
-                // castTimeEnd and cooldownEnd are based on Time.time, which
-                // will be different when restarting the server, so let's
+                // castTimeEnd and cooldownEnd are based on NetworkTime.time,
+                // which will be different when restarting the server, so let's
                 // convert them to the remaining time for easier save & load
-                // note: this does NOT work when trying to save character data shortly
-                //       before closing the editor or game because Time.time is 0 then.
+                // note: this does NOT work when trying to save character data
+                //       shortly before closing the editor or game because
+                //       NetworkTime.time is 0 then.
                 ExecuteNonQuery("INSERT INTO character_skills VALUES (@character, @name, @level, @castTimeEnd, @cooldownEnd)",
                                 new SqliteParameter("@character", player.name),
                                 new SqliteParameter("@name", skill.name),
@@ -638,11 +652,12 @@ public partial class Database
         // buffs: remove old entries first, then add all new ones
         ExecuteNonQuery("DELETE FROM character_buffs WHERE character=@character", new SqliteParameter("@character", player.name));
         foreach (Buff buff in player.buffs)
-            // buffTimeEnd is based on Time.time, which will be different when
-            // restarting the server, so let's convert them to the remaining
-            // time for easier save & load
-            // note: this does NOT work when trying to save character data shortly
-            //       before closing the editor or game because Time.time is 0 then.
+            // buffTimeEnd is based on NetworkTime.time, which will be different
+            // when restarting the server, so let's convert them to the
+            // remaining time for easier save & load
+            // note: this does NOT work when trying to save character data
+            //       shortly before closing the editor or game because
+            //       NetworkTime.time is 0 then.
             ExecuteNonQuery("INSERT INTO character_buffs VALUES (@character, @name, @level, @buffTimeEnd)",
                             new SqliteParameter("@character", player.name),
                             new SqliteParameter("@name", buff.name),

@@ -72,7 +72,7 @@ public class NetworkNavMeshAgent : NetworkBehaviour
             // (not on host because server handles it already anyway)
             if (requiredVelocity != Vector3.zero)
             {
-                agent.ResetPath(); // needed after click movement before we can use .velocity
+                agent.ResetMovement(); // needed after click movement before we can use .velocity
                 agent.velocity = requiredVelocity;
                 LookAtY(transform.position + requiredVelocity); // velocity doesn't set rotation
             }
@@ -86,11 +86,6 @@ public class NetworkNavMeshAgent : NetworkBehaviour
     }
 
     // server-side serialization
-    //
-    // I M P O R T A N T
-    //
-    // always read and write the same amount of bytes. never let any errors
-    // happen. otherwise readstr/readbytes out of range bugs happen.
     public override bool OnSerialize(NetworkWriter writer, bool initialState)
     {
         // always send position so client knows if he's too far off and needs warp
@@ -129,11 +124,6 @@ public class NetworkNavMeshAgent : NetworkBehaviour
     }
 
     // client-side deserialization
-    //
-    // I M P O R T A N T
-    //
-    // always read and write the same amount of bytes. never let any errors
-    // happen. otherwise readstr/readbytes out of range bugs happen.
     public override void OnDeserialize(NetworkReader reader, bool initialState)
     {
         // read position, speed and movement type

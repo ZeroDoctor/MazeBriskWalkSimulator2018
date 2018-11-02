@@ -200,8 +200,7 @@ public partial class Chat : NetworkBehaviour
         foreach (NetworkConnection conn in netIdentity.observers)
         {
             // call TargetRpc on that GameObject for that connection
-            GameObject go = Utils.GetGameObjectFromPlayerControllers(conn.playerControllers);
-            go.GetComponent<Chat>().TargetMsgLocal(conn, name, message);
+            conn.playerController.GetComponent<Chat>().TargetMsgLocal(conn, name, message);
         }
     }
 

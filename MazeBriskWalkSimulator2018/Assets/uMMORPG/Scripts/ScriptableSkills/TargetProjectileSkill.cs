@@ -39,6 +39,8 @@ public class TargetProjectileSkill : DamageSkill
             effect.target = caster.target;
             effect.caster = caster;
             effect.damage = damage.Get(skillLevel);
+            effect.stunChance = stunChance.Get(skillLevel);
+            effect.stunTime = stunTime.Get(skillLevel);
             NetworkServer.Spawn(go);
         }
         else Debug.LogWarning(name + ": missing projectile");

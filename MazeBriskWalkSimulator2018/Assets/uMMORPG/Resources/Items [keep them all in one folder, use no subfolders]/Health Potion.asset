@@ -20,7 +20,7 @@ MonoBehaviour:
   destroyable: 1
   toolTip: '<b>{NAME}</b>
 
-    Restores some health.
+    Restores some Health.
 
 
     Restores {USAGEHEALTH} Health on use.
@@ -45,3 +45,4 @@ MonoBehaviour:
   usageMana: 0
   usageExperience: 0
   usagePetHealth: 0
+  cooldownBuff: {fileID: 11400000, guid: 58b9f0dc3a41548cbbe4df5b9e5cbd22, type: 2}

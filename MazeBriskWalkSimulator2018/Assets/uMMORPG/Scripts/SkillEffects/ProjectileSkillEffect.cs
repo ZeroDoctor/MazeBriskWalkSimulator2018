@@ -11,6 +11,8 @@ public class ProjectileSkillEffect : SkillEffect
 {
     public float speed = 1;
     [HideInInspector] public int damage = 1; // set by skill
+    [HideInInspector] public float stunChance; // set by skill
+    [HideInInspector] public float stunTime; // set by skill
 
     // update here already so that it doesn't spawn with a weird rotation
     void Start() { FixedUpdate(); }
@@ -35,7 +37,7 @@ public class ProjectileSkillEffect : SkillEffect
                 if (target.health > 0)
                 {
                     // find the skill that we casted this effect with
-                    caster.DealDamageAt(target, caster.damage + damage);
+                    caster.DealDamageAt(target, caster.damage + damage, stunChance, stunTime);
                 }
                 NetworkServer.Destroy(gameObject);
             }

@@ -1,5 +1,6 @@
 ﻿// Buffs are like Skills, but for the Buffs list.
 using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Mirror;
@@ -14,7 +15,7 @@ public partial struct Buff
 
     // dynamic stats (cooldowns etc.)
     public int level;
-    public float buffTimeEnd; // server time
+    public double buffTimeEnd; // server time. double for long term precision.
 
     // constructors
     public Buff(BuffSkill data, int level)
@@ -25,7 +26,19 @@ public partial struct Buff
     }
 
     // wrappers for easier access
-    public BuffSkill data { get { return (BuffSkill)ScriptableSkill.dict[hash]; } }
+    public BuffSkill data
+    {
+        get
+        {
+            // show a useful error message if the key can't be found
+            // note: ScriptableSkill.OnValidate 'is in resource folder' check
+            //       causes Unity SendMessage warnings and false positives.
+            //       this solution is a lot better.
+            if (!ScriptableSkill.dict.ContainsKey(hash))
+                throw new KeyNotFoundException("There is no ScriptableSkill with hash=" + hash + ". Make sure that all ScriptableSkills are in the Resources folder so they are loaded properly.");
+            return (BuffSkill)ScriptableSkill.dict[hash];
+        }
+    }
     public string name { get { return data.name; } }
     public Sprite image { get { return data.image; } }
     public float buffTime { get { return data.buffTime.Get(level); } }
@@ -37,6 +50,7 @@ public partial struct Buff
     public float bonusCriticalChance { get { return data.bonusCriticalChance.Get(level); } }
     public float bonusHealthPercentPerSecond { get { return data.bonusHealthPercentPerSecond.Get(level); } }
     public float bonusManaPercentPerSecond { get { return data.bonusManaPercentPerSecond.Get(level); } }
+    public float bonusSpeed { get { return data.bonusSpeed.Get(level); } }
     public int maxLevel { get { return data.maxLevel; } }
 
     // tooltip - runtime part
@@ -55,7 +69,7 @@ public partial struct Buff
     public float BuffTimeRemaining()
     {
         // how much time remaining until the buff ends? (using server time)
-        return NetworkTime.time >= buffTimeEnd ? 0 : buffTimeEnd - NetworkTime.time;
+        return NetworkTime.time >= buffTimeEnd ? 0 : (float)(buffTimeEnd - NetworkTime.time);
     }
 }
 

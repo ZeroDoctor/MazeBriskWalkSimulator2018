@@ -8,11 +8,6 @@ using Mirror;
 public class NetworkName : NetworkBehaviour
 {
     // server-side serialization
-    //
-    // I M P O R T A N T
-    //
-    // always read and write the same amount of bytes. never let any errors
-    // happen. otherwise readstr/readbytes out of range bugs happen.
     public override bool OnSerialize(NetworkWriter writer, bool initialState)
     {
         writer.Write(name);
@@ -20,11 +15,6 @@ public class NetworkName : NetworkBehaviour
     }
 
     // client-side deserialization
-    //
-    // I M P O R T A N T
-    //
-    // always read and write the same amount of bytes. never let any errors
-    // happen. otherwise readstr/readbytes out of range bugs happen.
     public override void OnDeserialize(NetworkReader reader, bool initialState)
     {
         name = reader.ReadString();

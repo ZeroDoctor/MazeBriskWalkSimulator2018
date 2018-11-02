@@ -91,6 +91,19 @@ public static class Extensions
         return agent.transform.position;
     }
 
+    // NavMeshAgent's ResetPath() function clears the path, but doesn't clear
+    // the velocity immediately. This is a nightmare for finite state machines
+    // because we often reset a path, then switch to casting, which would then
+    // receive a movement event because velocity still isn't 0 until a few
+    // frames later.
+    //
+    // We need a function that truly stops all movement.
+    public static void ResetMovement(this NavMeshAgent agent)
+    {
+        agent.ResetPath();
+        agent.velocity = Vector3.zero;
+    }
+
     // check if a list has duplicates
     // new List<int>(){1, 2, 2, 3}.HasDuplicates() => true
     // new List<int>(){1, 2, 3, 4}.HasDuplicates() => false

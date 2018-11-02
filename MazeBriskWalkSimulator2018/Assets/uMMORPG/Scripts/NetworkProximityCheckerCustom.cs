@@ -14,7 +14,7 @@ public class NetworkProximityCheckerCustom : NetworkProximityChecker
 {
     // only chech with player layer, otherwise large groups of monsters will
     // cause large amounts of physics calculuations by spherecasting each other
-    public LayerMask castLayers;
+    public LayerMask m_castLayers;
 
     // function from bitbucket
     public override bool OnRebuildObservers(HashSet<NetworkConnection> observers, bool initial)
@@ -35,7 +35,7 @@ public class NetworkProximityCheckerCustom : NetworkProximityChecker
         {
             case CheckMethod.Physics3D:
             {
-                var hits = Physics.OverlapSphere(transform.position, visRange, castLayers);
+                var hits = Physics.OverlapSphere(transform.position, visRange, m_castLayers);
                 foreach (var hit in hits)
                 {
                     // (if an object has a connectionToClient, it is a player)
@@ -51,7 +51,7 @@ public class NetworkProximityCheckerCustom : NetworkProximityChecker
 
             case CheckMethod.Physics2D:
             {
-                var hits = Physics2D.OverlapCircleAll(transform.position, visRange, castLayers);
+                var hits = Physics2D.OverlapCircleAll(transform.position, visRange, m_castLayers);
                 foreach (var hit in hits)
                 {
                     // (if an object has a connectionToClient, it is a player)

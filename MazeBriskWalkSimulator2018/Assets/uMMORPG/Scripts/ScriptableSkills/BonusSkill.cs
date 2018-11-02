@@ -14,6 +14,7 @@ public abstract class BonusSkill : ScriptableSkill
     public LevelBasedFloat bonusCriticalChance; // range [0,1]
     public LevelBasedFloat bonusHealthPercentPerSecond; // 0.1=10%; can be negative too
     public LevelBasedFloat bonusManaPercentPerSecond; // 0.1=10%; can be negative too
+    public LevelBasedFloat bonusSpeed; // can be negative too
 
     // tooltip
     public override string ToolTip(int skillLevel, bool showRequirements = false)
@@ -27,6 +28,7 @@ public abstract class BonusSkill : ScriptableSkill
         tip.Replace("{BONUSCRITICALCHANCE}", Mathf.RoundToInt(bonusCriticalChance.Get(skillLevel) * 100).ToString());
         tip.Replace("{BONUSHEALTHPERCENTPERSECOND}", Mathf.RoundToInt(bonusHealthPercentPerSecond.Get(skillLevel) * 100).ToString());
         tip.Replace("{BONUSMANAPERCENTPERSECOND}", Mathf.RoundToInt(bonusManaPercentPerSecond.Get(skillLevel) * 100).ToString());
+        tip.Replace("{BONUSSPEED}", bonusSpeed.Get(skillLevel).ToString("F2"));
         return tip.ToString();
     }
 }

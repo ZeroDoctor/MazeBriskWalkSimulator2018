@@ -46,7 +46,8 @@ public partial class UISkills : MonoBehaviour
                                            !isPassive &&
                                            player.CastCheckSelf(skill); // checks mana, cooldown etc.
                 slot.button.onClick.SetListener(() => {
-                    player.CmdUseSkill(skillIndex);
+                    // try use the skill or walk closer if needed
+                    player.TryUseSkill(skillIndex);
                 });
 
                 // set state

@@ -7,7 +7,7 @@ public class UnityVersionCheck : MonoBehaviour
 
     void Awake()
     {
-        if (Application.unityVersion != recommended)
-            Debug.LogWarning("uMMORPG works best with Unity " + recommended + " LTS! Download: " + download + "\n");
+        //if (Application.unityVersion != recommended)
+            //Debug.LogWarning("uMMORPG works best with Unity " + recommended + " LTS! Download: " + download + "\n");
     }
 }

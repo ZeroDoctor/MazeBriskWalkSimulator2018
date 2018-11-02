@@ -33,6 +33,7 @@ MonoBehaviour:
   showCastBar: 1
   cancelCastIfTargetDied: 0
   predecessor: {fileID: 11400000, guid: 77d6d092d0a8c45a2aec83e9196a2b47, type: 2}
+  predecessorLevel: 2
   requiresWeapon: 1
   requiredLevel:
     baseValue: 2
@@ -75,6 +76,9 @@ MonoBehaviour:
     baseValue: 0
     bonusPerLevel: 0
   bonusManaPercentPerSecond:
+    baseValue: 0
+    bonusPerLevel: 0
+  bonusSpeed:
     baseValue: 0
     bonusPerLevel: 0
   buffTime:
