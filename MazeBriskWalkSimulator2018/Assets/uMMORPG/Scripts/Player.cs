@@ -461,7 +461,9 @@ public partial class Player : Entity
             m_AudioSource = GetComponent<AudioSource>();
             m_MouseLook.Init(transform , m_Camera.transform);
         } else {
-            GameObject.Find("PlayerCam").SetActive(false);
+            GameObject originalGameObject = GameObject.Find(name);
+            GameObject child = originalGameObject.transform.GetChild(4).gameObject;
+            child.SetActive(false);
         }
 
         onlinePlayers[name] = this;
