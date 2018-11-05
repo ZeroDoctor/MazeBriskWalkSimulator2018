@@ -26,7 +26,6 @@ using UnityEngine;
 using UnityEngine.AI;
 using Mirror;
 
-[RequireComponent(typeof(NavMeshAgent))]
 [NetworkSettings(sendInterval=0.1f)]
 public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
 {
@@ -35,15 +34,18 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
 
     // remember last serialized values for dirty bit
     Vector3 lastServerPosition;
+    Quaternion lastServerRotation;
     Vector3 lastSentDestination;
     Vector3 lastSentPosition;
+    Quaternion lastSentRotation;
     Vector3 lastReceivedDestination;
+    Quaternion lastReceivedRotation;
     double lastSentTime; // double for long term precision
     bool hadPath;
 
     // epsilon for float/vector3 comparison (needed because of imprecision
     // when sending over the network, etc.)
-    const float epsilon = 0.1f;
+    const float epsilon = 0.00001f; // * for smoothness
 
     // validate a move (the 'rubber' part)
     bool ValidateMove(Vector3 position)
@@ -62,7 +64,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
                (entity.state == "IDLE" || entity.state == "MOVING");
     }
 
-    [Command]
+/*     [Command]
     void CmdMovedClick(Vector3 destination, float stoppingDistance)
     {
         // rubberband (check if valid move)
@@ -83,18 +85,21 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
             // is trigger. it will warp eventually when getting too far away.
             SetDirtyBit(1);
         }
-    }
+    } */
 
     [Command]
-    void CmdMovedWASD(Vector3 position)
+    void CmdMovedWASD(Vector3 position, Quaternion rotation)
     {
         // rubberband (check if valid move)
         if (ValidateMove(position))
         {
             // set position via .destination to get free interpolation
-            agent.stoppingDistance = 0;
-            agent.destination = position;
+            /* agent.stoppingDistance = 0;
+            agent.destination = position; */
+            transform.position = position;
+            transform.rotation = rotation;
             lastReceivedDestination = position;
+            lastReceivedRotation = rotation;
 
             // set dirty to trigger a OnSerialize next time, so that other clients
             // know about the new position too
@@ -116,7 +121,10 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
     void Update()
     {
         // detect move mode
-        bool hasPath = HasPath();
+        bool hasPath = false;
+        if(agent != null) {
+            hasPath = HasPath();
+        }
 
         // server should detect teleports / react if we got too far off
         // do this BEFORE isLocalPlayer actions so that agent.ResetPath can be
@@ -126,126 +134,193 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
         {
             // neither click or wasd movement, but position changed further than 'speed'?
             // then we must have teleported, no other way to move this fast.
-            if (!hasPath && agent.velocity == Vector3.zero &&
-                Vector3.Distance(transform.position, lastServerPosition) > agent.speed)
-            {
-                // set NetworkNavMeshAgent dirty so that onserialize is
-                // triggered and the client receives the position change
-                SetDirtyBit(1);
-                //Debug.Log(name + " teleported!");
+            if(entity.GetType() == typeof(Player)) {
+                if (entity.m_speed == 0 &&
+                    Vector3.Distance(transform.position, lastServerPosition) > entity.m_speed)
+                {
+                    // set NetworkNavMeshAgent dirty so that onserialize is
+                    // triggered and the client receives the position change
+                    SetDirtyBit(1);
+                    //Debug.Log(name + " teleported!");
+                }
+
+                if( Vector3.Distance(transform.position, lastReceivedDestination) > epsilon) {
+                    SetDirtyBit(1);
+                    lastReceivedDestination = transform.position;
+                    lastReceivedRotation = transform.rotation;
+                }
+
+                if(transform.rotation != lastReceivedRotation) {
+                    lastReceivedRotation = transform.rotation;
+                    SetDirtyBit(1);
+                }
+
+                lastServerPosition = transform.position;
+                lastServerRotation = transform.rotation;
+
+            } else {
+                if (!hasPath && agent.velocity == Vector3.zero &&
+                    Vector3.Distance(transform.position, lastServerPosition) > agent.speed)
+                {
+                    // set NetworkNavMeshAgent dirty so that onserialize is
+                    // triggered and the client receives the position change
+                    SetDirtyBit(1);
+                    //Debug.Log(name + " teleported!");
+                }
+
+                // different destination than the one that we received from the
+                // client? then set dirty so it gets synced to others
+                // (epsilon comparison needed for float precision over the network)
+                if (HasPath() && Vector3.Distance(agent.destination, lastReceivedDestination) > epsilon)
+                {
+                    // set dirty so onserialize notifies others
+                    SetDirtyBit(1);
+                    //Debug.Log(name + " destination changed");
+
+                    // reset last received destination so we don't detect it again
+                    // until it changes again
+                    lastReceivedDestination = agent.destination;
+                }
+
+                // detect agent.Reset:
+                // - had a path before but not anymore?
+                // - and we never reached the planned destination even though path was canceled?
+                // (epsilon comparison needed for float precision over the network)
+                if (hadPath && !hasPath && Vector3.Distance(transform.position, lastReceivedDestination) > epsilon)
+                {
+                    // set dirty so onserialize notifies others
+                    SetDirtyBit(1);
+                    //Debug.Log(name + " path was reset");
+
+                    // reset last received destination so we don't detect it again
+                    // until it changes again
+                    lastReceivedDestination = agent.destination;
+
+                    // send target rpc to the local player so he doesn't ignore it
+                    // -> better than a 'bool forceReset' flag for OnSerialize
+                    //    because new Cmds might come in before OnSerialize was
+                    //    called, which could lead to race conditions
+                    // -> not in host mode (!isLocalPlayer)
+                    if (!isLocalPlayer) TargetResetMovement(connectionToClient);
+                }
+
+                lastServerPosition = transform.position;
+                hadPath = hasPath;
             }
-
-            // different destination than the one that we received from the
-            // client? then set dirty so it gets synced to others
-            // (epsilon comparison needed for float precision over the network)
-            if (HasPath() && Vector3.Distance(agent.destination, lastReceivedDestination) > epsilon)
-            {
-                // set dirty so onserialize notifies others
-                SetDirtyBit(1);
-                //Debug.Log(name + " destination changed");
-
-                // reset last received destination so we don't detect it again
-                // until it changes again
-                lastReceivedDestination = agent.destination;
-            }
-
-            // detect agent.Reset:
-            // - had a path before but not anymore?
-            // - and we never reached the planned destination even though path was canceled?
-            // (epsilon comparison needed for float precision over the network)
-            if (hadPath && !hasPath && Vector3.Distance(transform.position, lastReceivedDestination) > epsilon)
-            {
-                // set dirty so onserialize notifies others
-                SetDirtyBit(1);
-                //Debug.Log(name + " path was reset");
-
-                // reset last received destination so we don't detect it again
-                // until it changes again
-                lastReceivedDestination = agent.destination;
-
-                // send target rpc to the local player so he doesn't ignore it
-                // -> better than a 'bool forceReset' flag for OnSerialize
-                //    because new Cmds might come in before OnSerialize was
-                //    called, which could lead to race conditions
-                // -> not in host mode (!isLocalPlayer)
-                if (!isLocalPlayer) TargetResetMovement(connectionToClient);
-            }
-
-            lastServerPosition = transform.position;
-            hadPath = hasPath;
+            
         }
 
         // local player can move freely
         // (do nothing if in host mode though. don't want to overwrite the
         //  player's destination with Cmds here.)
-        if (isLocalPlayer && !isServer)
-        {
-            // click movement and destination changed since last sync?
-            // then send the latest DESTINATION
-            if (hasPath && agent.destination != lastSentDestination)
+
+        if(entity.GetType() == typeof(Player)) {
+            if (isLocalPlayer && !isServer)
             {
-                // don't send all the time to not DDOS the server
-                // note: if we check time BEFORE detecting move then moves are
-                //       detected very late and cause additional latency and
-                //       might cause move->idle->move effect if second move
-                //       doesn't come in fast enough, etc.
-                if (NetworkTime.time > lastSentTime + GetNetworkSendInterval())
+                // wasd movement and velocity changed since last sync?
+                // then send the latest POSITION (not velocity)
+                // why is velocity not zero after stopping?
+                if (entity.m_speed != 0 && transform.position != lastSentPosition)
                 {
-                    CmdMovedClick(agent.destination, agent.stoppingDistance);
-                    lastSentDestination = agent.destination;
-                    lastSentTime = NetworkTime.time;
+                    // don't send all the time to not DDOS the server
+                    // note: if we check time BEFORE detecting move then moves are
+                    //       detected very late and cause additional latency and
+                    //       might cause move->idle->move effect if second move
+                    //       doesn't come in fast enough, etc.
+                    if (NetworkTime.time > lastSentTime + GetNetworkSendInterval())
+                    {
+                        //CmdMovedWASD(transform.position, transform.rotation);
+                        lastSentPosition = transform.position;
+                        lastSentRotation = transform.rotation;
+                        lastSentTime = NetworkTime.time;
+                    }
+                }
+                Debug.Log("Sending...");
+                CmdMovedWASD(transform.position, transform.rotation);
+            }
+        } else {
+            if (isLocalPlayer && !isServer)
+            {
+                // click movement and destination changed since last sync?
+                // then send the latest DESTINATION
+                if (hasPath && agent.destination != lastSentDestination)
+                {
+                    // don't send all the time to not DDOS the server
+                    // note: if we check time BEFORE detecting move then moves are
+                    //       detected very late and cause additional latency and
+                    //       might cause move->idle->move effect if second move
+                    //       doesn't come in fast enough, etc.
+                    if (NetworkTime.time > lastSentTime + GetNetworkSendInterval())
+                    {
+                        //CmdMovedClick(agent.destination, agent.stoppingDistance);
+                        lastSentDestination = agent.destination;
+                        lastSentTime = NetworkTime.time;
+                    }
+                }
+                // wasd movement and velocity changed since last sync?
+                // then send the latest POSITION (not velocity)
+                // why is velocity not zero after stopping?
+                else if (!hasPath && agent.velocity != Vector3.zero && transform.position != lastSentPosition)
+                {
+                    // don't send all the time to not DDOS the server
+                    // note: if we check time BEFORE detecting move then moves are
+                    //       detected very late and cause additional latency and
+                    //       might cause move->idle->move effect if second move
+                    //       doesn't come in fast enough, etc.
+                    if (NetworkTime.time > lastSentTime + GetNetworkSendInterval())
+                    {
+                        CmdMovedWASD(transform.position, transform.rotation);
+                        lastSentPosition = transform.position;
+                        lastSentTime = NetworkTime.time;
+                    }
                 }
             }
-            // wasd movement and velocity changed since last sync?
-            // then send the latest POSITION (not velocity)
-            // why is velocity not zero after stopping?
-            else if (!hasPath && agent.velocity != Vector3.zero && transform.position != lastSentPosition)
-            {
-                // don't send all the time to not DDOS the server
-                // note: if we check time BEFORE detecting move then moves are
-                //       detected very late and cause additional latency and
-                //       might cause move->idle->move effect if second move
-                //       doesn't come in fast enough, etc.
-                if (NetworkTime.time > lastSentTime + GetNetworkSendInterval())
-                {
-                    CmdMovedWASD(transform.position);
-                    lastSentPosition = transform.position;
-                    lastSentTime = NetworkTime.time;
-                }
-            }
-        }
+        }   
     }
 
     [TargetRpc]
     void TargetResetMovement(NetworkConnection conn)
     {
-        // reset path and velocity
-        agent.ResetMovement();
+        if(entity.GetType() == typeof(Player)) {
+            entity.m_speed = 0;
+        } else { 
+            // reset path and velocity
+            agent.ResetMovement();
+        }
+        
     }
 
     // server-side serialization
     // used for the server to broadcast positions to other clients too
     public override bool OnSerialize(NetworkWriter writer, bool initialState)
     {
+        
         // always send position so client knows if he's too far off and needs warp
         // we also need it for wasd movement anyway
         writer.Write(transform.position);
+        
+        if(entity.GetType() == typeof(Player)) {
+            writer.Write(transform.rotation);
+            writer.Write(entity.m_speed);
+        } else {
+            // always send speed in case it's modified by something
+        
+            writer.Write(agent.speed);
 
-        // always send speed in case it's modified by something
-        writer.Write(agent.speed);
+            // click movement? then also send destination and stopping distance
+            // (no need to send everything all the time, saves bandwidth)
+            bool hasPath = agent.hasPath || agent.pathPending;
+            writer.Write(hasPath);
+            if (hasPath)
+            {
+                // destination
+                writer.Write(agent.destination);
 
-        // click movement? then also send destination and stopping distance
-        // (no need to send everything all the time, saves bandwidth)
-        bool hasPath = agent.hasPath || agent.pathPending;
-        writer.Write(hasPath);
-        if (hasPath)
-        {
-            // destination
-            writer.Write(agent.destination);
-
-            // always send stopping distance because monsters might stop early etc.
-            writer.Write(agent.stoppingDistance);
+                // always send stopping distance because monsters might stop early etc.
+                writer.Write(agent.stoppingDistance);
+            }
         }
+        
 
         return true;
     }
@@ -256,52 +331,71 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
         // read position, speed, movement type in any case, so that we read
         // exactly what we write
         Vector3 position = reader.ReadVector3();
-        agent.speed = reader.ReadSingle();
-        bool hasPath = reader.ReadBoolean();
 
-        // click or wasd movement?
-        if (hasPath)
-        {
-            // read destination and stopping distance
-            Vector3 destination = reader.ReadVector3();
-            float stoppingDistance = reader.ReadSingle();
+        if(entity.GetType() == typeof(Player)) {
 
-            // ignore for local player since he can move freely
-            if (!isLocalPlayer)
+            Quaternion rotation = reader.ReadQuaternion();
+            float speed = reader.ReadSingle();
+
+            if(!isLocalPlayer) {
+                transform.position = position;
+                transform.rotation = rotation;
+            }
+            
+            if (Vector3.Distance(transform.position, position) > entity.m_speed)
             {
-                // try setting destination if on navmesh
-                // (might not be while falling from the sky after joining etc.)
-                if (agent.isOnNavMesh)
+                entity.m_MoveDir = position;
+                //Debug.Log(name + " rubberbanding to " + position);
+            }
+        } else {
+            agent.speed = reader.ReadSingle();
+            bool hasPath = reader.ReadBoolean();
+            // click or wasd movement?
+            if (hasPath)
+            {
+                // read destination and stopping distance
+                Vector3 destination = reader.ReadVector3();
+                float stoppingDistance = reader.ReadSingle();
+
+                // ignore for local player since he can move freely
+                if (!isLocalPlayer)
                 {
-                    agent.stoppingDistance = stoppingDistance;
-                    agent.destination = destination;
+                    // try setting destination if on navmesh
+                    // (might not be while falling from the sky after joining etc.)
+                    if (agent.isOnNavMesh)
+                    {
+                        agent.stoppingDistance = stoppingDistance;
+                        agent.destination = destination;
+                    }
+                    else Debug.LogWarning("NetworkNavMeshAgent.OnSerialize: agent not on NavMesh, name=" + name + " position=" + transform.position + " destination=" + destination);
                 }
-                else Debug.LogWarning("NetworkNavMeshAgent.OnSerialize: agent not on NavMesh, name=" + name + " position=" + transform.position + " destination=" + destination);
             }
-        }
-        else
-        {
-            // ignore for local player since he can move freely
-            if (!isLocalPlayer)
+            else
             {
-                // set position via .destination to get free interpolation
-                agent.stoppingDistance = 0;
-                agent.destination = position;
+                // ignore for local player since he can move freely
+                if (!isLocalPlayer)
+                {
+                    // set position via .destination to get free interpolation
+                    agent.stoppingDistance = 0;
+                    agent.destination = position;
+                }
+            }
+
+            // rubberbanding: if we are too far off because of a rapid position
+            // change or latency or server side teleport, then warp
+            // -> agent moves 'speed' meter per seconds
+            // -> if we are speed * 2 units behind, then we teleport
+            //    (using speed is better than using a hardcoded value)
+            // -> we use speed * 2 for update/network latency tolerance. player
+            //    might have moved quit a bit already before OnSerialize was called
+            //    on the server.
+            if (Vector3.Distance(transform.position, position) > agent.speed * 2 && agent.isOnNavMesh)
+            {
+                agent.Warp(position);
+                //Debug.Log(name + " rubberbanding to " + position);
             }
         }
 
-        // rubberbanding: if we are too far off because of a rapid position
-        // change or latency or server side teleport, then warp
-        // -> agent moves 'speed' meter per seconds
-        // -> if we are speed * 2 units behind, then we teleport
-        //    (using speed is better than using a hardcoded value)
-        // -> we use speed * 2 for update/network latency tolerance. player
-        //    might have moved quit a bit already before OnSerialize was called
-        //    on the server.
-        if (Vector3.Distance(transform.position, position) > agent.speed * 2 && agent.isOnNavMesh)
-        {
-            agent.Warp(position);
-            //Debug.Log(name + " rubberbanding to " + position);
-        }
+        
     }
 }

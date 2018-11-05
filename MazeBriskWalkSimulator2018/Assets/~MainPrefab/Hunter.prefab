@@ -930,14 +930,15 @@ GameObject:
   - component: {fileID: 4912601917670514}
   - component: {fileID: 95832663075807030}
   - component: {fileID: 114864134869964522}
+  - component: {fileID: 114493687449954874}
   - component: {fileID: 114212866623772598}
-  - component: {fileID: 114126116385427998}
   - component: {fileID: 54853898988051860}
   - component: {fileID: 114025482076817876}
   - component: {fileID: 114129161894825250}
   - component: {fileID: 82717301383640926}
   - component: {fileID: 143753584130015526}
   - component: {fileID: 136358192413354090}
+  - component: {fileID: 114126116385427998}
   m_Layer: 0
   m_Name: Hunter
   m_TagString: Player
@@ -2216,7 +2217,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1740019301615000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 242.51596, y: 0, z: 54.434105}
+  m_LocalPosition: {x: 240.62389, y: 0, z: 56.501915}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4537488522222658}
@@ -2709,8 +2710,8 @@ Animator:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1740019301615000}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: cfff8d5ad98aa864aaab0a5c6280696a, type: 3}
-  m_Controller: {fileID: 9100000, guid: c79f85be6345a4874aa201203f0969a7, type: 2}
+  m_Avatar: {fileID: 9000000, guid: e214c0f0494b74f63bef1cf583fd3b7a, type: 3}
+  m_Controller: {fileID: 9100000, guid: 81921bc71c4181f4b94f0d0ba9b93731, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2871,6 +2872,102 @@ MonoBehaviour:
   nameOverlay: {fileID: 102584888320167792}
   stunnedOverlay: {fileID: 102960793535921554}
   inSafeZone: 0
+  m_IsWalking: 0
+  m_WalkSpeed: 5
+  m_RunSpeed: 8
+  m_RunstepLenghten: 0.575
+  m_JumpSpeed: 10
+  m_StickToGroundForce: 4
+  m_GravityMultiplier: 3
+  m_MouseLook:
+    target: {fileID: 4912601917670514}
+    XSensitivity: 1
+    YSensitivity: 1
+    clampVerticalRotation: 1
+    MinimumX: -90
+    MaximumX: 90
+    smooth: 0
+    smoothTime: 5
+    lockCursor: 1
+  m_UseFovKick: 0
+  m_FovKick:
+    Camera: {fileID: 20671367976036362}
+    originalFov: 0
+    FOVIncrease: 3
+    TimeToIncrease: 1
+    TimeToDecrease: 1
+    IncreaseCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  m_UseHeadBob: 0
+  m_HeadBob:
+    HorizontalBobRange: 0.33
+    VerticalBobRange: 0.33
+    Bobcurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.5
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.5
+        value: -1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 2
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    VerticaltoHorizontalRatio: 1
+  m_JumpBob:
+    BobDuration: 1
+    BobAmount: 0.5
+  m_StepInterval: 2
+  m_FootstepSounds: []
+  m_JumpSound: {fileID: 8300000, guid: 8a7bffa16cd573e488774a0ad4ef3602, type: 3}
+  m_LandSound: {fileID: 8300000, guid: fbd1956e338880a4398a58fbf64f6f90, type: 3}
+  m_MoveDir: {x: 0, y: 0, z: 0}
+  m_speed: 0
+  m_Input: {x: 0, y: 0}
   chat: {fileID: 114212866623772598}
   avatarCamera: {fileID: 20847065584552146}
   guildOverlay: {fileID: 102250141386955564}
@@ -2973,99 +3070,6 @@ MonoBehaviour:
   attackToMoveRangeRatio: 0.8
   deathExperienceLossPercent: 0.05
   nextRiskyActionTime: 0
-  m_IsWalking: 0
-  m_WalkSpeed: 5
-  m_RunSpeed: 8
-  m_RunstepLenghten: 0.942
-  m_JumpSpeed: 25
-  m_StickToGroundForce: 2
-  m_GravityMultiplier: 3
-  m_MouseLook:
-    target: {fileID: 4912601917670514}
-    XSensitivity: 1
-    YSensitivity: 1
-    clampVerticalRotation: 1
-    MinimumX: -90
-    MaximumX: 90
-    smooth: 0
-    smoothTime: 5
-    lockCursor: 1
-  m_UseFovKick: 0
-  m_FovKick:
-    Camera: {fileID: 20671367976036362}
-    originalFov: 0
-    FOVIncrease: 3
-    TimeToIncrease: 1
-    TimeToDecrease: 1
-    IncreaseCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-  m_UseHeadBob: 0
-  m_HeadBob:
-    HorizontalBobRange: 0.33
-    VerticalBobRange: 0.33
-    Bobcurve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 0.5
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1.5
-        value: -1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 2
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    VerticaltoHorizontalRatio: 1
-  m_JumpBob:
-    BobDuration: 1
-    BobAmount: 0.5
-  m_StepInterval: 2
-  m_FootstepSounds: []
-  m_JumpSound: {fileID: 8300000, guid: 8a7bffa16cd573e488774a0ad4ef3602, type: 3}
-  m_LandSound: {fileID: 8300000, guid: fbd1956e338880a4398a58fbf64f6f90, type: 3}
 --- !u!114 &114129161894825250
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3077,7 +3081,7 @@ MonoBehaviour:
   m_Script: {fileID: -2084202205, guid: 4663afc459f5c4110bc2dffe158fecad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visRange: 10
+  visRange: 50
   visUpdateInterval: 1
   checkMethod: 0
   forceHidden: 0
@@ -3123,6 +3127,19 @@ MonoBehaviour:
     identifierIn: (Info)
     color: {r: 1, g: 0, b: 0, a: 1}
   maxLength: 70
+--- !u!114 &114493687449954874
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1740019301615000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6705c6fca6a841a3b356d0bfc685b03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 0}
+  entity: {fileID: 114126116385427998}
 --- !u!114 &114674561207071474
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3198,7 +3215,7 @@ CapsuleCollider:
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: -0.12, z: 0}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!137 &137365735109675644
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
@@ -3321,7 +3338,7 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 2
+  m_Height: 1.9
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.3

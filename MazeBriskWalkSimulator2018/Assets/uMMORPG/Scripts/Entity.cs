@@ -25,6 +25,7 @@
 // idea in general to increase performance.
 using System;
 using System.Collections.Generic;
+using UnityStandardAssets.Utility;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
@@ -40,7 +41,7 @@ public abstract partial class Entity : NetworkBehaviour
     [Header("Components")]
     public NavMeshAgent agent;
     public NetworkProximityChecker proxchecker;
-    public NetworkIdentity netIdentity;
+    public Mirror.NetworkIdentity netIdentity;
     public Animator animator;
     new public Collider collider;
 
@@ -255,6 +256,30 @@ public abstract partial class Entity : NetworkBehaviour
     // -> needs to be in Entity because both player and pet need it
     [HideInInspector] public bool inSafeZone;
 
+    // FirstPersonController ///////////////////////////////////////////////////
+    [Header("PlayerMovment")]
+    [SerializeField] public bool m_IsWalking;
+    [SerializeField] public float m_WalkSpeed;
+    [SerializeField] public float m_RunSpeed;
+    [SerializeField] [Range(0f, 1f)] public float m_RunstepLenghten;
+    [SerializeField] public float m_JumpSpeed;
+    [SerializeField] public float m_StickToGroundForce;
+    [SerializeField] public float m_GravityMultiplier;
+    [SerializeField] public UnityStandardAssets.Characters.FirstPerson.MouseLook m_MouseLook;
+    [SerializeField] public bool m_UseFovKick;
+    [SerializeField] public FOVKick m_FovKick = new FOVKick(); 
+    [SerializeField] public bool m_UseHeadBob;
+    [SerializeField] public CurveControlledBob m_HeadBob = new CurveControlledBob();
+    [SerializeField] public LerpControlledBob m_JumpBob = new LerpControlledBob();
+    [SerializeField] public float m_StepInterval;
+    [SerializeField] public AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
+    [SerializeField] public AudioClip m_JumpSound;           // the sound played when character leaves the ground.
+    [SerializeField] public AudioClip m_LandSound;           // the sound played when character touches back on ground.
+
+    [HideInInspector] public Vector3 m_MoveDir = Vector3.zero;
+    [HideInInspector] public float m_speed;
+    [HideInInspector] public Vector2 m_Input;
+
     // networkbehaviour ////////////////////////////////////////////////////////
     protected virtual void Awake()
     {
@@ -309,6 +334,7 @@ public abstract partial class Entity : NetworkBehaviour
     // note: can still use LateUpdate for Updates that should happen in any case
     void Update()
     {
+        
         // only update if it's worth updating (see IsWorthUpdating comments)
         // -> we also clear the target if it's hidden, so that players don't
         //    keep hidden (respawning) monsters as target, hence don't show them
@@ -390,10 +416,15 @@ public abstract partial class Entity : NetworkBehaviour
         //    also works when clicking somewhere onto a obstacle that isn't
         //    directly reachable.
         // -> velocity is the best way to detect WASD movement
+
+        if(speed != 0f)
+            return true;
+        else
+            return false;
+
         /* return agent.pathPending ||
                agent.remainigDistance > agent.stoppingDistance ||
                agent.velocity != Vector3.zero; */
-               return false; //temp return value 
     }
 
     // health & mana ///////////////////////////////////////////////////////////
