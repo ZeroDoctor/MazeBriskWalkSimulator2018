@@ -26,7 +26,7 @@ namespace UnityStandardAssets.Utility
 
         public void DelayedReset(float delay)
         {
-            //StartCoroutine(ResetCoroutine(delay));
+            StartCoroutine(ResetCoroutine(delay));
         }
 
 

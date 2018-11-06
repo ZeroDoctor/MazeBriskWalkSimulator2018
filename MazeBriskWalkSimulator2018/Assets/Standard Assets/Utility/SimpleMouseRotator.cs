@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityStandardAssets.CrossPlatformInput;
 
 namespace UnityStandardAssets.Utility
 {
@@ -44,8 +45,8 @@ namespace UnityStandardAssets.Utility
             float inputV;
             if (relative)
             {
-                inputH = Input.GetAxis("Mouse X");
-                inputV = Input.GetAxis("Mouse Y");
+                inputH = CrossPlatformInputManager.GetAxis("Mouse X");
+                inputV = CrossPlatformInputManager.GetAxis("Mouse Y");
 
                 // wrap values to avoid springing quickly the wrong way from positive to negative
                 if (m_TargetAngles.y > 180)
@@ -69,10 +70,24 @@ namespace UnityStandardAssets.Utility
                     m_FollowAngles.x += 360;
                 }
 
-
+#if MOBILE_INPUT
+            // on mobile, sometimes we want input mapped directly to tilt value,
+            // so it springs back automatically when the look input is released.
+			if (autoZeroHorizontalOnMobile) {
+				m_TargetAngles.y = Mathf.Lerp (-rotationRange.y * 0.5f, rotationRange.y * 0.5f, inputH * .5f + .5f);
+			} else {
+				m_TargetAngles.y += inputH * rotationSpeed;
+			}
+			if (autoZeroVerticalOnMobile) {
+				m_TargetAngles.x = Mathf.Lerp (-rotationRange.x * 0.5f, rotationRange.x * 0.5f, inputV * .5f + .5f);
+			} else {
+				m_TargetAngles.x += inputV * rotationSpeed;
+			}
+#else
                 // with mouse input, we have direct control with no springback required.
                 m_TargetAngles.y += inputH*rotationSpeed;
                 m_TargetAngles.x += inputV*rotationSpeed;
+#endif
 
                 // clamp values to allowed range
                 m_TargetAngles.y = Mathf.Clamp(m_TargetAngles.y, -rotationRange.y*0.5f, rotationRange.y*0.5f);

@@ -57,7 +57,7 @@ namespace UnityStandardAssets.Utility
             m_SpringJoint.maxDistance = k_Distance;
             m_SpringJoint.connectedBody = hit.rigidbody;
 
-            //StartCoroutine("DragObject", hit.distance);
+            StartCoroutine("DragObject", hit.distance);
         }
 
 
