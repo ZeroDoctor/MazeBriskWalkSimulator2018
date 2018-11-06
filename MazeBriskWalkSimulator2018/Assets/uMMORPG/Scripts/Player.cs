@@ -53,7 +53,6 @@ public struct ItemMallCategory
     public ScriptableItem[] items;
 }
 
-[RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Chat))]
 [RequireComponent(typeof(NetworkName))]
 public partial class Player : Entity
@@ -282,7 +281,7 @@ public partial class Player : Entity
 
     [Header("Crafting")]
     public List<int> craftingIndices = Enumerable.Repeat(-1, ScriptableRecipe.recipeSize).ToList();
-    [HideInInspector] public CraftingState craftingState = CraftingState.None; // // client sided
+    [HideInInspector] public CraftingState craftingState = CraftingState.None; // client sided
     [SyncVar, HideInInspector] public double craftingTimeEnd; // double for long term precision
 
     [Header("Item Mall")]
@@ -429,9 +428,9 @@ public partial class Player : Entity
         base.Start();
 
         if(isLocalPlayer) {
-            GameObject originalGameObject = GameObject.Find(name);
-            GameObject child = originalGameObject.transform.GetChild(4).gameObject;
-            child.SetActive(true);
+            GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
+            GameObject headBone = GameObject.Find(name + "/Hunter_model/Hips/Spine/Spine1/Spine2/Neck/Head");
+            camera.SetActive(true);
             m_CharacterController = GetComponent<CharacterController>();
             m_Camera = GetComponentInChildren<Camera>();
             m_OriginalCameraPosition = m_Camera.transform.localPosition;
@@ -441,11 +440,10 @@ public partial class Player : Entity
             m_NextStep = m_StepCycle / 2f;
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
-            m_MouseLook.Init(transform , m_Camera.transform);
+            m_MouseLook.Init(transform , m_Camera.transform, headBone);
         } else {
-            GameObject originalGameObject = GameObject.Find(name);
-            GameObject child = originalGameObject.transform.GetChild(4).gameObject;
-            child.SetActive(false);
+            GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
+            camera.SetActive(false);
         }
 
         onlinePlayers[name] = this;
@@ -1348,8 +1346,8 @@ public partial class Player : Entity
         if(UIUtils.AnyInputActive())
             return;
         // Read input
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
 
         bool waswalking = m_IsWalking;
 

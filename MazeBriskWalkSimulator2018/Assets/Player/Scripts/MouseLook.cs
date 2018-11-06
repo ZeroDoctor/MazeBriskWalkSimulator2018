@@ -23,7 +23,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private Quaternion m_CameraTargetRot;
         private bool m_cursorIsLocked = true;
 
-        public void Init(Transform character, Transform camera)
+        private Transform headBone;
+
+        public void Init(Transform character, Transform camera, GameObject headBone)
         {
             
             if(character != target)
@@ -31,6 +33,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             m_CharacterTargetRot = character.localRotation;
             m_CameraTargetRot = camera.localRotation;
+
+            this.headBone = headBone.transform;
+            this.headBone.position += new Vector3(0f, 0.2f,0.2f); 
+            if(headBone == null) {
+                Debug.Break();
+                Debug.Log("Could not find head bone");
+            }
+                
+        }
+
+        public void UpdateCameraPosition(Transform camera) {
+            camera.position = headBone.position;
+            camera.position += new Vector3(0f,0.2f,0.2f); 
         }
         public void LookRotation(Transform character, Transform camera)
         {
@@ -58,6 +73,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 character.localRotation = m_CharacterTargetRot;
                 camera.localRotation = m_CameraTargetRot;
             }
+
+            
 
             UpdateCursorLock();
         }

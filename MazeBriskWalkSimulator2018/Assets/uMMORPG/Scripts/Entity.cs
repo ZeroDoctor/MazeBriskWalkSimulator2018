@@ -417,7 +417,7 @@ public abstract partial class Entity : NetworkBehaviour
         //    directly reachable.
         // -> velocity is the best way to detect WASD movement
 
-        if(speed != 0f)
+        if(m_MoveDir.x != 0f)
             return true;
         else
             return false;
