@@ -342,7 +342,8 @@ public abstract partial class Entity : NetworkBehaviour
         if (IsWorthUpdating())
         {
             // always apply speed to agent
-            //agent.speed = speed;
+            if (agent != null)
+                agent.speed = speed;
 
             if (isClient)
             {
@@ -419,12 +420,10 @@ public abstract partial class Entity : NetworkBehaviour
 
         if(m_MoveDir.x != 0f)
             return true;
-        else
-            return false;
-
-        /* return agent.pathPending ||
-               agent.remainigDistance > agent.stoppingDistance ||
-               agent.velocity != Vector3.zero; */
+        else if(agent != null)
+            return agent.pathPending || agent.remainingDistance > agent.stoppingDistance || false;
+        
+         return false; 
     }
 
     // health & mana ///////////////////////////////////////////////////////////

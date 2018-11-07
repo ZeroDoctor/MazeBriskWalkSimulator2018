@@ -1,0 +1,199 @@
+fileFormatVersion: 2
+guid: bc2933caee87dc94b8418539472d56d8
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: 11_cells_diameter_theta_maze
+    100002: 13_cells_diameter_theta_maze
+    100004: 15_cells_diameter_theta_maze
+    100006: 17_cells_diameter_theta_maze
+    100008: 19_cells_diameter_theta_maze
+    100010: 21_cells_diameter_theta_maze
+    100012: 5_cells_diameter_theta_maze
+    100014: 7_cells_diameter_theta_maze
+    100016: 9_cells_diameter_theta_maze
+    100018: LAYER_1
+    100020: LAYER_2
+    100022: LAYER_3
+    100024: LAYER_4
+    100026: LAYER_5
+    100028: LAYER_6
+    100030: LAYER_7
+    100032: LAYER_8
+    100034: LAYER_9
+    100036: //RootNode
+    100038: Outside
+    400000: 11_cells_diameter_theta_maze
+    400002: 13_cells_diameter_theta_maze
+    400004: 15_cells_diameter_theta_maze
+    400006: 17_cells_diameter_theta_maze
+    400008: 19_cells_diameter_theta_maze
+    400010: 21_cells_diameter_theta_maze
+    400012: 5_cells_diameter_theta_maze
+    400014: 7_cells_diameter_theta_maze
+    400016: 9_cells_diameter_theta_maze
+    400018: LAYER_1
+    400020: LAYER_2
+    400022: LAYER_3
+    400024: LAYER_4
+    400026: LAYER_5
+    400028: LAYER_6
+    400030: LAYER_7
+    400032: LAYER_8
+    400034: LAYER_9
+    400036: //RootNode
+    400038: Outside
+    2100000: Material_001
+    2100002: 21_cells_diameter_theta_maze__21_cells_diameter_theta_maze_png
+    2100004: 19_cells_diameter_theta_maze__19_cells_diameter_theta_maze_png
+    2100006: 17_cells_diameter_theta_maze__17_cells_diameter_theta_maze_png
+    2100008: 15_cells_diameter_theta_maze__15_cells_diameter_theta_maze_png
+    2100010: 13_cells_diameter_theta_maze__13_cells_diameter_theta_maze_png
+    2100012: 11_cells_diameter_theta_maze__11_cells_diameter_theta_maze_png
+    2100014: 9_cells_diameter_theta_maze__9_cells_diameter_theta_maze_png
+    2100016: 7_cells_diameter_theta_maze__7_cells_diameter_theta_maze_png
+    2100018: 5_cells_diameter_theta_maze__5_cells_diameter_theta_maze_png
+    2100020: unnamed
+    2300000: 11_cells_diameter_theta_maze
+    2300002: 13_cells_diameter_theta_maze
+    2300004: 15_cells_diameter_theta_maze
+    2300006: 17_cells_diameter_theta_maze
+    2300008: 19_cells_diameter_theta_maze
+    2300010: 21_cells_diameter_theta_maze
+    2300012: 5_cells_diameter_theta_maze
+    2300014: 7_cells_diameter_theta_maze
+    2300016: 9_cells_diameter_theta_maze
+    2300018: LAYER_1
+    2300020: LAYER_2
+    2300022: LAYER_3
+    2300024: LAYER_4
+    2300026: LAYER_5
+    2300028: LAYER_6
+    2300030: LAYER_7
+    2300032: LAYER_8
+    2300034: LAYER_9
+    2300036: Outside
+    3300000: 11_cells_diameter_theta_maze
+    3300002: 13_cells_diameter_theta_maze
+    3300004: 15_cells_diameter_theta_maze
+    3300006: 17_cells_diameter_theta_maze
+    3300008: 19_cells_diameter_theta_maze
+    3300010: 21_cells_diameter_theta_maze
+    3300012: 5_cells_diameter_theta_maze
+    3300014: 7_cells_diameter_theta_maze
+    3300016: 9_cells_diameter_theta_maze
+    3300018: LAYER_1
+    3300020: LAYER_2
+    3300022: LAYER_3
+    3300024: LAYER_4
+    3300026: LAYER_5
+    3300028: LAYER_6
+    3300030: LAYER_7
+    3300032: LAYER_8
+    3300034: LAYER_9
+    3300036: Outside
+    4300000: Outside
+    4300002: LAYER_1
+    4300004: 21_cells_diameter_theta_maze
+    4300006: 19_cells_diameter_theta_maze
+    4300008: 17_cells_diameter_theta_maze
+    4300010: 15_cells_diameter_theta_maze
+    4300012: 13_cells_diameter_theta_maze
+    4300014: 11_cells_diameter_theta_maze
+    4300016: 9_cells_diameter_theta_maze
+    4300018: 7_cells_diameter_theta_maze
+    4300020: 5_cells_diameter_theta_maze
+    4300022: LAYER_2
+    4300024: LAYER_3
+    4300026: LAYER_4
+    4300028: LAYER_5
+    4300030: LAYER_6
+    4300032: LAYER_7
+    4300034: LAYER_8
+    4300036: LAYER_9
+    7400000: Default Take
+    9500000: //RootNode
+    2186277476908879412: ImportLogs
+  externalObjects: {}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 1
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
