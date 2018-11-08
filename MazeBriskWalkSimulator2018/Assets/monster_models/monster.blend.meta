@@ -51,6 +51,7 @@ ModelImporter:
     100090: Tail6_Vert
     100092: Tail7
     100094: Upper_Spine
+    100096: Sand_beach_soil_ground_shore_desert_texture_ver_3
     400000: Armature
     400002: Head
     400004: Jaw
@@ -99,19 +100,28 @@ ModelImporter:
     400090: Tail6_Vert
     400092: Tail7
     400094: Upper_Spine
+    400096: Sand_beach_soil_ground_shore_desert_texture_ver_3
     2100000: Body__BodyNormal
     2100002: BottomTeeth__NormalsTeethB
     2100004: Mouth__NormalsMouth
     2100006: TopTeeth__TextureTeethT
     2100008: Horns__NormalsHorns
     2100010: Skull__NormalsSkull
+    2100012: Sand_beach_soil_ground_shore_desert_texture_ver_3__Sand_beach_soil_ground_shore_desert_texture_ver_3_jpg
+    2300000: Sand_beach_soil_ground_shore_desert_texture_ver_3
+    3300000: Sand_beach_soil_ground_shore_desert_texture_ver_3
     4300000: LP_BigBody
     4300002: LP_Teeth_bottom
     4300004: LP_Mouth
     4300006: LP_Teeth_top
     4300008: LP_Horns
     4300010: LP_Skull
-    7400000: Default Take
+    4300012: Sand_beach_soil_ground_shore_desert_texture_ver_3
+    6400000: Sand_beach_soil_ground_shore_desert_texture_ver_3
+    7400000: Idle
+    7400002: Idle
+    7400004: Run
+    7400006: Walk
     9500000: //RootNode
     13700000: LP_BigBody
     13700002: LP_Horns
@@ -147,7 +157,91 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Run
+      takeName: ArmatureAction_001
+      firstFrame: 0
+      lastFrame: 20
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Idle
+      takeName: ArmatureAction_001
+      firstFrame: 95
+      lastFrame: 121
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Walk
+      takeName: ArmatureAction_001
+      firstFrame: 45
+      lastFrame: 76
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 1
   meshes:
     lODScreenPercentages: []
