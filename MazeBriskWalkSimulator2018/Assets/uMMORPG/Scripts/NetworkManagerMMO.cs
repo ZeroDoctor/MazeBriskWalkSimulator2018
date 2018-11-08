@@ -36,7 +36,6 @@ public partial class NetworkManagerMMO : NetworkManager
     // we don't just name it 'account' to avoid collisions in handshake
     [Header("Login")]
     public string loginAccount = "";
-    public string loginPassword = "";
 
     // we may want to add another game server if the first one gets too crowded.
     // the server list allows people to choose a server.
@@ -193,17 +192,9 @@ public partial class NetworkManagerMMO : NetworkManager
         client.RegisterHandler(CharactersAvailableMsg.MsgId, OnClientCharactersAvailable);
         client.RegisterHandler(ErrorMsg.MsgId, OnClientReceivePopup);
 
-        // send login packet with hashed password, so that the original one
-        // never leaves the player's computer.
-        //
-        // it's recommended to use a different salt for each hash. ideally we
-        // would store each user's salt in the database. to not overcomplicate
-        // things, we will use the account name as salt (at least 16 bytes)
-        //
         // Application.version can be modified under:
         // Edit -> Project Settings -> Player -> Bundle Version
-        string hash = Utils.PBKDF2Hash(loginPassword, "at_least_16_byte" + loginAccount);
-        LoginMsg message = new LoginMsg{account=loginAccount, password=hash, version=Application.version};
+        LoginMsg message = new LoginMsg{account=loginAccount, version=Application.version};
         conn.Send(LoginMsg.MsgId, message);
         print("login message was sent");
 
@@ -264,7 +255,7 @@ public partial class NetworkManagerMMO : NetworkManager
             if (IsAllowedAccountName(message.account))
             {
                 // validate account info
-                if (Database.IsValidAccount(message.account, message.password))
+                if (Database.IsValidAccount(message.account))
                 {
                     // not in lobby and not in world yet?
                     if (!AccountLoggedIn(message.account))
@@ -294,7 +285,7 @@ public partial class NetworkManagerMMO : NetworkManager
                 }
                 else
                 {
-                    print("invalid account or password for: " + message.account);
+                    print("invalid account for: " + message.account);
                     ClientSendPopup(netMsg.conn, "invalid account", true);
                 }
             }

@@ -2237,7 +2237,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1740019301615000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 263.45032, y: 0.24565887, z: 73.44548}
+  m_LocalPosition: {x: 77.98374, y: 0.5267587, z: 585.0512}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4441316531544270}
@@ -2802,59 +2802,60 @@ MonoBehaviour:
   agent: {fileID: 0}
   proxchecker: {fileID: 114129161894825250}
   netIdentity: {fileID: 114864134869964522}
-  animator: {fileID: 0}
-  collider: {fileID: 0}
+  animator: {fileID: 95201033662315768}
+  collider: {fileID: 136318204441732362}
   _state: IDLE
   level: 1
   _healthMax:
     baseValue: 100
-    bonusPerLevel: 0
+    bonusPerLevel: 25
   invincible: 0
   healthRecovery: 1
   _healthRecoveryRate:
     baseValue: 1
-    bonusPerLevel: 0
+    bonusPerLevel: 2
   _manaMax:
     baseValue: 100
-    bonusPerLevel: 0
+    bonusPerLevel: 1
   manaRecovery: 1
   _manaRecoveryRate:
     baseValue: 1
-    bonusPerLevel: 0
+    bonusPerLevel: 1
   _damage:
     baseValue: 1
-    bonusPerLevel: 0
+    bonusPerLevel: 2
   _defense:
     baseValue: 1
-    bonusPerLevel: 0
+    bonusPerLevel: 1
   _blockChance:
     baseValue: 0
-    bonusPerLevel: 0
+    bonusPerLevel: 1
   _criticalChance:
-    baseValue: 0
-    bonusPerLevel: 0
+    baseValue: 1
+    bonusPerLevel: 3
   _speed:
     baseValue: 5
     bonusPerLevel: 0
   damagePopupPrefab: {fileID: 179236, guid: e81ebbaa55e254e31b9909cef04e3855, type: 2}
-  skillTemplates: []
+  skillTemplates:
+  - {fileID: 11400000, guid: 54f1b3885da2e44b991163483e674f92, type: 2}
   currentSkill: -1
-  _effectMount: {fileID: 0}
-  _gold: 0
+  _effectMount: {fileID: 4371106936711594}
+  _gold: 15
   nameOverlay: {fileID: 102584888320167792}
   stunnedOverlay: {fileID: 102960793535921554}
   inSafeZone: 0
   m_IsWalking: 0
-  m_WalkSpeed: 5
-  m_RunSpeed: 8
+  m_WalkSpeed: 10
+  m_RunSpeed: 15
   m_RunstepLenghten: 0.575
   m_JumpSpeed: 10
   m_StickToGroundForce: 4
   m_GravityMultiplier: 3
   m_MouseLook:
     target: {fileID: 4912601917670514}
-    XSensitivity: 1
-    YSensitivity: 1
+    XSensitivity: 1.5
+    YSensitivity: 1.5
     clampVerticalRotation: 1
     MinimumX: -90
     MaximumX: 90
@@ -2874,6 +2875,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
+  headBone: {fileID: 1169918433850582}
   m_UseHeadBob: 0
   m_HeadBob:
     HorizontalBobRange: 0.33
@@ -2955,11 +2957,11 @@ MonoBehaviour:
   className: 
   strength: 0
   intelligence: 0
-  maxLevel: 1
+  maxLevel: 5
   _experience: 0
   _experienceMax:
     baseValue: 10
-    bonusPerLevel: 10
+    bonusPerLevel: 15
   skillExperience: 0
   indicatorPrefab: {fileID: 120922, guid: 95fc72c38103b4c928f9e12db60c9f8e, type: 2}
   inventorySize: 30
@@ -2974,9 +2976,9 @@ MonoBehaviour:
       petExperience: 0
     amount: 0
   equipmentInfo:
-  - requiredCategory: Weapon
-    location: {fileID: 0}
-    defaultItem: {fileID: 0}
+  - requiredCategory: WeaponBow
+    location: {fileID: 4487981780906306}
+    defaultItem: {fileID: 11400000, guid: ed9584898ad0e4ecc93ae9e3c257edc7, type: 2}
   - requiredCategory: Head
     location: {fileID: 0}
     defaultItem: {fileID: 0}

@@ -34,10 +34,10 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
 
     // remember last serialized values for dirty bit
     Vector3 lastServerPosition;
-    Quaternion lastServerRotation;
+    //Quaternion lastServerRotation;
     Vector3 lastSentDestination;
     Vector3 lastSentPosition;
-    Quaternion lastSentRotation;
+    //Quaternion lastSentRotation;
     Vector3 lastReceivedDestination;
     Quaternion lastReceivedRotation;
     double lastSentTime; // double for long term precision
@@ -155,8 +155,8 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
                     SetDirtyBit(1);
                 }
 
-                lastServerPosition = transform.position;
-                lastServerRotation = transform.rotation;
+                //lastServerPosition = transform.position;
+                //lastServerRotation = transform.rotation;
 
             } else {
                 if (!hasPath && agent.velocity == Vector3.zero &&
@@ -231,7 +231,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
                     {
                         //CmdMovedWASD(transform.position, transform.rotation);
                         lastSentPosition = transform.position;
-                        lastSentRotation = transform.rotation;
+                        //lastSentRotation = transform.rotation;
                         lastSentTime = NetworkTime.time;
                     }
                 }
@@ -335,7 +335,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
         if(entity.GetType() == typeof(Player)) {
 
             Quaternion rotation = reader.ReadQuaternion();
-            float speed = reader.ReadSingle();
+            //float speed = reader.ReadSingle();
 
             if(!isLocalPlayer) {
                 transform.position = position;

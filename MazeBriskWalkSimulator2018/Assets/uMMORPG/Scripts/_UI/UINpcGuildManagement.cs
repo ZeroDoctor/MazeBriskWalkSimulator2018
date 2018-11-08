@@ -24,15 +24,15 @@ public partial class UINpcGuildManagement : MonoBehaviour {
             createPriceText.text = Guild.CreationPrice.ToString();
 
             createButton.interactable = !player.InGuild() && Guild.IsValidGuildName(createNameInput.text);
-            createButton.onClick.SetListener(() => {
+            /* createButton.onClick.SetListener(() => {
                 player.CmdCreateGuild(createNameInput.text);
                 createNameInput.text = ""; // clear the input afterwards
-            });
+            }); */
 
             terminateButton.interactable = player.guild.CanTerminate(player.name);
-            terminateButton.onClick.SetListener(() => {
+            /* terminateButton.onClick.SetListener(() => {
                 player.CmdTerminateGuild();
-            });
+            }); */
         }
         else panel.SetActive(false); // hide
     }

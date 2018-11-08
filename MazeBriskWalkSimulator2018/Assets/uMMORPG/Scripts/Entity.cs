@@ -267,7 +267,8 @@ public abstract partial class Entity : NetworkBehaviour
     [SerializeField] public float m_GravityMultiplier;
     [SerializeField] public UnityStandardAssets.Characters.FirstPerson.MouseLook m_MouseLook;
     [SerializeField] public bool m_UseFovKick;
-    [SerializeField] public FOVKick m_FovKick = new FOVKick(); 
+    [SerializeField] public FOVKick m_FovKick = new FOVKick();
+    [SerializeField] protected GameObject headBone;
     [SerializeField] public bool m_UseHeadBob;
     [SerializeField] public CurveControlledBob m_HeadBob = new CurveControlledBob();
     [SerializeField] public LerpControlledBob m_JumpBob = new LerpControlledBob();

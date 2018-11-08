@@ -23,9 +23,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private Quaternion m_CameraTargetRot;
         private bool m_cursorIsLocked = true;
 
-        private Transform headBone;
-
-        public void Init(Transform character, Transform camera, GameObject headBone)
+        public void Init(Transform character, Transform camera)
         {
             
             if(character != target)
@@ -33,21 +31,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             m_CharacterTargetRot = character.localRotation;
             m_CameraTargetRot = camera.localRotation;
-
-            this.headBone = headBone.transform;
-            this.headBone.position += new Vector3(0f, 0.2f,0.2f); 
-            if(headBone == null) {
-                Debug.Break();
-                Debug.Log("Could not find head bone");
-            }
-                
         }
 
-        public void UpdateCameraPosition(Transform camera) {
-            camera.position = headBone.position;
-            camera.position += new Vector3(0f,0.2f,0.2f); 
-        }
-        public void LookRotation(Transform character, Transform camera)
+        public void LookRotation(Transform character, Transform camera, GameObject headBone)
         {
             if(character != target)
                 return;
@@ -57,6 +43,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             m_CharacterTargetRot *= Quaternion.Euler (0f, yRot, 0f);
             m_CameraTargetRot *= Quaternion.Euler (-xRot, 0f, 0f);
+            
+            //Temp
+            if(camera.localPosition.z < 0.2f) {
+                camera.localPosition = new Vector3(camera.localPosition.x, camera.localPosition.y, 0.2f);
+            }
 
             if(clampVerticalRotation)
                 m_CameraTargetRot = ClampRotationAroundXAxis (m_CameraTargetRot);
@@ -74,7 +65,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 camera.localRotation = m_CameraTargetRot;
             }
 
-            
+            //camera.localPosition = Vector3.Lerp(m_CameraTargetPos, headBone.localPosition + new Vector3(0f, 1.5f, -0.1f), smoothTime * Time.deltaTime);
 
             UpdateCursorLock();
         }

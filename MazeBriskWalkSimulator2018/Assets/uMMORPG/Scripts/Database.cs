@@ -11,54 +11,18 @@
 //   - we can't easily read 'just the class of a character' etc., but we need it
 //     for character selection etc. often
 //   - if each account is a folder that contains players, then we can't save
-//     additional account info like password, banned, etc. unless we use an
+//     additional account info like banned, etc. unless we use an
 //     additional account.xml file, which overcomplicates everything
 //   - there will always be forbidden file names like 'COM', which will cause
 //     problems when people try to create accounts or characters with that name
-//
-// About item mall coins:
-//   The payment provider's callback should add new orders to the
-//   character_orders table. The server will then process them while the player
-//   is ingame. Don't try to modify 'coins' in the character table directly.
-//
-// Tools to open sqlite database files:
-//   Windows/OSX program: http://sqlitebrowser.org/
-//   Firefox extension: https://addons.mozilla.org/de/firefox/addon/sqlite-manager/
-//   Webhost: Adminer/PhpLiteAdmin
-//
-// About performance:
-// - It's recommended to only keep the SQlite connection open while it's used.
-//   MMO Servers use it all the time, so we keep it open all the time. This also
-//   allows us to use transactions easily, and it will make the transition to
-//   MYSQL easier.
-// - Transactions are definitely necessary:
-//   saving 100 players without transactions takes 3.6s
-//   saving 100 players with transactions takes    0.38s
-// - Using tr = conn.BeginTransaction() + tr.Commit() and passing it through all
-//   the functions is ultra complicated. We use a BEGIN + END queries instead.
-//
-// Some benchmarks:
-//   saving 100 players unoptimized: 4s
-//   saving 100 players always open connection + transactions: 3.6s
-//   saving 100 players always open connection + transactions + WAL: 3.6s
-//   saving 100 players in 1 'using tr = ...' transaction: 380ms
-//   saving 100 players in 1 BEGIN/END style transactions: 380ms
-//   saving 100 players with XML: 369ms
-//
-// Build notes:
-// - requires Player settings to be set to '.NET' instead of '.NET Subset',
-//   otherwise System.Data.dll causes ArgumentException.
-// - requires sqlite3.dll x86 and x64 version for standalone (windows/mac/linux)
-//   => found on sqlite.org website
-// - requires libsqlite3.so x86 and armeabi-v7a for android
-//   => compiled from sqlite.org amalgamation source with android ndk r9b linux
+
 using UnityEngine;
 using Mirror;
 using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using Mono.Data.Sqlite; // copied from Unity/Mono/lib/mono/2.0 to Plugins
+using Mono.Data.Sqlite;
 
 public partial class Database
 {
@@ -173,7 +137,7 @@ public partial class Database
         //   update the kicked member's guild field manually each time
         // * it's easier to remove / modify the guild feature if it's not hard-
         //   coded into the characters table
-        ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS character_guild (
+        /* ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS character_guild (
                             character TEXT NOT NULL PRIMARY KEY,
                             guild TEXT NOT NULL,
                             rank INTEGER NOT NULL)");
@@ -185,22 +149,18 @@ public partial class Database
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
         ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS guild_info (
                             name TEXT NOT NULL PRIMARY KEY,
-                            notice TEXT NOT NULL)");
+                            notice TEXT NOT NULL)"); */
 
         // [PRIMARY KEY is important for performance: O(log n) instead of O(n)]
         ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS accounts (
                             name TEXT NOT NULL PRIMARY KEY,
-                            password TEXT NOT NULL,
                             banned INTEGER NOT NULL)");
 
         // addon system hooks
         Utils.InvokeMany(typeof(Database), null, "Initialize_");
-
-        Debug.Log("connected to database");
     }
 
     // helper functions ////////////////////////////////////////////////////////
-    // run a query that doesn't return anything
     public static void ExecuteNonQuery(string sql, params SqliteParameter[] args)
     {
         using (SqliteCommand command = new SqliteCommand(sql, connection))
@@ -210,8 +170,6 @@ public partial class Database
             command.ExecuteNonQuery();
         }
     }
-
-    // run a query that returns a single value
     public static object ExecuteScalar(string sql, params SqliteParameter[] args)
     {
         using (SqliteCommand command = new SqliteCommand(sql, connection))
@@ -222,8 +180,6 @@ public partial class Database
         }
     }
 
-    // run a query that returns several values
-    // note: sqlite has long instead of int, so use Convert.ToInt32 etc.
     public static List< List<object> > ExecuteReader(string sql, params SqliteParameter[] args)
     {
         List< List<object> > result = new List< List<object> >();
@@ -235,13 +191,6 @@ public partial class Database
 
             using (SqliteDataReader reader = command.ExecuteReader())
             {
-                // the following code causes a SQL EntryPointNotFoundException
-                // because sqlite3_column_origin_name isn't found on OSX and
-                // some other platforms. newer mono versions have a workaround,
-                // but as long as Unity doesn't update, we will have to work
-                // around it manually. see also GetSchemaTable function:
-                // https://github.com/mono/mono/blob/master/mcs/class/Mono.Data.Sqlite/Mono.Data.Sqlite_2.0/SQLiteDataReader.cs
-                //
                 //result.Load(reader); (DataTable)
                 while (reader.Read())
                 {
@@ -256,60 +205,21 @@ public partial class Database
     }
 
     // account data ////////////////////////////////////////////////////////////
-    public static bool IsValidAccount(string account, string password)
+    public static bool IsValidAccount(string account)
     {
-        // this function can be used to verify account credentials in a database
-        // or a content management system.
-        //
-        // for example, we could setup a content management system with a forum,
-        // news, shop etc. and then use a simple HTTP-GET to check the account
-        // info, for example:
-        //
-        //   var request = new WWW("example.com/verify.php?id="+id+"&amp;pw="+pw);
-        //   while (!request.isDone)
-        //       print("loading...");
-        //   return request.error == null && request.text == "ok";
-        //
-        // where verify.php is a script like this one:
-        //   <?php
-        //   // id and pw set with HTTP-GET?
-        //   if (isset($_GET['id']) && isset($_GET['pw'])) {
-        //       // validate id and pw by using the CMS, for example in Drupal:
-        //       if (user_authenticate($_GET['id'], $_GET['pw']))
-        //           echo "ok";
-        //       else
-        //           echo "invalid id or pw";
-        //   }
-        //   ?>
-        //
-        // or we could check in a MYSQL database:
-        //   var dbConn = new MySql.Data.MySqlClient.MySqlConnection("Persist Security Info=False;server=localhost;database=notas;uid=root;password=" + dbpwd);
-        //   var cmd = dbConn.CreateCommand();
-        //   cmd.CommandText = "SELECT id FROM accounts WHERE id='" + account + "' AND pw='" + password + "'";
-        //   dbConn.Open();
-        //   var reader = cmd.ExecuteReader();
-        //   if (reader.Read())
-        //       return reader.ToString() == account;
-        //   return false;
-        //
-        // as usual, we will use the simplest solution possible:
-        // create account if not exists, compare password otherwise.
-        // no CMS communication necessary and good enough for an Indie MMORPG.
-
-        // not empty?
-        if (!Utils.IsNullOrWhiteSpace(account) && !Utils.IsNullOrWhiteSpace(password))
+        if (!Utils.IsNullOrWhiteSpace(account))
         {
-            List< List<object> > table = ExecuteReader("SELECT password, banned FROM accounts WHERE name=@name", new SqliteParameter("@name", account));
+            List< List<object> > table = ExecuteReader("SELECT banned FROM accounts WHERE name=@name", new SqliteParameter("@name", account));
             if (table.Count == 1)
             {
-                // account exists. check password and ban status.
+                // account exists. ban status.
                 List<object> row = table[0];
-                return (string)row[0] == password && (long)row[1] == 0;
+                return (long)row[0] == 0;
             }
             else
             {
                 // account doesn't exist. create it.
-                ExecuteNonQuery("INSERT INTO accounts VALUES (@name, @password, 0)", new SqliteParameter("@name", account), new SqliteParameter("@password", password));
+                ExecuteNonQuery("INSERT INTO accounts VALUES (@name, 0)", new SqliteParameter("@name", account));
                 return true;
             }
         }
@@ -484,7 +394,7 @@ public partial class Database
         }
     }
 
-    static void LoadGuild(Player player)
+/*     static void LoadGuild(Player player)
     {
         // in a guild?
         string guild = (string)ExecuteScalar("SELECT guild FROM character_guild WHERE character=@character", new SqliteParameter("@character", player.name));
@@ -520,7 +430,7 @@ public partial class Database
             player.guild.members = members.ToArray(); // guild.AddMember each time is too slow because array resizing
         }
     }
-
+ */
     public static GameObject CharacterLoad(string characterName, List<Player> prefabs)
     {
         List< List<object> > table = ExecuteReader("SELECT * FROM characters WHERE name=@name AND deleted=0", new SqliteParameter("@name", characterName));
@@ -566,15 +476,16 @@ public partial class Database
                     Debug.Log(player.name + " invalid position was reset");
                 } */
 
+                Transform start = NetworkManager.singleton.GetNearestStartPosition(position);
+                player.StartLocation(position);
+
                 LoadInventory(player);
                 LoadEquipment(player);
                 LoadSkills(player);
                 LoadBuffs(player);
                 LoadQuests(player);
-                LoadGuild(player);
+                //LoadGuild(player);
 
-                // assign health / mana after max values were fully loaded
-                // (they depend on equipment, buffs, etc.)
                 player.health = health;
                 player.mana = mana;
 
@@ -771,14 +682,6 @@ public partial class Database
     // item mall ///////////////////////////////////////////////////////////////
     public static List<long> GrabCharacterOrders(string characterName)
     {
-        // grab new orders from the database and delete them immediately
-        //
-        // note: this requires an orderid if we want someone else to write to
-        // the database too. otherwise deleting would delete all the new ones or
-        // updating would update all the new ones. especially in sqlite.
-        //
-        // note: we could just delete processed orders, but keeping them in the
-        // database is easier for debugging / support.
         List<long> result = new List<long>();
         List< List<object> > table = ExecuteReader("SELECT orderid, coins FROM character_orders WHERE character=@character AND processed=0", new SqliteParameter("@character", characterName));
         foreach (List<object> row in table)
