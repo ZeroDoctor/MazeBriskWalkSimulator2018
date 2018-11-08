@@ -426,25 +426,26 @@ public partial class Player : Entity
     protected override void Start()
     {
         base.Start();
-
-        if(isLocalPlayer) {
-            GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
-            GameObject headBone = GameObject.Find(name + "/Hunter_model/Hips/Spine/Spine1/Spine2/Neck/Head");
-            camera.SetActive(true);
-            m_CharacterController = GetComponent<CharacterController>();
-            m_Camera = GetComponentInChildren<Camera>();
-            m_OriginalCameraPosition = m_Camera.transform.localPosition;
-            m_FovKick.Setup(m_Camera);
-            m_HeadBob.Setup(m_Camera, m_StepInterval);
-            m_StepCycle = 0f;
-            m_NextStep = m_StepCycle / 2f;
-            m_Jumping = false;
-            m_AudioSource = GetComponent<AudioSource>();
-            m_MouseLook.Init(transform , m_Camera.transform, headBone);
-        } else {
-            GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
-            camera.SetActive(false);
+        if(agent == null) {
+            if(isLocalPlayer) {
+                GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
+                camera.SetActive(true);
+                m_CharacterController = GetComponent<CharacterController>();
+                m_Camera = GetComponentInChildren<Camera>();
+                m_OriginalCameraPosition = m_Camera.transform.localPosition;
+                m_FovKick.Setup(m_Camera);
+                m_HeadBob.Setup(m_Camera, m_StepInterval);
+                m_StepCycle = 0f;
+                m_NextStep = m_StepCycle / 2f;
+                m_Jumping = false;
+                m_AudioSource = GetComponent<AudioSource>();
+                m_MouseLook.Init(transform , m_Camera.transform);
+            } else {
+                GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
+                camera.SetActive(false);
+            }
         }
+        
 
         onlinePlayers[name] = this;
 
@@ -1025,7 +1026,7 @@ public partial class Player : Entity
         if (EventRespawn())
         {
             // revive to closest spawn, with 50% health, then go to idle
-            Transform start = NetworkManager.singleton.GetNearestStartPosition(transform.position);
+            //Transform start = NetworkManager.singleton.GetNearestStartPosition(transform.position);
             //agent.Warp(start.position); // recommended over transform.position
             Revive(0.5f);
             return "IDLE";
@@ -1076,47 +1077,54 @@ public partial class Player : Entity
             if (isLocalPlayer)
             {
                 // simply accept input
-                //SelectionHandling();
-                //WASDHandling();
-                UpdateJumping();
-                UpdateMovement();
-                //TargetNearest();
+                if(agent != null) {
+                    SelectionHandling();
+                    WASDHandling();
+                    TargetNearest();
 
-                // canel action if escape key was pressed
-                //if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
-
-                // trying to cast a skill on a monster that wasn't in range?
-                // then check if we walked into attack range by now
-                /* if (useSkillWhenCloser != -1)
-                {
-                    // can we still attack the target? maybe it was switched.
-                    if (CanAttack(target))
+                    // trying to cast a skill on a monster that wasn't in range?
+                    // then check if we walked into attack range by now
+                    if (useSkillWhenCloser != -1)
                     {
-                        // in range already?
-                        // -> we don't use CastCheckDistance because we want to
-                        // move a bit closer (attackToMoveRangeRatio)
-                        float range = skills[useSkillWhenCloser].castRange * attackToMoveRangeRatio;
-                        if (Utils.ClosestDistance(collider, target.collider) <= range)
+                        // can we still attack the target? maybe it was switched.
+                        if (CanAttack(target))
                         {
-                            // then stop moving and start attacking
-                            CmdUseSkill(useSkillWhenCloser);
+                            // in range already?
+                            // -> we don't use CastCheckDistance because we want to
+                            // move a bit closer (attackToMoveRangeRatio)
+                            float range = skills[useSkillWhenCloser].castRange * attackToMoveRangeRatio;
+                            if (Utils.ClosestDistance(collider, target.collider) <= range)
+                            {
+                                // then stop moving and start attacking
+                                CmdUseSkill(useSkillWhenCloser);
 
-                            // reset
-                            useSkillWhenCloser = -1;
+                                // reset
+                                useSkillWhenCloser = -1;
+                            }
+                            // otherwise keep walking there. the target might move
+                            // around or run away, so we need to keep adjusting the
+                            // destination all the time
+                            else
+                            {
+                                //Debug.Log("walking closer to target...");
+                                //agent.stoppingDistance = range * attackToMoveRangeRatio;
+                                //agent.destination = target.collider.ClosestPointOnBounds(transform.position);
+                            }
                         }
-                        // otherwise keep walking there. the target might move
-                        // around or run away, so we need to keep adjusting the
-                        // destination all the time
-                        else
-                        {
-                            //Debug.Log("walking closer to target...");
-                            //agent.stoppingDistance = range * attackToMoveRangeRatio;
-                            //agent.destination = target.collider.ClosestPointOnBounds(transform.position);
-                        }
+                        // otherwise reset
+                        else useSkillWhenCloser = -1;
                     }
-                    // otherwise reset
-                    else useSkillWhenCloser = -1;
-                } */
+
+                    // canel action if escape key was pressed
+                    if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
+                } else {
+                    UpdateJumping();
+                    UpdateMovement();
+                }
+
+                
+
+                
             }
         }
         else if (state == "CASTING")
@@ -1127,15 +1135,17 @@ public partial class Player : Entity
             if (isLocalPlayer)
             {
                 // simply accept input and reset any client sided movement
-                //SelectionHandling();
-                //WASDHandling(); // still call this to set pendingVelocity for after cast
-                UpdateJumping();
-                UpdateMovement();
-                //TargetNearest();
-                //agent.ResetMovement();
+                if(agent != null) {
+                    SelectionHandling();
+                    WASDHandling();
+                    TargetNearest();
+                    agent.ResetMovement();
 
-                // canel action if escape key was pressed
-                //if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
+                    if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
+                } else {
+                    UpdateJumping();
+                    UpdateMovement();
+                }
             }
         }
         else if (state == "STUNNED")
@@ -1283,7 +1293,7 @@ public partial class Player : Entity
     [Client]
     private void RotateView()
     {
-        m_MouseLook.LookRotation(transform, m_Camera.transform);
+        m_MouseLook.LookRotation(transform, m_Camera.transform, headBone);
     }
 
     [Client]
@@ -1373,6 +1383,10 @@ public partial class Player : Entity
             StopAllCoroutines();
             StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
         }
+    }
+
+    public void StartLocation(Vector3 position) {
+        transform.position = position;
     }
 
     [Client]
@@ -3470,26 +3484,54 @@ public partial class Player : Entity
         {
             // get horizontal and vertical input
             // note: no != 0 check because it's 0 when we stop moving rapidly
-           /*  float horizontal = Input.GetAxis("Horizontal");
+            float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
-            bool jump = Input.GetKey(KeyCode.Space);
-            float jumpSpeed = 0;
 
             if (horizontal != 0 || vertical != 0)
             {
-                horizontal *= movementSpeed;
-                vertical *= movementSpeed;
+                // create input vector, normalize in case of diagonal movement
+                Vector3 input = new Vector3(horizontal, 0, vertical);
+                if (input.magnitude > 1) input = input.normalized;
 
-                if(jump) {
-                    jumpSpeed = 5;
+                // get camera rotation without up/down angle, only left/right
+                Vector3 angles = Camera.main.transform.rotation.eulerAngles;
+                angles.x = 0;
+                Quaternion rotation = Quaternion.Euler(angles); // back to quaternion
+
+                // calculate input direction relative to camera rotation
+                Vector3 direction = rotation * input;
+
+                // draw direction for debugging
+                Debug.DrawLine(transform.position, transform.position + direction, Color.green, 0, false);
+
+                // clear indicator if there is one, and if it's not on a target
+                // (simply looks better)
+                if (direction != Vector3.zero && indicator != null && indicator.transform.parent == null)
+                    Destroy(indicator);
+
+                // cancel path if we are already doing click movement, otherwise
+                // we will slide
+                agent.ResetMovement();
+
+                // casting? then set pending velocity
+                if (state == "CASTING")
+                {
+                    pendingVelocity = direction * speed;
+                    pendingVelocityValid = true;
+                }
+                else
+                {
+                    // set velocity
+                    agent.velocity = direction * speed;
+
+                    // moving with velocity doesn't look at the direction, do it manually
+                    LookAtY(transform.position + direction);
                 }
 
-                Vector3 moveDir = new Vector3(horizontal, jumpSpeed, vertical);
-                transform.rotation = Quaternion.LookRotation(moveDir);
-
-                moveDir.y -= gravity * Time.deltaTime;
-                controller.Move(moveDir * Time.deltaTime);
-            } */
+                // clear requested skill in any case because if we clicked
+                // somewhere else then we don't care about it anymore
+                useSkillWhenCloser = -1;
+            }
         }
     }
 

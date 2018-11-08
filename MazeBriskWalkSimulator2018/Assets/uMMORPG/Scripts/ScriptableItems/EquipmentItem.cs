@@ -27,7 +27,7 @@ public class EquipmentItem : UsableItem
         string requiredCategory = player.equipmentInfo[equipmentIndex].requiredCategory;
         return base.CanUse(player, inventoryIndex) &&
                requiredCategory != "" &&
-               category.StartsWith(requiredCategory);
+               category.StartsWith(requiredCategory);;
     }
 
     int FindEquipableSlotFor(Player player, int inventoryIndex)

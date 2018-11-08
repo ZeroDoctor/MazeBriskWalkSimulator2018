@@ -11,7 +11,6 @@ public partial class UILogin : MonoBehaviour
     public GameObject panel;
     public Text statusText;
     public InputField accountInput;
-    public InputField passwordInput;
     public Dropdown serverDropdown;
     public Button loginButton;
     public Button registerButton;
@@ -64,13 +63,10 @@ public partial class UILogin : MonoBehaviour
             hostButton.onClick.SetListener(() => { manager.StartHost(); });
             cancelButton.gameObject.SetActive(manager.IsConnecting());
             cancelButton.onClick.SetListener(() => { manager.StopClient(); });
-            dedicatedButton.interactable = !manager.isNetworkActive;
-            dedicatedButton.onClick.SetListener(() => { manager.StartServer(); });
             quitButton.onClick.SetListener(() => { NetworkManagerMMO.Quit(); });
 
             // inputs
             manager.loginAccount = accountInput.text;
-            manager.loginPassword = passwordInput.text;
 
             // copy servers to dropdown; copy selected one to networkmanager ip/port.
             serverDropdown.interactable = !manager.isNetworkActive;
