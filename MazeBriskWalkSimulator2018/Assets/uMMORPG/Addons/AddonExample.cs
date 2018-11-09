@@ -126,6 +126,11 @@ public partial class Pet
     [Server] void OnDeath_Example() {}
 }
 
+public partial class PlayerContorller 
+{
+
+}
+
 public partial class Entity
 {
     void Awake_Example() {}

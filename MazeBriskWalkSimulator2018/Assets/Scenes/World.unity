@@ -2865,8 +2865,8 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 105590911}
-  m_LocalRotation: {x: -0.048858497, y: 0.4819889, z: 0.026930286, w: 0.8743994}
-  m_LocalPosition: {x: 71.662056, y: -2.2789245, z: 582.70123}
+  m_LocalRotation: {x: 0.057292733, y: 0.4655035, z: 0.030216604, w: -0.88267267}
+  m_LocalPosition: {x: 308.9497, y: -13.540493, z: 112.69024}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -40942,7 +40942,7 @@ MonoBehaviour:
   resultSlotImage: {fileID: 170186299}
   resultSlotToolTip: {fileID: 170186298}
   craftButton: {fileID: 705203003}
-  progressSlider: {fileID: 0}
+  progressSlider: {fileID: 963512912}
   resultText: {fileID: 634060857}
   successColor: {r: 0, g: 1, b: 0, a: 1}
   failedColor: {r: 1, g: 0, b: 0, a: 1}

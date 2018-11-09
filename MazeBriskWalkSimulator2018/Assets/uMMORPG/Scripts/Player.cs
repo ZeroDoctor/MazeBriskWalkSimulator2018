@@ -655,12 +655,12 @@ public partial class Player : Entity
             currentSkill = -1; // just in case
             return "CRAFTING";
         }
-        if (EventMoveStart())
+        /* if (EventMoveStart())
         {
             // cancel casting (if any)
             currentSkill = -1;
             return "MOVING";
-        }
+        } */
         if (EventSkillRequest())
         {
             // user wants to cast a skill.
@@ -668,7 +668,8 @@ public partial class Player : Entity
             Skill skill = skills[currentSkill];
             nextTarget = target; // return to this one after any corrections by CastCheckTarget
             Vector3 destination;
-            if (CastCheckSelf(skill) && CastCheckTarget(skill) && CastCheckDistance(skill, out destination))
+            StartCastSkill(skill);
+            if (CastCheckSelf(skill) /* && CastCheckTarget(skill) && CastCheckDistance(skill, out destination) */)
             {
                 // start casting and cancel movement in any case
                 // (player might move into attack range * 0.8 but as soon as we
@@ -744,7 +745,7 @@ public partial class Player : Entity
             Skill skill = skills[currentSkill];
             nextTarget = target; // return to this one after any corrections by CastCheckTarget
             Vector3 destination;
-            if (CastCheckSelf(skill) && CastCheckTarget(skill) && CastCheckDistance(skill, out destination))
+            if (CastCheckSelf(skill) /* && CastCheckTarget(skill) && CastCheckDistance(skill, out destination) */)
             {
                 // start casting and cancel movement in any case
                 //agent.ResetMovement();
@@ -841,7 +842,7 @@ public partial class Player : Entity
             nextTarget = null;
             return "TRADING";
         }
-        if (EventTargetDisappeared())
+        /* if (EventTargetDisappeared())
         {
             // cancel if the target matters for this skill
             if (skills[currentSkill].cancelCastIfTargetDied)
@@ -850,8 +851,8 @@ public partial class Player : Entity
                 UseNextTargetIfAny(); // if user selected a new target while casting
                 return "IDLE";
             }
-        }
-        if (EventTargetDied())
+        } */
+        /* if (EventTargetDied())
         {
             // cancel if the target matters for this skill
             if (skills[currentSkill].cancelCastIfTargetDied)
@@ -860,7 +861,7 @@ public partial class Player : Entity
                 UseNextTargetIfAny(); // if user selected a new target while casting
                 return "IDLE";
             }
-        }
+        } */
         if (EventSkillFinished())
         {
             // apply the skill after casting is finished
@@ -2022,10 +2023,11 @@ public partial class Player : Entity
         if (state != "CASTING" || ignoreState)
         {
             Skill skill = skills[skillIndex];
-            if (CastCheckSelf(skill) && CastCheckTarget(skill))
+            if (CastCheckSelf(skill) /* && CastCheckTarget(skill) */)
             {
+                CmdUseSkill(skillIndex);
                 // check distance between self and target
-                Vector3 destination;
+                /* Vector3 destination;
                 if (CastCheckDistance(skill, out destination))
                 {
                     // cast
@@ -2040,7 +2042,7 @@ public partial class Player : Entity
 
                     // use skill when there
                     useSkillWhenCloser = skillIndex;
-                }
+                } */
             }
         }
         else
