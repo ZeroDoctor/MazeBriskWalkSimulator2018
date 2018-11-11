@@ -31,7 +31,7 @@ public class ShootBow : MonoBehaviour {
             Entity entity = hit.transform.GetComponent<Entity>();
 
             if(entity != null) {
-                base.DealDamageAt(entity, amount, 0, 0);
+                //base.DealDamageAt(entity, amount, 0, 0);
             }
 
             if(hit.rigidbody != null) {

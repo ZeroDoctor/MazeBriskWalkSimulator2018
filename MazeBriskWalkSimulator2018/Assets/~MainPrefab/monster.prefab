@@ -339,8 +339,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4217359825993208}
   - component: {fileID: 95166487397998656}
-  - component: {fileID: 195547508721452968}
   - component: {fileID: 114423002488945316}
+  - component: {fileID: 195547508721452968}
   - component: {fileID: 114921586632075860}
   - component: {fileID: 82685570915105032}
   - component: {fileID: 54469433120418220}
@@ -904,7 +904,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1371954334842252}
-  m_LocalRotation: {x: 0.5490086, y: 0.57150584, z: -0.37414294, w: -0.48165095}
+  m_LocalRotation: {x: 0.54900867, y: 0.57150584, z: -0.37414297, w: -0.48165095}
   m_LocalPosition: {x: -1.702704, y: 0.00000033452744, z: 0.000000028200645}
   m_LocalScale: {x: 1, y: 1, z: 0.99999994}
   m_Children: []
@@ -931,7 +931,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1401947634022678}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 208.7607, y: 2.51, z: 86.75009}
+  m_LocalPosition: {x: 295.7, y: 2.51, z: 98.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4384730073246500}
@@ -1147,7 +1147,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1280610506034842}
-  m_LocalRotation: {x: -0.0059306873, y: -0.012299647, z: 0.029133094, w: 0.9994823}
+  m_LocalRotation: {x: -0.005930688, y: -0.012299647, z: 0.029133098, w: 0.9994823}
   m_LocalPosition: {x: -1.9173201, y: 0.00000053085387, z: -0.00000007547888}
   m_LocalScale: {x: 1, y: 0.99999994, z: 0.99999994}
   m_Children:
@@ -1643,6 +1643,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7c98275aaba14c3d8300d396cf2f47a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isFirstPerson: 0
   agent: {fileID: 195547508721452968}
   proxchecker: {fileID: 0}
   netIdentity: {fileID: 114423002488945316}
@@ -1718,6 +1719,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
+  headBone: {fileID: 0}
   m_UseHeadBob: 0
   m_HeadBob:
     HorizontalBobRange: 0.33
@@ -1787,7 +1789,7 @@ MonoBehaviour:
   moveProbability: 0.75
   moveDistance: 10
   followDistance: 20
-  attackToMoveRangeRatio: 0.8
+  attackToMoveRangeRatio: 0.899
   rewardExperience: 10
   rewardSkillExperience: 2
   lootGoldMin: 0

@@ -30,6 +30,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 using Mirror;
+using Random = UnityEngine.Random;
 
 public enum DamageType {Normal, Block, Crit};
 
@@ -38,6 +39,8 @@ public enum DamageType {Normal, Block, Crit};
 [RequireComponent(typeof(AudioSource))]
 public abstract partial class Entity : NetworkBehaviour
 {
+
+    public Boolean isFirstPerson = false;
     [Header("Components")]
     public NavMeshAgent agent;
     public NetworkProximityChecker proxchecker;
@@ -257,33 +260,38 @@ public abstract partial class Entity : NetworkBehaviour
     [HideInInspector] public bool inSafeZone;
 
     // FirstPersonController ///////////////////////////////////////////////////
-    [Header("PlayerMovment")]
-    [SerializeField] public bool m_IsWalking;
-    [SerializeField] public float m_WalkSpeed;
-    [SerializeField] public float m_RunSpeed;
-    [SerializeField] [Range(0f, 1f)] public float m_RunstepLenghten;
-    [SerializeField] public float m_JumpSpeed;
-    [SerializeField] public float m_StickToGroundForce;
-    [SerializeField] public float m_GravityMultiplier;
-    [SerializeField] public UnityStandardAssets.Characters.FirstPerson.MouseLook m_MouseLook;
-    [SerializeField] public bool m_UseFovKick;
-    [SerializeField] public FOVKick m_FovKick = new FOVKick();
-    [SerializeField] protected GameObject headBone;
-    [SerializeField] public bool m_UseHeadBob;
-    [SerializeField] public CurveControlledBob m_HeadBob = new CurveControlledBob();
-    [SerializeField] public LerpControlledBob m_JumpBob = new LerpControlledBob();
-    [SerializeField] public float m_StepInterval;
-    [SerializeField] public AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
-    [SerializeField] public AudioClip m_JumpSound;           // the sound played when character leaves the ground.
-    [SerializeField] public AudioClip m_LandSound;           // the sound played when character touches back on ground.
 
     [HideInInspector] public Vector3 m_MoveDir = Vector3.zero;
-    [HideInInspector] public float m_speed;
-    [HideInInspector] public Vector2 m_Input;
+    [HideInInspector] public RaycastHit hit;
 
     // networkbehaviour ////////////////////////////////////////////////////////
     protected virtual void Awake()
     {
+        float collisionSize = 5f;
+
+        
+
+        if(this is Monster) {
+            if(gameObject.name == "monster") {
+                collisionSize = 10f;
+            }
+            
+            Vector3 randPos = Vector3.zero;
+            int myCheck = 0;
+            do {
+                myCheck = 0;
+                randPos = new Vector3(Random.Range(50f, 150f), 0f, Random.Range(50f, 150f));
+                Collider[] hitColliders = Physics.OverlapSphere(randPos, collisionSize);
+                for(int j = 0; j < hitColliders.Length; j++) {
+                    if (hitColliders[j].tag == "LAYER_1" || hitColliders[j].tag == "Outside") {
+                        myCheck++;
+                    }
+                }
+            } while (myCheck > 0);
+            transform.position = randPos;
+        }
+        
+
         // addon system hooks
         Utils.InvokeMany(typeof(Entity), this, "Awake_");
     }
@@ -633,7 +641,7 @@ public abstract partial class Entity : NetworkBehaviour
         // note: we don't check the distance again. the skill will be cast even
         //   if the target walked a bit while we casted it (it's simply better
         //   gameplay and less frustrating)
-        if (CastCheckSelf(skill, false) && CastCheckTarget(skill))
+        if (CastCheckSelf(skill, false) /* && CastCheckTarget(skill) */)
         {
             // let the skill template handle the action
             skill.Apply(this);

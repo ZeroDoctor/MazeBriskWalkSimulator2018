@@ -385,6 +385,7 @@ public partial class NetworkManagerMMO : NetworkManager
                  t.GetComponent<NetworkStartPositionForClass>().playerPrefab != null &&
                  t.GetComponent<NetworkStartPositionForClass>().playerPrefab.name == className
         );
+
         return spawn ?? GetStartPosition();
     }
 
