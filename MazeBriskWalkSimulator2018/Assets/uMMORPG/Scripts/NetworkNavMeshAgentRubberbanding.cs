@@ -45,7 +45,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
 
     // epsilon for float/vector3 comparison (needed because of imprecision
     // when sending over the network, etc.)
-    const float epsilon = 0.00001f; // * for smoothness
+    const float epsilon = 0.000001f; // * for smoothness
 
     // validate a move (the 'rubber' part)
     bool ValidateMove(Vector3 position)
@@ -144,7 +144,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
                     //Debug.Log(name + " teleported!");
                 }
 
-                if( Vector3.Distance(transform.position, lastReceivedDestination) > epsilon) {
+                if(Vector3.Distance(transform.position, lastReceivedDestination) > epsilon) {
                     SetDirtyBit(1);
                     lastReceivedDestination = transform.position;
                     lastReceivedRotation = transform.rotation;
@@ -230,13 +230,14 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
                     if (NetworkTime.time > lastSentTime + GetNetworkSendInterval())
                     {
                         //CmdMovedWASD(transform.position, transform.rotation);
+                        CmdMovedWASD(transform.position, transform.rotation);
                         lastSentPosition = transform.position;
                         //lastSentRotation = transform.rotation;
                         lastSentTime = NetworkTime.time;
                     }
                 }
-                Debug.Log("Sending...");
-                CmdMovedWASD(transform.position, transform.rotation);
+
+                
             }
         } else {
             if (isLocalPlayer && !isServer)
@@ -335,6 +336,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
         if(entity.GetType() == typeof(Player)) {
 
             Quaternion rotation = reader.ReadQuaternion();
+            entity.m_speed = reader.ReadSingle();
             //float speed = reader.ReadSingle();
 
             if(!isLocalPlayer) {

@@ -13,8 +13,10 @@ public class ProjectileSkillEffect : SkillEffect
     [HideInInspector] public int damage = 1; // set by skill
     [HideInInspector] public float stunChance; // set by skill
     [HideInInspector] public float stunTime; // set by skill
-    private bool hasSetTime = false;
+    [SerializeField] private bool hasSetTime = false;
     private float now;
+
+    private bool once = false;
 
     // update here already so that it doesn't spawn with a weird rotation
     void Start() { 
@@ -26,19 +28,30 @@ public class ProjectileSkillEffect : SkillEffect
     // using a NetworkTransform
     void FixedUpdate()
     {
-        if(caster.isFirstPerson) {
-            if(target != null && caster != null) {               
-                if(isServer) {
+        if(caster != null && caster.isFirstPerson) {
+            if(target != null) {
+
+                Vector3 goal = target.collider.bounds.center;
+                transform.position = Vector3.MoveTowards(transform.position, goal, speed);
+                transform.LookAt(goal);
+
+                if(target.collider.bounds.Contains(transform.position)) {
+                    transform.parent = target.transform;
+                    if(!once && target.agent != null) {
+                        //caster.hit.rigidbody.AddForce(-caster.hit.normal * caster.knockBack); // Does not work on navmesh agents
+                        //target.agent.GetComponent<Rigidbody>().AddForce(-caster.hit.normal * caster.knockBack); // Didn't work either
+                        once = true;
+                    }
+                }
+
+                if(isServer && transform.position == goal) {
                     if(target.health > 0 && !hasSetTime) {
                         caster.DealDamageAt(target, caster.damage + damage, stunChance, stunTime);
                     }
-                    if(transform.position == target.transform.position) {
-                        transform.parent = target.transform;
-                    }
+                    
 
                     now = SetTime(now, hasSetTime);
-                    if(now + 10f <= Time.time) {
-                        Debug.Log(Time.time);
+                    if(now + 1f <= Time.time) {
                         NetworkServer.Destroy(gameObject);
                     }
                         
@@ -48,7 +61,7 @@ public class ProjectileSkillEffect : SkillEffect
             // target and caster still around?
             // note: we keep flying towards it even if it died already, because
             //       it looks weird if fireballs would be canceled inbetween.
-            if (target != null && caster != null)
+            if (target != null)
             {
                 // move closer and look at the target
                 Vector3 goal = target.collider.bounds.center;

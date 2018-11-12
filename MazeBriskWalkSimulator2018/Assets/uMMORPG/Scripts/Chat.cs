@@ -267,7 +267,7 @@ public partial class Chat : NetworkBehaviour
         // add message with identifierIn
         string identifier = whisper.identifierIn;
         string reply = whisper.command + " " + sender + " "; // whisper
-        chat.AddMessage(new ChatMessage(sender, identifier, message, reply, whisper.color));
+        //chat.AddMessage(new ChatMessage(sender, identifier, message, reply, whisper.color));
     }
 
     [TargetRpc]
@@ -276,7 +276,7 @@ public partial class Chat : NetworkBehaviour
         // add message with identifierOut
         string identifier = whisper.identifierOut;
         string reply = whisper.command + " " + receiver + " "; // whisper
-        chat.AddMessage(new ChatMessage(receiver, identifier, message, reply, whisper.color));
+        //chat.AddMessage(new ChatMessage(receiver, identifier, message, reply, whisper.color));
     }
 
     [TargetRpc] // send to observers
@@ -285,26 +285,26 @@ public partial class Chat : NetworkBehaviour
         // add message with identifierIn or Out depending on who sent it
         string identifier = sender != name ? local.identifierIn : local.identifierOut;
         string reply = whisper.command + " " + sender + " "; // whisper
-        chat.AddMessage(new ChatMessage(sender, identifier, message, reply, local.color));
+        //chat.AddMessage(new ChatMessage(sender, identifier, message, reply, local.color));
     }
 
     [TargetRpc]
     public void TargetMsgGuild(NetworkConnection target, string sender, string message)
     {
         string reply = whisper.command + " " + sender + " "; // whisper
-        chat.AddMessage(new ChatMessage(sender, guild.identifierIn, message, reply, guild.color));
+        //chat.AddMessage(new ChatMessage(sender, guild.identifierIn, message, reply, guild.color));
     }
 
     [TargetRpc]
     public void TargetMsgParty(NetworkConnection target, string sender, string message)
     {
         string reply = whisper.command + " " + sender + " "; // whisper
-        chat.AddMessage(new ChatMessage(sender, party.identifierIn, message, reply, party.color));
+        //chat.AddMessage(new ChatMessage(sender, party.identifierIn, message, reply, party.color));
     }
 
     [TargetRpc]
     public void TargetMsgInfo(NetworkConnection target, string message)
     {
-        chat.AddMessage(new ChatMessage("", info.identifierIn, message, "", info.color));
+        //chat.AddMessage(new ChatMessage("", info.identifierIn, message, "", info.color));
     }
 }

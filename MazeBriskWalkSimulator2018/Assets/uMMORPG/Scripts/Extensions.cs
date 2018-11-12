@@ -100,6 +100,9 @@ public static class Extensions
     // We need a function that truly stops all movement.
     public static void ResetMovement(this NavMeshAgent agent)
     {
+        if(agent == null)
+            return;
+            
         agent.ResetPath();
         agent.velocity = Vector3.zero;
     }

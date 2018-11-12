@@ -263,24 +263,24 @@ public abstract partial class Entity : NetworkBehaviour
 
     [HideInInspector] public Vector3 m_MoveDir = Vector3.zero;
     [HideInInspector] public RaycastHit hit;
+    [SerializeField] public float knockBack = 50f;
+    [HideInInspector] public float m_speed;
 
     // networkbehaviour ////////////////////////////////////////////////////////
     protected virtual void Awake()
     {
-        float collisionSize = 5f;
-
-        
+        float collisionSize = 15f;
 
         if(this is Monster) {
-            if(gameObject.name == "monster") {
+            /* if(gameObject.name == "monster") {
                 collisionSize = 10f;
-            }
+            } */
             
             Vector3 randPos = Vector3.zero;
             int myCheck = 0;
             do {
                 myCheck = 0;
-                randPos = new Vector3(Random.Range(50f, 150f), 0f, Random.Range(50f, 150f));
+                randPos = new Vector3(Random.Range(50f, 250f), 0f, Random.Range(50f, 250f));
                 Collider[] hitColliders = Physics.OverlapSphere(randPos, collisionSize);
                 for(int j = 0; j < hitColliders.Length; j++) {
                     if (hitColliders[j].tag == "LAYER_1" || hitColliders[j].tag == "Outside") {
@@ -427,7 +427,7 @@ public abstract partial class Entity : NetworkBehaviour
         //    directly reachable.
         // -> velocity is the best way to detect WASD movement
 
-        if(m_MoveDir.x != 0f)
+        if(m_MoveDir.x != 0f || m_MoveDir.z != 0f)
             return true;
         else if(agent != null)
             return agent.pathPending || agent.remainingDistance > agent.stoppingDistance || false;
@@ -655,7 +655,7 @@ public abstract partial class Entity : NetworkBehaviour
             mana -= skill.manaCosts;
 
             // start the cooldown (and save it in the struct)
-            skill.cooldownEnd = NetworkTime.time + skill.cooldown;
+            //skill.cooldownEnd = NetworkTime.time + skill.cooldown;
 
             // save any skill modifications in any case
             skills[currentSkill] = skill;

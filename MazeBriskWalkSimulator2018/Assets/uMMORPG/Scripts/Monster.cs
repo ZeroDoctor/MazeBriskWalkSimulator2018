@@ -81,10 +81,6 @@ public partial class Monster : Entity
 
     public override void OnStartServer()
     {
-        if(gameObject.name == "monster") {
-            agent.SetAreaCost(1, 1);
-            Debug.Log("Area Cost is: " + agent.GetAreaCost(3));
-        }
         // call Entity's OnStartServer
         base.OnStartServer();
 
