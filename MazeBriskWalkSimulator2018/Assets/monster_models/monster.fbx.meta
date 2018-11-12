@@ -1,0 +1,254 @@
+fileFormatVersion: 2
+guid: 21631dba631179f44a3ee512fa3ed70a
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: Armature
+    100002: Camera
+    100004: Head
+    100006: Jaw
+    100008: Jaw Bone
+    100010: Jaw_end
+    100012: L BCollarbone
+    100014: L BHand
+    100016: L BHand_end
+    100018: L BLower arm
+    100020: L BShoulder
+    100022: L BUpper arm
+    100024: L BWrist
+    100026: L UCollarbone
+    100028: L UHand
+    100030: L UHand_end
+    100032: L ULower arm
+    100034: L UShoulder
+    100036: L UUpper arm
+    100038: Lamp
+    100040: Lower Spine
+    100042: LP BigBody
+    100044: LP Horns
+    100046: LP Mouth
+    100048: LP Skull
+    100050: LP Teeth bottom
+    100052: LP Teeth top
+    100054: //RootNode
+    100056: R BCollarbone
+    100058: R BHand
+    100060: R BHand_end
+    100062: R BLower arm
+    100064: R BShoulder
+    100066: R BUpper arm
+    100068: R BWrist
+    100070: R UCollarbone
+    100072: R UHand
+    100074: R UHand_end
+    100076: R ULower arm
+    100078: R UShoulder
+    100080: R UUpper arm
+    100082: Sand beach soil ground shore desert texture ver 3
+    100084: Tail1
+    100086: Tail1 Vert
+    100088: Tail1 Vert_end
+    100090: Tail1_end
+    100092: Tail2
+    100094: Tail2 Vert
+    100096: Tail2 Vert_end
+    100098: Tail3
+    100100: Tail3 Vert
+    100102: Tail3 Vert_end
+    100104: Tail4
+    100106: Tail4 Vert
+    100108: Tail4 Vert_end
+    100110: Tail5
+    100112: Tail5 Vert
+    100114: Tail5 Vert_end
+    100116: Tail6
+    100118: Tail6 Vert
+    100120: Tail6 Vert_end
+    100122: Tail7
+    100124: Upper Spine
+    400000: Armature
+    400002: Camera
+    400004: Head
+    400006: Jaw
+    400008: Jaw Bone
+    400010: Jaw_end
+    400012: L BCollarbone
+    400014: L BHand
+    400016: L BHand_end
+    400018: L BLower arm
+    400020: L BShoulder
+    400022: L BUpper arm
+    400024: L BWrist
+    400026: L UCollarbone
+    400028: L UHand
+    400030: L UHand_end
+    400032: L ULower arm
+    400034: L UShoulder
+    400036: L UUpper arm
+    400038: Lamp
+    400040: Lower Spine
+    400042: LP BigBody
+    400044: LP Horns
+    400046: LP Mouth
+    400048: LP Skull
+    400050: LP Teeth bottom
+    400052: LP Teeth top
+    400054: //RootNode
+    400056: R BCollarbone
+    400058: R BHand
+    400060: R BHand_end
+    400062: R BLower arm
+    400064: R BShoulder
+    400066: R BUpper arm
+    400068: R BWrist
+    400070: R UCollarbone
+    400072: R UHand
+    400074: R UHand_end
+    400076: R ULower arm
+    400078: R UShoulder
+    400080: R UUpper arm
+    400082: Sand beach soil ground shore desert texture ver 3
+    400084: Tail1
+    400086: Tail1 Vert
+    400088: Tail1 Vert_end
+    400090: Tail1_end
+    400092: Tail2
+    400094: Tail2 Vert
+    400096: Tail2 Vert_end
+    400098: Tail3
+    400100: Tail3 Vert
+    400102: Tail3 Vert_end
+    400104: Tail4
+    400106: Tail4 Vert
+    400108: Tail4 Vert_end
+    400110: Tail5
+    400112: Tail5 Vert
+    400114: Tail5 Vert_end
+    400116: Tail6
+    400118: Tail6 Vert
+    400120: Tail6 Vert_end
+    400122: Tail7
+    400124: Upper Spine
+    2000000: Camera
+    2100000: Sand beach soil ground shore desert texture ver 3
+    2100002: Body
+    2100004: BottomTeeth
+    2100006: Mouth
+    2100008: TopTeeth
+    2100010: Horns
+    2100012: Skull
+    2300000: Sand beach soil ground shore desert texture ver 3
+    3300000: Sand beach soil ground shore desert texture ver 3
+    4300000: Sand beach soil ground shore desert texture ver 3
+    4300002: LP BigBody
+    4300004: LP Teeth bottom
+    4300006: LP Mouth
+    4300008: LP Teeth top
+    4300010: LP Horns
+    4300012: LP Skull
+    7400000: Camera|CameraAction
+    7400002: Camera|LampAction
+    7400004: Camera|Sand beach soil ground shore desert texture ver 3Action
+    7400006: Sand beach soil ground shore desert texture ver 3|CameraAction
+    7400008: Sand beach soil ground shore desert texture ver 3|LampAction
+    7400010: Sand beach soil ground shore desert texture ver 3|Sand beach soil ground
+      shore desert texture ver 3Action
+    7400012: Lamp|CameraAction
+    7400014: Lamp|LampAction
+    7400016: Lamp|Sand beach soil ground shore desert texture ver 3Action
+    7400018: Armature|ArmatureAction.001
+    7400020: Armature|CameraAction
+    7400022: Armature|LampAction
+    7400024: Armature|Sand beach soil ground shore desert texture ver 3Action
+    9500000: //RootNode
+    10800000: Lamp
+    13700000: LP BigBody
+    13700002: LP Horns
+    13700004: LP Mouth
+    13700006: LP Skull
+    13700008: LP Teeth bottom
+    13700010: LP Teeth top
+    2186277476908879412: ImportLogs
+  externalObjects: {}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -46,7 +46,7 @@ public abstract partial class Entity : NetworkBehaviour
     public NetworkProximityChecker proxchecker;
     public Mirror.NetworkIdentity netIdentity;
     public Animator animator;
-    new public Collider collider;
+    public new Collider collider;
 
     // finite state machine
     // -> state only writable by entity class to avoid all kinds of confusion

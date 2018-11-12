@@ -466,6 +466,16 @@ public partial class Player : Entity
             if(isLocalPlayer) {
                 GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
                 camera.SetActive(true);
+                GameObject menuEnv = GameObject.Find("MenuEnvironment");
+                if(menuEnv != null) {
+                    menuEnv.SetActive(false);
+                }
+                
+                menuEnv = GameObject.Find("WaterReflectionSceneCamera");
+                if(menuEnv != null) {
+                    menuEnv.SetActive(false);
+                }
+                
                 m_CharacterController = GetComponent<CharacterController>();
                 m_Camera = GetComponentInChildren<Camera>();
                 m_OriginalCameraPosition = m_Camera.transform.localPosition;
@@ -1681,7 +1691,7 @@ public partial class Player : Entity
         // (see murder code section comments to understand the system)
         else if (entity is Player)
         {
-            //OnDamageDealtToPlayer((Player)entity);
+            OnDamageDealtToPlayer((Player)entity);
         }
         // a pet?
         // (see murder code section comments to understand the system)

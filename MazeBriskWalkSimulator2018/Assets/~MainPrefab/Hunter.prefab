@@ -2237,7 +2237,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1740019301615000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 50.714878, y: 0, z: 58.251392}
+  m_LocalPosition: {x: 86.644806, y: 0.33850098, z: 582.1998}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4441316531544270}
@@ -2847,6 +2847,8 @@ MonoBehaviour:
   stunnedOverlay: {fileID: 102960793535921554}
   inSafeZone: 0
   m_MoveDir: {x: 0, y: 0, z: 0}
+  knockBack: 50
+  m_speed: 0
   chat: {fileID: 114212866623772598}
   avatarCamera: {fileID: 20847065584552146}
   guildOverlay: {fileID: 102250141386955564}
@@ -3043,9 +3045,7 @@ MonoBehaviour:
   m_FootstepSounds: []
   m_JumpSound: {fileID: 8300000, guid: 8a7bffa16cd573e488774a0ad4ef3602, type: 3}
   m_LandSound: {fileID: 8300000, guid: fbd1956e338880a4398a58fbf64f6f90, type: 3}
-  m_speed: 0
   m_Input: {x: 0, y: 0}
-  knockBack: 50
   range: 1000
   fireRate: 15
   nextTimeToFire: 0
@@ -3113,7 +3113,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1821989251682694}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ff26db721962cdf4a8edcdfa9a767d2a, type: 3}
   m_Name: 
