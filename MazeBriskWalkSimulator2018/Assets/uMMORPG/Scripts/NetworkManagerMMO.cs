@@ -5,6 +5,8 @@
 // dragged into the spawnable objects property.
 //
 using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
@@ -50,8 +52,26 @@ public partial class NetworkManagerMMO : NetworkManager
         public string name;
         public string ip;
     }
+
+     public static string LocalIPAddress()
+     {
+         IPHostEntry host;
+         string localIP = "";
+         host = Dns.GetHostEntry(Dns.GetHostName());
+         foreach (IPAddress ip in host.AddressList)
+         {
+             if (ip.AddressFamily == AddressFamily.InterNetwork)
+             {
+                 localIP = ip.ToString();
+                 break;
+             }
+         }
+         Debug.Log("Local Server IP is: " + localIP);
+         return localIP;
+     }
+
     public List<ServerInfo> serverList = new List<ServerInfo>() {
-        new ServerInfo{name="Local", ip="localhost"}
+        new ServerInfo{name="Local", ip=LocalIPAddress()}
     };
 
     [Header("Database")]

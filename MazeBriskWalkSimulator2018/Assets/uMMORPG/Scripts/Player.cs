@@ -388,7 +388,6 @@ public partial class Player : Entity
     private bool m_Jumping;
     private AudioSource m_AudioSource;
 
-    [HideInInspector] public float m_speed;
     [HideInInspector] public Vector2 m_Input;
 
     // networkbehaviour ////////////////////////////////////////////////////////
@@ -417,9 +416,6 @@ public partial class Player : Entity
                 }
             } while (myCheck > 0);
             transform.position = randPos;
-            Debug.Log("Yep");
-        } else {
-            Debug.Log("Nope");
         }
         // setup camera targets
         //Camera.main.GetComponent<CameraMMO>().target = transform;
@@ -470,6 +466,16 @@ public partial class Player : Entity
             if(isLocalPlayer) {
                 GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
                 camera.SetActive(true);
+                GameObject menuEnv = GameObject.Find("MenuEnvironment");
+                if(menuEnv != null) {
+                    menuEnv.SetActive(false);
+                }
+                
+                menuEnv = GameObject.Find("WaterReflectionSceneCamera");
+                if(menuEnv != null) {
+                    menuEnv.SetActive(false);
+                }
+                
                 m_CharacterController = GetComponent<CharacterController>();
                 m_Camera = GetComponentInChildren<Camera>();
                 m_OriginalCameraPosition = m_Camera.transform.localPosition;
@@ -1214,7 +1220,7 @@ public partial class Player : Entity
             {
                 // note: murderer has higher priority (a player can be a murderer and an
                 // offender at the same time)
-                if (IsMurderer())
+                /* if (IsMurderer())
                     nameOverlay.color = nameOverlayMurdererColor;
                 else if (IsOffender())
                     nameOverlay.color = nameOverlayOffenderColor;
@@ -1223,7 +1229,7 @@ public partial class Player : Entity
                     nameOverlay.color = nameOverlayPartyColor;
                 // otherwise default
                 else
-                    nameOverlay.color = nameOverlayDefaultColor;
+                    nameOverlay.color = nameOverlayDefaultColor; */
             }
         }
         if (guildOverlay != null)
@@ -1233,7 +1239,6 @@ public partial class Player : Entity
         Utils.InvokeMany(typeof(Player), this, "UpdateClient_");
     }
 
-    [SerializeField] private float knockBack = 50f;
     [SerializeField] private float range = 1000f;
     [SerializeField] private float fireRate = 15f;
     [SerializeField] private float nextTimeToFire = 0f;
@@ -1261,9 +1266,8 @@ public partial class Player : Entity
 
         if(Physics.Raycast(m_Camera.transform.position, m_Camera.transform.forward, out hit, range)) {
             Entity entity = hit.transform.GetComponent<Entity>();
-            Debug.Log(entity);
             if(entity != null && CanAttack(entity)) {
-                if(entity.health != 0) {
+                if(entity.health != 0 && target != entity) {
                     CmdSetTarget(entity.netIdentity);
                 }
                 
@@ -1319,6 +1323,7 @@ public partial class Player : Entity
         m_MouseLook.UpdateCursorLock();
     }
 
+    [Client]
     void UpdateJumping() {
 
         RotateView();
@@ -1644,7 +1649,7 @@ public partial class Player : Entity
     [Server]
     public void OnDamageDealtToPlayer(Player player)
     {
-        // was he innocent?
+        /* // was he innocent?
         if (!player.IsOffender() && !player.IsMurderer())
         {
             // did we kill him? then start/reset murder status
@@ -1652,7 +1657,7 @@ public partial class Player : Entity
             // (unless we are already a murderer)
             if (player.health == 0) StartMurderer();
             else if (!IsMurderer()) StartOffender();
-        }
+        } */
     }
 
     [Server]
@@ -2810,12 +2815,12 @@ public partial class Player : Entity
     // that we need here.
     public bool IsOffender()
     {
-        return offenderBuff != null && buffs.Any(buff => buff.name == offenderBuff.name);
+        return false; //offenderBuff != null && buffs.Any(buff => buff.name == offenderBuff.name);
     }
 
     public bool IsMurderer()
     {
-        return murdererBuff != null && buffs.Any(buff => buff.name == murdererBuff.name);
+        return false; //murdererBuff != null && buffs.Any(buff => buff.name == murdererBuff.name);
     }
 
     public void StartOffender()

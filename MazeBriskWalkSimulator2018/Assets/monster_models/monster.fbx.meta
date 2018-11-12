@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: ce2bc73de02b4a544ba90f027775bf48
+=======
+guid: 21631dba631179f44a3ee512fa3ed70a
+>>>>>>> 8abb6560c80d3cdf75a3edc02f597035b384b22b
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
@@ -160,12 +164,15 @@ ModelImporter:
     7400020: Armature|CameraAction
     7400022: Armature|LampAction
     7400024: Armature|Sand beach soil ground shore desert texture ver 3Action
+<<<<<<< HEAD
     7400026: DigUp
     7400028: Underground
     7400030: DigDown
     7400032: Idle
     7400034: Walk
     7400036: Run
+=======
+>>>>>>> 8abb6560c80d3cdf75a3edc02f597035b384b22b
     9500000: //RootNode
     10800000: Lamp
     13700000: LP BigBody
@@ -202,6 +209,7 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
+<<<<<<< HEAD
     clipAnimations:
     - serializedVersion: 16
       name: Armature|ArmatureAction.001
@@ -399,6 +407,9 @@ ModelImporter:
       maskType: 3
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
+=======
+    clipAnimations: []
+>>>>>>> 8abb6560c80d3cdf75a3edc02f597035b384b22b
     isReadable: 1
   meshes:
     lODScreenPercentages: []
@@ -442,8 +453,13 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+<<<<<<< HEAD
     rootMotionBoneName: Armature
     rootMotionBoneRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
+=======
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+>>>>>>> 8abb6560c80d3cdf75a3edc02f597035b384b22b
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
