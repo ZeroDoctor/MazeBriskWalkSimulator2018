@@ -3,7 +3,22 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - LootSlot
+  - Monster
+  - NpcSellSlot
+  - MinimapCamera
+  - TrashSlot
+  - NpcPetReviveSlot
+  - Pet
+  - InventorySlot
+  - EquipmentSlot
+  - ItemMallSlot
+  - CraftingIngredientSlot
+  - SkillbarSlot
+  - SkillsSlot
+  - TradingSlot
+  - CraftingResultSlot
   layers:
   - Default
   - TransparentFX
@@ -16,7 +31,7 @@ TagManager:
   - PostProcessing
   - LocalPlayer
   - Enemy
-  - 
+  - Terrain
   - 
   - 
   - 

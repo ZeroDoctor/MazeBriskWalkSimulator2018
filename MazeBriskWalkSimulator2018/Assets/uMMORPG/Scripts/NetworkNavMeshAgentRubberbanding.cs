@@ -30,7 +30,7 @@ using Mirror;
 public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
 {
     public NavMeshAgent agent; // assign in Inspector (instead of GetComponent)
-    public Entity entity;
+    public Player entity;
 
     // remember last serialized values for dirty bit
     Vector3 lastServerPosition;

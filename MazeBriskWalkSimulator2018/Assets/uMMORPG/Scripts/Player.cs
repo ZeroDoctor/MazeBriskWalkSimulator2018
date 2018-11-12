@@ -354,6 +354,26 @@ public partial class Player : Entity
     private CharacterController controller;
 
     // FirstPersonController ///////////////////////////////////////////////////
+
+    [Header("PlayerMovment")]
+    [SerializeField] public bool m_IsWalking;
+    [SerializeField] public float m_WalkSpeed;
+    [SerializeField] public float m_RunSpeed;
+    [SerializeField] [Range(0f, 1f)] public float m_RunstepLenghten;
+    [SerializeField] public float m_JumpSpeed;
+    [SerializeField] public float m_StickToGroundForce;
+    [SerializeField] public float m_GravityMultiplier;
+    [SerializeField] public UnityStandardAssets.Characters.FirstPerson.MouseLook m_MouseLook;
+    [SerializeField] public bool m_UseFovKick;
+    [SerializeField] public FOVKick m_FovKick = new FOVKick();
+    [SerializeField] protected GameObject headBone;
+    [SerializeField] public bool m_UseHeadBob;
+    [SerializeField] public CurveControlledBob m_HeadBob = new CurveControlledBob();
+    [SerializeField] public LerpControlledBob m_JumpBob = new LerpControlledBob();
+    [SerializeField] public float m_StepInterval;
+    [SerializeField] public AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
+    [SerializeField] public AudioClip m_JumpSound;           // the sound played when character leaves the ground.
+    [SerializeField] public AudioClip m_LandSound;           // the sound played when character touches back on ground.
     
 
     private Camera m_Camera; //MouseLook
@@ -368,6 +388,9 @@ public partial class Player : Entity
     private bool m_Jumping;
     private AudioSource m_AudioSource;
 
+    [HideInInspector] public float m_speed;
+    [HideInInspector] public Vector2 m_Input;
+
     // networkbehaviour ////////////////////////////////////////////////////////
     protected override void Awake()
     {
@@ -380,7 +403,24 @@ public partial class Player : Entity
 
     public override void OnStartLocalPlayer()
     {
-        
+        if(transform.position == new Vector3(34f,4f,71f)) {
+            Vector3 randPos = Vector3.zero;
+            int myCheck = 0;
+            do {
+                myCheck = 0;
+                randPos = new Vector3(Random.Range(50f, 150f), 0f, Random.Range(50f, 150f));
+                Collider[] hitColliders = Physics.OverlapSphere(randPos, 10f);
+                for(int j = 0; j < hitColliders.Length; j++) {
+                    if (hitColliders[j].tag == "LAYER_1" || hitColliders[j].tag == "Outside") {
+                        myCheck++;
+                    }
+                }
+            } while (myCheck > 0);
+            transform.position = randPos;
+            Debug.Log("Yep");
+        } else {
+            Debug.Log("Nope");
+        }
         // setup camera targets
         //Camera.main.GetComponent<CameraMMO>().target = transform;
         GameObject.FindWithTag("MinimapCamera").GetComponent<CopyPosition>().target = transform;
@@ -655,12 +695,12 @@ public partial class Player : Entity
             currentSkill = -1; // just in case
             return "CRAFTING";
         }
-        if (EventMoveStart())
+        /* if (EventMoveStart())
         {
             // cancel casting (if any)
             currentSkill = -1;
             return "MOVING";
-        }
+        } */
         if (EventSkillRequest())
         {
             // user wants to cast a skill.
@@ -668,7 +708,7 @@ public partial class Player : Entity
             Skill skill = skills[currentSkill];
             nextTarget = target; // return to this one after any corrections by CastCheckTarget
             Vector3 destination;
-            if (CastCheckSelf(skill) && CastCheckTarget(skill) && CastCheckDistance(skill, out destination))
+            if (CastCheckSelf(skill) && CastCheckTarget(skill) /* && CastCheckDistance(skill, out destination) */)
             {
                 // start casting and cancel movement in any case
                 // (player might move into attack range * 0.8 but as soon as we
@@ -744,7 +784,7 @@ public partial class Player : Entity
             Skill skill = skills[currentSkill];
             nextTarget = target; // return to this one after any corrections by CastCheckTarget
             Vector3 destination;
-            if (CastCheckSelf(skill) && CastCheckTarget(skill) && CastCheckDistance(skill, out destination))
+            if (CastCheckSelf(skill) && CastCheckTarget(skill) /* && CastCheckDistance(skill, out destination) */)
             {
                 // start casting and cancel movement in any case
                 //agent.ResetMovement();
@@ -785,7 +825,8 @@ public partial class Player : Entity
     string UpdateServer_CASTING()
     {
         // keep looking at the target for server & clients (only Y rotation)
-        if (target) LookAtY(target.transform.position);
+        if(!isFirstPerson)
+            if (target) LookAtY(target.transform.position);
 
         // events sorted by priority (e.g. target doesn't matter if we died)
         //
@@ -841,7 +882,7 @@ public partial class Player : Entity
             nextTarget = null;
             return "TRADING";
         }
-        if (EventTargetDisappeared())
+        /* if (EventTargetDisappeared())
         {
             // cancel if the target matters for this skill
             if (skills[currentSkill].cancelCastIfTargetDied)
@@ -850,8 +891,8 @@ public partial class Player : Entity
                 UseNextTargetIfAny(); // if user selected a new target while casting
                 return "IDLE";
             }
-        }
-        if (EventTargetDied())
+        } */
+        /* if (EventTargetDied())
         {
             // cancel if the target matters for this skill
             if (skills[currentSkill].cancelCastIfTargetDied)
@@ -860,7 +901,7 @@ public partial class Player : Entity
                 UseNextTargetIfAny(); // if user selected a new target while casting
                 return "IDLE";
             }
-        }
+        } */
         if (EventSkillFinished())
         {
             // apply the skill after casting is finished
@@ -1120,17 +1161,15 @@ public partial class Player : Entity
                 } else {
                     UpdateJumping();
                     UpdateMovement();
+                    UpdateAttack();
                 }
-
-                
-
-                
             }
         }
         else if (state == "CASTING")
         {
             // keep looking at the target for server & clients (only Y rotation)
-            if (target) LookAtY(target.transform.position);
+            if(!isFirstPerson)
+                if (target) LookAtY(target.transform.position);
 
             if (isLocalPlayer)
             {
@@ -1145,6 +1184,7 @@ public partial class Player : Entity
                 } else {
                     UpdateJumping();
                     UpdateMovement();
+                    UpdateAttack();
                 }
             }
         }
@@ -1191,6 +1231,49 @@ public partial class Player : Entity
 
         // addon system hooks
         Utils.InvokeMany(typeof(Player), this, "UpdateClient_");
+    }
+
+    [SerializeField] private float knockBack = 50f;
+    [SerializeField] private float range = 1000f;
+    [SerializeField] private float fireRate = 15f;
+    [SerializeField] private float nextTimeToFire = 0f;
+    [SerializeField] private bool autoFire = false;
+
+    [Client]
+    void UpdateAttack() {
+        if(equipmentInfo[0].requiredCategory == "WeaponBow") {
+            if(autoFire) {
+                if(Input.GetButtonDown("Fire1") && Time.time >= nextTimeToFire) {
+                    nextTimeToFire = Time.time + 1f / fireRate;
+                    Shoot();
+                    
+                } 
+            } else {
+                if(Input.GetButtonDown("Fire1") ) {
+                    Shoot();
+                }
+            }
+        }
+    }
+
+    void Shoot() {
+        RaycastHit hit;
+
+        if(Physics.Raycast(m_Camera.transform.position, m_Camera.transform.forward, out hit, range)) {
+            Entity entity = hit.transform.GetComponent<Entity>();
+            Debug.Log(entity);
+            if(entity != null && CanAttack(entity)) {
+                if(entity.health != 0) {
+                    CmdSetTarget(entity.netIdentity);
+                }
+                
+                if (skills.Count > 0)
+                {
+                    TryUseSkill(0);
+                    base.hit = hit;
+                }
+            }
+        }
     }
 
     [Client]
@@ -1439,12 +1522,12 @@ public partial class Player : Entity
         // user pressed another skill button?
         else if (pendingSkill != -1)
         {
-            TryUseSkill(pendingSkill, true);
+            //TryUseSkill(pendingSkill, true);
         }
         // otherwise do follow up attack if no interruptions happened
         else if (skill.followupDefaultAttack)
         {
-            TryUseSkill(0, true);
+            //TryUseSkill(0, true);
         }
 
         // clear pending actions in any case
@@ -2022,10 +2105,11 @@ public partial class Player : Entity
         if (state != "CASTING" || ignoreState)
         {
             Skill skill = skills[skillIndex];
-            if (CastCheckSelf(skill) && CastCheckTarget(skill))
+            if (CastCheckSelf(skill) /* && CastCheckTarget(skill) */)
             {
+                CmdUseSkill(skillIndex);
                 // check distance between self and target
-                Vector3 destination;
+                /* Vector3 destination;
                 if (CastCheckDistance(skill, out destination))
                 {
                     // cast
@@ -2040,7 +2124,7 @@ public partial class Player : Entity
 
                     // use skill when there
                     useSkillWhenCloser = skillIndex;
-                }
+                } */
             }
         }
         else

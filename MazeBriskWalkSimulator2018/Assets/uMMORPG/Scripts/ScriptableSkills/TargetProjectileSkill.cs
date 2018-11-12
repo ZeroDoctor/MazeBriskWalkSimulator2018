@@ -16,17 +16,36 @@ public class TargetProjectileSkill : DamageSkill
     public override bool CheckDistance(Entity caster, int skillLevel, out Vector3 destination)
     {
         // target still around?
-        if (caster.target != null)
+        /* if (caster.target != null)
         {
             destination = caster.target.collider.ClosestPointOnBounds(caster.transform.position);
             return Utils.ClosestDistance(caster.collider, caster.target.collider) <= castRange.Get(skillLevel);
         }
         destination = caster.transform.position;
-        return false;
+        return false; */
+
+        destination = caster.transform.position;
+        return true;
     }
 
     public override void Apply(Entity caster, int skillLevel)
     {
+        if(caster.isFirstPerson) {
+            if (projectile != null)
+            {
+                GameObject go = Instantiate(projectile.gameObject, caster.hit.point, Quaternion.LookRotation(caster.hit.normal));
+                ProjectileSkillEffect effect = go.GetComponent<ProjectileSkillEffect>();
+                effect.target = caster.target;
+                effect.caster = caster;
+                effect.damage = damage.Get(skillLevel);
+                effect.stunChance = stunChance.Get(skillLevel);
+                effect.stunTime = stunTime.Get(skillLevel);
+                NetworkServer.Spawn(go);
+            }
+            else Debug.LogWarning(name + ": missing projectile");
+
+            return;
+        }
         // spawn the skill effect. this can be used for anything ranging from
         // blood splatter to arrows to chain lightning.
         // -> we need to call an RPC anyway, it doesn't make much of a diff-

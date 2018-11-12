@@ -83,7 +83,7 @@ public partial class Chat : NetworkBehaviour
         //    all players here
         chat = FindObjectOfType<UIChat>();
 
-        // test messages
+/*         // test messages
         chat.AddMessage(new ChatMessage("", info.identifierIn, "Use /w NAME to whisper", "",  info.color));
         chat.AddMessage(new ChatMessage("", info.identifierIn, "Use /p for party chat", "",  info.color));
         chat.AddMessage(new ChatMessage("", info.identifierIn, "Use /g for guild chat", "",  info.color));
@@ -91,7 +91,7 @@ public partial class Chat : NetworkBehaviour
         chat.AddMessage(new ChatMessage("Someone", guild.identifierIn, "Anyone here?", "/g ",  guild.color));
         chat.AddMessage(new ChatMessage("Someone", party.identifierIn, "Let's hunt!", "/p ",  party.color));
         chat.AddMessage(new ChatMessage("Someone", whisper.identifierIn, "Are you there?", "/w Someone ",  whisper.color));
-        chat.AddMessage(new ChatMessage("Someone", local.identifierIn, "Hello!", "/w Someone ",  local.color));
+        chat.AddMessage(new ChatMessage("Someone", local.identifierIn, "Hello!", "/w Someone ",  local.color)); */
 
         // addon system hooks
         Utils.InvokeMany(typeof(Chat), this, "OnStartLocalPlayer_");
