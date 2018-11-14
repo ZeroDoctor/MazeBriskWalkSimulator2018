@@ -1,180 +1,149 @@
 fileFormatVersion: 2
-<<<<<<< HEAD
 guid: ce2bc73de02b4a544ba90f027775bf48
-=======
-guid: 21631dba631179f44a3ee512fa3ed70a
->>>>>>> 8abb6560c80d3cdf75a3edc02f597035b384b22b
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
     100000: Armature
-    100002: Camera
-    100004: Head
-    100006: Jaw
-    100008: Jaw Bone
-    100010: Jaw_end
-    100012: L BCollarbone
-    100014: L BHand
-    100016: L BHand_end
-    100018: L BLower arm
-    100020: L BShoulder
-    100022: L BUpper arm
-    100024: L BWrist
-    100026: L UCollarbone
-    100028: L UHand
-    100030: L UHand_end
-    100032: L ULower arm
-    100034: L UShoulder
-    100036: L UUpper arm
-    100038: Lamp
-    100040: Lower Spine
-    100042: LP BigBody
-    100044: LP Horns
-    100046: LP Mouth
-    100048: LP Skull
-    100050: LP Teeth bottom
-    100052: LP Teeth top
-    100054: //RootNode
-    100056: R BCollarbone
-    100058: R BHand
-    100060: R BHand_end
-    100062: R BLower arm
-    100064: R BShoulder
-    100066: R BUpper arm
-    100068: R BWrist
-    100070: R UCollarbone
-    100072: R UHand
-    100074: R UHand_end
-    100076: R ULower arm
-    100078: R UShoulder
-    100080: R UUpper arm
-    100082: Sand beach soil ground shore desert texture ver 3
-    100084: Tail1
-    100086: Tail1 Vert
-    100088: Tail1 Vert_end
-    100090: Tail1_end
-    100092: Tail2
-    100094: Tail2 Vert
-    100096: Tail2 Vert_end
-    100098: Tail3
-    100100: Tail3 Vert
-    100102: Tail3 Vert_end
-    100104: Tail4
-    100106: Tail4 Vert
-    100108: Tail4 Vert_end
-    100110: Tail5
-    100112: Tail5 Vert
-    100114: Tail5 Vert_end
-    100116: Tail6
-    100118: Tail6 Vert
-    100120: Tail6 Vert_end
-    100122: Tail7
-    100124: Upper Spine
+    100002: Head
+    100004: Jaw
+    100006: Jaw Bone
+    100008: Jaw_end
+    100010: L BCollarbone
+    100012: L BHand
+    100014: L BHand_end
+    100016: L BLower arm
+    100018: L BShoulder
+    100020: L BUpper arm
+    100022: L BWrist
+    100024: L UCollarbone
+    100026: L UHand
+    100028: L UHand_end
+    100030: L ULower arm
+    100032: L UShoulder
+    100034: L UUpper arm
+    100036: Lower Spine
+    100038: LP BigBody
+    100040: LP Horns
+    100042: LP Mouth
+    100044: LP Skull
+    100046: LP Teeth bottom
+    100048: LP Teeth top
+    100050: //RootNode
+    100052: R BCollarbone
+    100054: R BHand
+    100056: R BHand_end
+    100058: R BLower arm
+    100060: R BShoulder
+    100062: R BUpper arm
+    100064: R BWrist
+    100066: R UCollarbone
+    100068: R UHand
+    100070: R UHand_end
+    100072: R ULower arm
+    100074: R UShoulder
+    100076: R UUpper arm
+    100078: Tail1
+    100080: Tail1 Vert
+    100082: Tail1 Vert_end
+    100084: Tail1_end
+    100086: Tail2
+    100088: Tail2 Vert
+    100090: Tail2 Vert_end
+    100092: Tail3
+    100094: Tail3 Vert
+    100096: Tail3 Vert_end
+    100098: Tail4
+    100100: Tail4 Vert
+    100102: Tail4 Vert_end
+    100104: Tail5
+    100106: Tail5 Vert
+    100108: Tail5 Vert_end
+    100110: Tail6
+    100112: Tail6 Vert
+    100114: Tail6 Vert_end
+    100116: Tail7
+    100118: Upper Spine
     400000: Armature
-    400002: Camera
-    400004: Head
-    400006: Jaw
-    400008: Jaw Bone
-    400010: Jaw_end
-    400012: L BCollarbone
-    400014: L BHand
-    400016: L BHand_end
-    400018: L BLower arm
-    400020: L BShoulder
-    400022: L BUpper arm
-    400024: L BWrist
-    400026: L UCollarbone
-    400028: L UHand
-    400030: L UHand_end
-    400032: L ULower arm
-    400034: L UShoulder
-    400036: L UUpper arm
-    400038: Lamp
-    400040: Lower Spine
-    400042: LP BigBody
-    400044: LP Horns
-    400046: LP Mouth
-    400048: LP Skull
-    400050: LP Teeth bottom
-    400052: LP Teeth top
-    400054: //RootNode
-    400056: R BCollarbone
-    400058: R BHand
-    400060: R BHand_end
-    400062: R BLower arm
-    400064: R BShoulder
-    400066: R BUpper arm
-    400068: R BWrist
-    400070: R UCollarbone
-    400072: R UHand
-    400074: R UHand_end
-    400076: R ULower arm
-    400078: R UShoulder
-    400080: R UUpper arm
-    400082: Sand beach soil ground shore desert texture ver 3
-    400084: Tail1
-    400086: Tail1 Vert
-    400088: Tail1 Vert_end
-    400090: Tail1_end
-    400092: Tail2
-    400094: Tail2 Vert
-    400096: Tail2 Vert_end
-    400098: Tail3
-    400100: Tail3 Vert
-    400102: Tail3 Vert_end
-    400104: Tail4
-    400106: Tail4 Vert
-    400108: Tail4 Vert_end
-    400110: Tail5
-    400112: Tail5 Vert
-    400114: Tail5 Vert_end
-    400116: Tail6
-    400118: Tail6 Vert
-    400120: Tail6 Vert_end
-    400122: Tail7
-    400124: Upper Spine
-    2000000: Camera
-    2100000: Sand beach soil ground shore desert texture ver 3
-    2100002: Body
-    2100004: BottomTeeth
-    2100006: Mouth
-    2100008: TopTeeth
-    2100010: Horns
-    2100012: Skull
-    2300000: Sand beach soil ground shore desert texture ver 3
-    3300000: Sand beach soil ground shore desert texture ver 3
-    4300000: Sand beach soil ground shore desert texture ver 3
-    4300002: LP BigBody
-    4300004: LP Teeth bottom
-    4300006: LP Mouth
-    4300008: LP Teeth top
-    4300010: LP Horns
-    4300012: LP Skull
-    7400000: Camera|CameraAction
-    7400002: Camera|LampAction
-    7400004: Camera|Sand beach soil ground shore desert texture ver 3Action
-    7400006: Sand beach soil ground shore desert texture ver 3|CameraAction
-    7400008: Sand beach soil ground shore desert texture ver 3|LampAction
-    7400010: Sand beach soil ground shore desert texture ver 3|Sand beach soil ground
-      shore desert texture ver 3Action
-    7400012: Lamp|CameraAction
-    7400014: Lamp|LampAction
-    7400016: Lamp|Sand beach soil ground shore desert texture ver 3Action
-    7400018: Armature|ArmatureAction.001
-    7400020: Armature|CameraAction
-    7400022: Armature|LampAction
-    7400024: Armature|Sand beach soil ground shore desert texture ver 3Action
-<<<<<<< HEAD
-    7400026: DigUp
-    7400028: Underground
-    7400030: DigDown
-    7400032: Idle
-    7400034: Walk
-    7400036: Run
-=======
->>>>>>> 8abb6560c80d3cdf75a3edc02f597035b384b22b
+    400002: Head
+    400004: Jaw
+    400006: Jaw Bone
+    400008: Jaw_end
+    400010: L BCollarbone
+    400012: L BHand
+    400014: L BHand_end
+    400016: L BLower arm
+    400018: L BShoulder
+    400020: L BUpper arm
+    400022: L BWrist
+    400024: L UCollarbone
+    400026: L UHand
+    400028: L UHand_end
+    400030: L ULower arm
+    400032: L UShoulder
+    400034: L UUpper arm
+    400036: Lower Spine
+    400038: LP BigBody
+    400040: LP Horns
+    400042: LP Mouth
+    400044: LP Skull
+    400046: LP Teeth bottom
+    400048: LP Teeth top
+    400050: //RootNode
+    400052: R BCollarbone
+    400054: R BHand
+    400056: R BHand_end
+    400058: R BLower arm
+    400060: R BShoulder
+    400062: R BUpper arm
+    400064: R BWrist
+    400066: R UCollarbone
+    400068: R UHand
+    400070: R UHand_end
+    400072: R ULower arm
+    400074: R UShoulder
+    400076: R UUpper arm
+    400078: Tail1
+    400080: Tail1 Vert
+    400082: Tail1 Vert_end
+    400084: Tail1_end
+    400086: Tail2
+    400088: Tail2 Vert
+    400090: Tail2 Vert_end
+    400092: Tail3
+    400094: Tail3 Vert
+    400096: Tail3 Vert_end
+    400098: Tail4
+    400100: Tail4 Vert
+    400102: Tail4 Vert_end
+    400104: Tail5
+    400106: Tail5 Vert
+    400108: Tail5 Vert_end
+    400110: Tail6
+    400112: Tail6 Vert
+    400114: Tail6 Vert_end
+    400116: Tail7
+    400118: Upper Spine
+    2100000: Body
+    2100002: BottomTeeth
+    2100004: Mouth
+    2100006: TopTeeth
+    2100008: Horns
+    2100010: Skull
+    4300000: LP BigBody
+    4300002: LP Teeth bottom
+    4300004: LP Mouth
+    4300006: LP Teeth top
+    4300008: LP Horns
+    4300010: LP Skull
+    7400000: Armature|ArmatureAction.001
+    7400002: DigUp
+    7400004: Underground
+    7400006: DigDown
+    7400008: Idle
+    7400010: Walk
+    7400012: Run
+    7400014: Armature|ArmatureAction.001 (1)
     9500000: //RootNode
-    10800000: Lamp
     13700000: LP BigBody
     13700002: LP Horns
     13700004: LP Mouth
@@ -209,36 +178,7 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-<<<<<<< HEAD
     clipAnimations:
-    - serializedVersion: 16
-      name: Armature|ArmatureAction.001
-      takeName: Armature|ArmatureAction.001
-      firstFrame: 0
-      lastFrame: 306
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: DigUp
       takeName: Armature|ArmatureAction.001
@@ -407,9 +347,34 @@ ModelImporter:
       maskType: 3
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
-=======
-    clipAnimations: []
->>>>>>> 8abb6560c80d3cdf75a3edc02f597035b384b22b
+    - serializedVersion: 16
+      name: Armature|ArmatureAction.001 (1)
+      takeName: Armature|ArmatureAction.001
+      firstFrame: 0
+      lastFrame: 306
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
     isReadable: 1
   meshes:
     lODScreenPercentages: []
@@ -453,13 +418,8 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-<<<<<<< HEAD
-    rootMotionBoneName: Armature
-    rootMotionBoneRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-=======
     rootMotionBoneName: 
     rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
->>>>>>> 8abb6560c80d3cdf75a3edc02f597035b384b22b
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
