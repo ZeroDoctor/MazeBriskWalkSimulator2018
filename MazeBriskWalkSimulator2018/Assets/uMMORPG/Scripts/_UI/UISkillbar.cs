@@ -35,20 +35,20 @@ public partial class UISkillbar : MonoBehaviour
                 Skill skill = player.skills[skillIndex];
 
                 // hotkey pressed and not typing in any input right now?
-                if (Input.GetKeyDown(player.skillbar[i].hotKey) &&
+                /* if (Input.GetKeyDown(player.skillbar[i].hotKey) &&
                     !UIUtils.AnyInputActive() &&
                     player.CastCheckSelf(skill)) // checks mana, cooldowns, etc.) {
                 {
                     // try use the skill or walk closer if needed
                     player.TryUseSkill(skillIndex);
-                }
+                } */
 
                 // refresh skill slot
-                slot.button.interactable = player.CastCheckSelf(skill); // check mana, cooldowns, etc.
-                slot.button.onClick.SetListener(() => {
+                //slot.button.interactable = player.CastCheckSelf(skill); // check mana, cooldowns, etc.
+                /* slot.button.onClick.SetListener(() => {
                     // try use the skill or walk closer if needed
                     player.TryUseSkill(skillIndex);
-                });
+                }); */
                 slot.tooltip.enabled = true;
                 slot.tooltip.text = skill.ToolTip();
                 slot.dragAndDropable.dragable = true;

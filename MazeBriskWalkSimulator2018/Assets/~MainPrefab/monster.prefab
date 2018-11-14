@@ -190,6 +190,7 @@ GameObject:
   - component: {fileID: 114473394026669018}
   - component: {fileID: 82036830331655752}
   - component: {fileID: 54933065029501990}
+  - component: {fileID: 114209058835731526}
   - component: {fileID: 114826495168050284}
   m_Layer: 0
   m_Name: monster
@@ -2087,6 +2088,24 @@ MonoBehaviour:
     i15: 233
   m_ServerOnly: 0
   m_LocalPlayerAuthority: 0
+--- !u!114 &114209058835731526
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1135821924694248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -2084202205, guid: 4663afc459f5c4110bc2dffe158fecad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visRange: 50
+  visUpdateInterval: 1
+  checkMethod: 0
+  forceHidden: 0
+  castLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!114 &114473394026669018
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2112,7 +2131,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isFirstPerson: 0
   agent: {fileID: 195607535238579410}
-  proxchecker: {fileID: 0}
+  proxchecker: {fileID: 114209058835731526}
   netIdentity: {fileID: 114116913317844944}
   animator: {fileID: 95789037026247576}
   collider: {fileID: 0}
@@ -2148,7 +2167,7 @@ MonoBehaviour:
   _speed:
     baseValue: 5
     bonusPerLevel: 0
-  damagePopupPrefab: {fileID: 0}
+  damagePopupPrefab: {fileID: 179236, guid: e81ebbaa55e254e31b9909cef04e3855, type: 2}
   skillTemplates: []
   currentSkill: -1
   _effectMount: {fileID: 0}
@@ -2167,7 +2186,7 @@ MonoBehaviour:
   lootGoldMax: 10
   dropChances: []
   deathTime: 30
-  respawn: 1
+  respawn: 0
   respawnTime: 10
 --- !u!137 &137257548235573562
 SkinnedMeshRenderer:

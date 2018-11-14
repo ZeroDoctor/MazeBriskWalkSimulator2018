@@ -1223,7 +1223,7 @@ public partial class Player : Entity
             Player player = Utils.ClientLocalPlayer();
             if (player != null)
             {
-                // note: murderer has higher priority (a player can be a murderer and an
+               /*  // note: murderer has higher priority (a player can be a murderer and an
                 // offender at the same time)
                 if (IsMurderer())
                     nameOverlay.color = nameOverlayMurdererColor;
@@ -1234,7 +1234,7 @@ public partial class Player : Entity
                     nameOverlay.color = nameOverlayPartyColor;
                 // otherwise default
                 else
-                    nameOverlay.color = nameOverlayDefaultColor;
+                    nameOverlay.color = nameOverlayDefaultColor; */
             }
         }
         if (guildOverlay != null)
@@ -1267,6 +1267,7 @@ public partial class Player : Entity
         }
     }
 
+    [Client]
     void Shoot() {
         RaycastHit hit;
 
@@ -1330,6 +1331,7 @@ public partial class Player : Entity
         m_MouseLook.UpdateCursorLock();
     }
 
+    [Client]
     void UpdateJumping() {
 
         RotateView();
@@ -1656,14 +1658,14 @@ public partial class Player : Entity
     public void OnDamageDealtToPlayer(Player player)
     {
         // was he innocent?
-        if (!player.IsOffender() && !player.IsMurderer())
+        /* if (!player.IsOffender() && !player.IsMurderer())
         {
             // did we kill him? then start/reset murder status
             // did we just attack him? then start/reset offender status
             // (unless we are already a murderer)
             if (player.health == 0) StartMurderer();
             else if (!IsMurderer()) StartOffender();
-        }
+        } */
     }
 
     [Server]
@@ -2836,7 +2838,7 @@ public partial class Player : Entity
 
     public void StartMurderer()
     {
-        if (murdererBuff != null) AddOrRefreshBuff(new Buff(murdererBuff, 1));
+        //if (murdererBuff != null) AddOrRefreshBuff(new Buff(murdererBuff, 1));
     }
 
     // item mall ///////////////////////////////////////////////////////////////

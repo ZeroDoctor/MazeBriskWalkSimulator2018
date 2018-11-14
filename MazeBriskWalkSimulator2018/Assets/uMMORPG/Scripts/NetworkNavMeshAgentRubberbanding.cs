@@ -45,7 +45,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
 
     // epsilon for float/vector3 comparison (needed because of imprecision
     // when sending over the network, etc.)
-    const float epsilon = 0.00001f; // * for smoothness
+    const float epsilon = 0.000001f; // * for smoothness
 
     // validate a move (the 'rubber' part)
     bool ValidateMove(Vector3 position)
@@ -229,14 +229,13 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
                     //       doesn't come in fast enough, etc.
                     if (NetworkTime.time > lastSentTime + GetNetworkSendInterval())
                     {
-                        //CmdMovedWASD(transform.position, transform.rotation);
                         lastSentPosition = transform.position;
                         //lastSentRotation = transform.rotation;
                         lastSentTime = NetworkTime.time;
+                        CmdMovedWASD(transform.position, transform.rotation);
                     }
                 }
-                Debug.Log("Sending...");
-                CmdMovedWASD(transform.position, transform.rotation);
+                
             }
         } else {
             if (isLocalPlayer && !isServer)
@@ -336,13 +335,15 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
 
             Quaternion rotation = reader.ReadQuaternion();
             //float speed = reader.ReadSingle();
+            float speed = reader.ReadSingle();
 
             if(!isLocalPlayer) {
                 transform.position = position;
                 transform.rotation = rotation;
+                entity.m_speed = speed;
             }
             
-            if (Vector3.Distance(transform.position, position) > entity.m_speed)
+            if (Vector3.Distance(transform.position, position) > entity.m_speed * 2)
             {
                 entity.m_MoveDir = position;
                 //Debug.Log(name + " rubberbanding to " + position);

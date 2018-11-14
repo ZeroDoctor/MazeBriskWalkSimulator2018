@@ -37,8 +37,7 @@ public class ProjectileSkillEffect : SkillEffect
                     }
 
                     now = SetTime(now, hasSetTime);
-                    if(now + 10f <= Time.time) {
-                        Debug.Log(Time.time);
+                    if(now + 1f <= Time.time) {
                         NetworkServer.Destroy(gameObject);
                     }
                         

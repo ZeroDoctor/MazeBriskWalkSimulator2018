@@ -104,7 +104,7 @@ public partial struct Skill
     public float CastTimeRemaining()
     {
         // how much time remaining until the casttime ends? (using server time)
-        return NetworkTime.time >= castTimeEnd ? 0 : (float)(castTimeEnd - NetworkTime.time);
+        return (float) castTimeEnd; //NetworkTime.time >= castTimeEnd ? 0 : (float)(castTimeEnd - NetworkTime.time);
     }
 
     public bool IsCasting()
@@ -116,7 +116,7 @@ public partial struct Skill
     public float CooldownRemaining()
     {
         // how much time remaining until the cooldown ends? (using server time)
-        return NetworkTime.time >= cooldownEnd ? 0 : (float)(cooldownEnd - NetworkTime.time);
+        return (float) cooldownEnd; // NetworkTime.time >= cooldownEnd ? 0 : (float)(cooldownEnd - NetworkTime.time);
     }
 
     public bool IsReady()

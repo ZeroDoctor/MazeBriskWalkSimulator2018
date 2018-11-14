@@ -268,9 +268,6 @@ public abstract partial class Entity : NetworkBehaviour
     protected virtual void Awake()
     {
         
-
-        
-
         if(this is Monster) {
 
             float collisionSize = 17f;
