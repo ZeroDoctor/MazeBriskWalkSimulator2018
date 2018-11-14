@@ -269,13 +269,14 @@ public abstract partial class Entity : NetworkBehaviour
     // networkbehaviour ////////////////////////////////////////////////////////
     protected virtual void Awake()
     {
-        float collisionSize = 15f;
+        
+
+        
 
         if(this is Monster) {
-            /* if(gameObject.name == "monster") {
-                collisionSize = 10f;
-            } */
-            
+
+            float collisionSize = 17f;
+
             Vector3 randPos = Vector3.zero;
             int myCheck = 0;
             do {

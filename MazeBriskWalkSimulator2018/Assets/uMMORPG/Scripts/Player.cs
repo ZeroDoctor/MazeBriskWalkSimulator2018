@@ -464,6 +464,17 @@ public partial class Player : Entity
         base.Start();
         if(agent == null) {
             if(isLocalPlayer) {
+
+                GameObject menuEnv = GameObject.Find("MenuEnvironment");
+                if(menuEnv != null) {
+                    menuEnv.SetActive(false);
+                }
+
+                menuEnv = GameObject.Find("WaterReflectionSceneCamera");
+                if(menuEnv != null) {
+                    menuEnv.SetActive(false);
+                }
+
                 GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
                 camera.SetActive(true);
                 GameObject menuEnv = GameObject.Find("MenuEnvironment");
