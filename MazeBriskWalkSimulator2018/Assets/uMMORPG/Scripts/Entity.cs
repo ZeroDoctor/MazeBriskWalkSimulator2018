@@ -267,20 +267,19 @@ public abstract partial class Entity : NetworkBehaviour
     // networkbehaviour ////////////////////////////////////////////////////////
     protected virtual void Awake()
     {
-        float collisionSize = 5f;
+        
 
         
 
         if(this is Monster) {
-            if(gameObject.name == "monster") {
-                collisionSize = 10f;
-            }
-            
+
+            float collisionSize = 17f;
+
             Vector3 randPos = Vector3.zero;
             int myCheck = 0;
             do {
                 myCheck = 0;
-                randPos = new Vector3(Random.Range(50f, 150f), 0f, Random.Range(50f, 150f));
+                randPos = new Vector3(Random.Range(50f, 250f), 0f, Random.Range(50f, 250f));
                 Collider[] hitColliders = Physics.OverlapSphere(randPos, collisionSize);
                 for(int j = 0; j < hitColliders.Length; j++) {
                     if (hitColliders[j].tag == "LAYER_1" || hitColliders[j].tag == "Outside") {
