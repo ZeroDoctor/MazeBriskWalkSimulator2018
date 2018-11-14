@@ -15,6 +15,6 @@ public partial class UIRespawn : MonoBehaviour
 
         // visible while player is dead
         panel.SetActive(player.health == 0);
-        button.onClick.SetListener(() => { player.CmdRespawn(); });
+        button.onClick.SetListener(() => { Application.Quit(); });
     }
 }

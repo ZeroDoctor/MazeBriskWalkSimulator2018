@@ -46,7 +46,7 @@ public abstract partial class Entity : NetworkBehaviour
     public NetworkProximityChecker proxchecker;
     public Mirror.NetworkIdentity netIdentity;
     public Animator animator;
-    new public Collider collider;
+    public new Collider collider;
 
     // finite state machine
     // -> state only writable by entity class to avoid all kinds of confusion
@@ -263,6 +263,8 @@ public abstract partial class Entity : NetworkBehaviour
 
     [HideInInspector] public Vector3 m_MoveDir = Vector3.zero;
     [HideInInspector] public RaycastHit hit;
+    [SerializeField] public float knockBack = 50f;
+    [HideInInspector] public float m_speed;
 
     // networkbehaviour ////////////////////////////////////////////////////////
     protected virtual void Awake()
@@ -423,7 +425,7 @@ public abstract partial class Entity : NetworkBehaviour
         //    directly reachable.
         // -> velocity is the best way to detect WASD movement
 
-        if(m_MoveDir.x != 0f)
+        if(m_MoveDir.x != 0f || m_MoveDir.z != 0f)
             return true;
         else if(agent != null)
             return agent.pathPending || agent.remainingDistance > agent.stoppingDistance || false;
@@ -651,7 +653,7 @@ public abstract partial class Entity : NetworkBehaviour
             mana -= skill.manaCosts;
 
             // start the cooldown (and save it in the struct)
-            skill.cooldownEnd = NetworkTime.time + skill.cooldown;
+            //skill.cooldownEnd = NetworkTime.time + skill.cooldown;
 
             // save any skill modifications in any case
             skills[currentSkill] = skill;

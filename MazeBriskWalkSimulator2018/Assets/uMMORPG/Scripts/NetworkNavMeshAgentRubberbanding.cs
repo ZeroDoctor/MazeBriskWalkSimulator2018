@@ -144,7 +144,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
                     //Debug.Log(name + " teleported!");
                 }
 
-                if( Vector3.Distance(transform.position, lastReceivedDestination) > epsilon) {
+                if(Vector3.Distance(transform.position, lastReceivedDestination) > epsilon) {
                     SetDirtyBit(1);
                     lastReceivedDestination = transform.position;
                     lastReceivedRotation = transform.rotation;
@@ -229,13 +229,13 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
                     //       doesn't come in fast enough, etc.
                     if (NetworkTime.time > lastSentTime + GetNetworkSendInterval())
                     {
+                        //CmdMovedWASD(transform.position, transform.rotation);
                         lastSentPosition = transform.position;
                         //lastSentRotation = transform.rotation;
                         lastSentTime = NetworkTime.time;
                         CmdMovedWASD(transform.position, transform.rotation);
                     }
                 }
-                
             }
         } else {
             if (isLocalPlayer && !isServer)
@@ -334,6 +334,7 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
         if(entity.GetType() == typeof(Player)) {
 
             Quaternion rotation = reader.ReadQuaternion();
+            entity.m_speed = reader.ReadSingle();
             //float speed = reader.ReadSingle();
             float speed = reader.ReadSingle();
 
