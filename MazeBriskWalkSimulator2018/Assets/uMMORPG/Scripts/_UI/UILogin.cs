@@ -11,6 +11,7 @@ public partial class UILogin : MonoBehaviour
     public GameObject panel;
     public Text statusText;
     public InputField accountInput;
+    public InputField passwordInput;
     public Dropdown serverDropdown;
     public Button loginButton;
     public Button registerButton;
@@ -67,13 +68,14 @@ public partial class UILogin : MonoBehaviour
 
             // inputs
             manager.loginAccount = accountInput.text;
-
+            manager.serverList[0].ip = passwordInput.text;
+            manager.networkAddress = manager.serverList[0].ip;
             // copy servers to dropdown; copy selected one to networkmanager ip/port.
-            serverDropdown.interactable = !manager.isNetworkActive;
+            /* serverDropdown.interactable = !manager.isNetworkActive;
             serverDropdown.options = manager.serverList.Select(
                 sv => new Dropdown.OptionData(sv.name)
             ).ToList();
-            manager.networkAddress = manager.serverList[serverDropdown.value].ip;
+            manager.networkAddress = manager.serverList[serverDropdown.value].ip; */
         }
         else panel.SetActive(false);
     }

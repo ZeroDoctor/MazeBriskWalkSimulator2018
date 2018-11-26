@@ -475,17 +475,13 @@ public partial class Player : Entity
                     menuEnv.SetActive(false);
                 }
 
+                menuEnv = GameObject.Find("SceneCamera");
+                if(menuEnv != null) {
+                    menuEnv.SetActive(false);
+                }
+
                 GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
                 camera.SetActive(true);
-                GameObject menuEnv = GameObject.Find("MenuEnvironment");
-                if(menuEnv != null) {
-                    menuEnv.SetActive(false);
-                }
-                
-                menuEnv = GameObject.Find("WaterReflectionSceneCamera");
-                if(menuEnv != null) {
-                    menuEnv.SetActive(false);
-                }
                 
                 m_CharacterController = GetComponent<CharacterController>();
                 m_Camera = GetComponentInChildren<Camera>();
@@ -1261,8 +1257,7 @@ public partial class Player : Entity
             if(autoFire) {
                 if(Input.GetButtonDown("Fire1") && Time.time >= nextTimeToFire) {
                     nextTimeToFire = Time.time + 1f / fireRate;
-                    Shoot();
-                    
+                    Shoot();  
                 } 
             } else {
                 if(Input.GetButtonDown("Fire1") ) {
@@ -1785,6 +1780,8 @@ public partial class Player : Entity
         // send an info chat message
         string message = "You died and lost " + loss + " experience.";
         chat.TargetMsgInfo(connectionToClient, message);
+
+        m_MouseLook.SetCursorLock(false);
 
         // addon system hooks
         Utils.InvokeMany(typeof(Player), this, "OnDeath_");

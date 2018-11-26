@@ -335,13 +335,10 @@ public class NetworkNavMeshAgentRubberbanding : NetworkBehaviour
 
             Quaternion rotation = reader.ReadQuaternion();
             entity.m_speed = reader.ReadSingle();
-            //float speed = reader.ReadSingle();
-            float speed = reader.ReadSingle();
 
             if(!isLocalPlayer) {
                 transform.position = position;
                 transform.rotation = rotation;
-                entity.m_speed = speed;
             }
             
             if (Vector3.Distance(transform.position, position) > entity.m_speed * 2)

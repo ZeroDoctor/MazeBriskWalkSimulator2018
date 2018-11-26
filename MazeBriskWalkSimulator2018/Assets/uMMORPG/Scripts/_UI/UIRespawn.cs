@@ -15,6 +15,28 @@ public partial class UIRespawn : MonoBehaviour
 
         // visible while player is dead
         panel.SetActive(player.health == 0);
-        button.onClick.SetListener(() => { Application.Quit(); });
+
+        button.onClick.SetListener(() => {
+            GameObject go = GameObject.Find(player.name);
+            if(go != null) {
+                go.SetActive(false);
+            }
+            player.health = 1;
+            player.manaRecovery = false;
+            player.mana = -1;
+
+            go = GameObject.Find("SceneCamera");
+            if(go != null) {
+                go.SetActive(true);
+            }
+
+            go.GetComponent<GhostFlyCamera>().enabled = true;
+
+            go = GameObject.Find("MenuEnvironment");
+            if(go != null) {
+                go.SetActive(true);
+            }
+            
+        });
     }
 }

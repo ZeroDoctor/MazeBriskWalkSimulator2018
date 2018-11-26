@@ -1,0 +1,21 @@
+Virtual Cameras for Unity Lite
+Version 1.2 for Unity 2018.1.0
+
+Quick start:
+Navigate to the "Prefabs" folder to select the camera you want to use. By dragging the prefab into your scene it will be activated and added to the hierarchy.
+Every prefab has a C# script attached to it. In the script you can easily adjust the variables. When you hover over a variable it will show an explentation via a tooltip.
+
+Controls:
+- DragCamera: use the "Fire1" input axis to start dragging away from the world position. The origin is retrieved using the on-screen mouse position rather than a raycast. By setting any of the "moveLimits" variables you can set boundaries for the camera.
+- FlyCamera: use the "Mouse X" and "Mouse Y" input axes to rotate the camera. Use the "Horizontal" and "Vertical" input axes to move the position of the camera. If you set up the "Fast" and "Slow" input axes you can boost and slow down the movement. If you set up the "Up" and "Down" input axes you can move the camera vertically.
+- MTPCamera: use the "Fire1" input axis to target a world position. The position is retrieved using a raycast. Use "Mouse X" and "Mouse Y" to rotate the camera.
+- OrbitCamera: set a target and axis to rotate on, such as Vector3(0, 1, 0);
+- RPGCamera: use the "Fire2" input axis to start rotating around the player. Rotation is done by using "Mouse X" and "Mouse Y". By using "Mouse ScrollWheel" you can position the camera closer or away from the target.
+- RTSCamera: set the "scrollZone" to define the boundaries of the game window. If the cursor is in the window you can use "Mouse X" and "Mouse Y" or the cursor to move the camera. Use "Mouse ScrollWheel" to position the camera closer or away from the target.
+- SmoothFollowCamera: set a target and offset for the camera to follow.
+- MultiTargetCamera: set a couple of targets and offset for the camera to follow.
+
+Troubleshooting:
+"Input Axis is not setup": Make sure to set the "Horizontal", "Vertical", "Mouse X", "Mouse Y", "Mouse ScrollWheel", "Fire1" and "Fire2" axes in the Unity Editor at Edit->Project Settings->Input.
+
+Thank you for using VCU!

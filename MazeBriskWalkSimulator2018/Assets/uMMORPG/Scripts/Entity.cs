@@ -270,9 +270,9 @@ public abstract partial class Entity : NetworkBehaviour
     protected virtual void Awake()
     {
         
-        if(this is Monster) {
+        if(this is Monster && agent.isOnNavMesh) {
 
-            float collisionSize = 17f;
+            float collisionSize = 15f;
 
             Vector3 randPos = Vector3.zero;
             int myCheck = 0;
@@ -286,6 +286,7 @@ public abstract partial class Entity : NetworkBehaviour
                     }
                 }
             } while (myCheck > 0);
+
             transform.position = randPos;
         }
         
@@ -594,10 +595,12 @@ public abstract partial class Entity : NetworkBehaviour
     public bool CastCheckSelf(Skill skill, bool checkSkillReady = true)
     {
         // has a weapon (important for projectiles etc.), no cooldown, hp, mp?
-        return (!skill.requiresWeapon || HasCastWeapon()) &&
+        bool temp = (!skill.requiresWeapon || HasCastWeapon()) &&
                (!checkSkillReady || skill.IsReady()) &&
                health > 0 &&
                mana >= skill.manaCosts;
+
+        return temp;
     }
 
     // the second check validates the target and corrects it for the skill if

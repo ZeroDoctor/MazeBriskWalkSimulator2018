@@ -2829,7 +2829,7 @@ MonoBehaviour:
     baseValue: 1
     bonusPerLevel: 1
   _blockChance:
-    baseValue: 0
+    baseValue: 0.1
     bonusPerLevel: 1
   _criticalChance:
     baseValue: 1

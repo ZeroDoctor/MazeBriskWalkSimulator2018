@@ -626,6 +626,6 @@ public partial class NetworkManagerMMO : NetworkManager
     {
         // ip has to be changed in the server list. make it obvious to users.
         if (!Application.isPlaying && networkAddress != "")
-            networkAddress = "Use the Server List below!";
+            networkAddress = "nope";
     }
 }
