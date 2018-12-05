@@ -2830,7 +2830,7 @@ MonoBehaviour:
     bonusPerLevel: 1
   _blockChance:
     baseValue: 0.1
-    bonusPerLevel: 1
+    bonusPerLevel: 0.01
   _criticalChance:
     baseValue: 1
     bonusPerLevel: 3
@@ -3132,6 +3132,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 0}
   entity: {fileID: 114126116385427998}
+  sendInterval: 0.1
+  syncRotationX: 0
+  syncRotationY: 1
+  syncRotationZ: 0
+  compressRotation: 2
+  rubberbandDistance: 5
+  previousPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &114674561207071474
 MonoBehaviour:
   m_ObjectHideFlags: 1

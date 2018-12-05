@@ -28,8 +28,8 @@ using System.Linq;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
-public enum TradeStatus {Free, Locked, Accepted}
-public enum CraftingState {None, InProgress, Success, Failed}
+public enum TradeStatus { Free, Locked, Accepted }
+public enum CraftingState { None, InProgress, Success, Failed }
 
 [Serializable]
 public struct SkillbarEntry
@@ -215,7 +215,7 @@ public partial class Player : Entity
             }
         }
     }
-    [SerializeField] protected LevelBasedLong _experienceMax = new LevelBasedLong{baseValue=10, bonusPerLevel=10};
+    [SerializeField] protected LevelBasedLong _experienceMax = new LevelBasedLong { baseValue = 10, bonusPerLevel = 10 };
     public long experienceMax { get { return _experienceMax.Get(level); } }
 
     [Header("Skill Experience")]
@@ -228,7 +228,7 @@ public partial class Player : Entity
     [Header("Inventory")]
     public int inventorySize = 30;
     public ScriptableItem[] defaultItems;
-    public KeyCode[] inventorySplitKeys = {KeyCode.LeftShift, KeyCode.RightShift};
+    public KeyCode[] inventorySplitKeys = { KeyCode.LeftShift, KeyCode.RightShift };
 
     [Header("Trash")]
     [SyncVar] public ItemSlot trash = new ItemSlot();
@@ -304,7 +304,7 @@ public partial class Player : Entity
     [SyncVar] GameObject _activePet;
     public Pet activePet
     {
-        get { return _activePet != null  ? _activePet.GetComponent<Pet>() : null; }
+        get { return _activePet != null ? _activePet.GetComponent<Pet>() : null; }
         set { _activePet = value != null ? value.gameObject : null; }
     }
     // pet's destination should always be right next to player, not inside him
@@ -339,7 +339,7 @@ public partial class Player : Entity
     [SyncVar] GameObject _nextTarget;
     public Entity nextTarget
     {
-        get { return _nextTarget != null  ? _nextTarget.GetComponent<Entity>() : null; }
+        get { return _nextTarget != null ? _nextTarget.GetComponent<Entity>() : null; }
         set { _nextTarget = value != null ? value.gameObject : null; }
     }
 
@@ -374,7 +374,7 @@ public partial class Player : Entity
     [SerializeField] public AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
     [SerializeField] public AudioClip m_JumpSound;           // the sound played when character leaves the ground.
     [SerializeField] public AudioClip m_LandSound;           // the sound played when character touches back on ground.
-    
+
 
     private Camera m_Camera; //MouseLook
     private bool m_Jump;
@@ -402,15 +402,19 @@ public partial class Player : Entity
 
     public override void OnStartLocalPlayer()
     {
-        if(transform.position == new Vector3(34f,4f,71f)) {
+        if (transform.position == new Vector3(34f, 4f, 71f))
+        {
             Vector3 randPos = Vector3.zero;
             int myCheck = 0;
-            do {
+            do
+            {
                 myCheck = 0;
                 randPos = new Vector3(Random.Range(50f, 150f), 0f, Random.Range(50f, 150f));
                 Collider[] hitColliders = Physics.OverlapSphere(randPos, 10f);
-                for(int j = 0; j < hitColliders.Length; j++) {
-                    if (hitColliders[j].tag == "LAYER_1" || hitColliders[j].tag == "Outside") {
+                for (int j = 0; j < hitColliders.Length; j++)
+                {
+                    if (hitColliders[j].tag == "LAYER_1" || hitColliders[j].tag == "Outside")
+                    {
                         myCheck++;
                     }
                 }
@@ -462,27 +466,32 @@ public partial class Player : Entity
     protected override void Start()
     {
         base.Start();
-        if(agent == null) {
-            if(isLocalPlayer) {
+        if (agent == null)
+        {
+            if (isLocalPlayer)
+            {
 
                 GameObject menuEnv = GameObject.Find("MenuEnvironment");
-                if(menuEnv != null) {
+                if (menuEnv != null)
+                {
                     menuEnv.SetActive(false);
                 }
 
                 menuEnv = GameObject.Find("WaterReflectionSceneCamera");
-                if(menuEnv != null) {
+                if (menuEnv != null)
+                {
                     menuEnv.SetActive(false);
                 }
 
                 menuEnv = GameObject.Find("SceneCamera");
-                if(menuEnv != null) {
+                if (menuEnv != null)
+                {
                     menuEnv.SetActive(false);
                 }
 
                 GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
                 camera.SetActive(true);
-                
+
                 m_CharacterController = GetComponent<CharacterController>();
                 m_Camera = GetComponentInChildren<Camera>();
                 m_OriginalCameraPosition = m_Camera.transform.localPosition;
@@ -492,13 +501,15 @@ public partial class Player : Entity
                 m_NextStep = m_StepCycle / 2f;
                 m_Jumping = false;
                 m_AudioSource = GetComponent<AudioSource>();
-                m_MouseLook.Init(transform , m_Camera.transform);
-            } else {
+                m_MouseLook.Init(transform, m_Camera.transform);
+            }
+            else
+            {
                 GameObject camera = GameObject.Find(name + "/Hunter_model/PlayerCam");
                 camera.SetActive(false);
             }
         }
-        
+
 
         onlinePlayers[name] = this;
 
@@ -737,13 +748,13 @@ public partial class Player : Entity
                 return "IDLE";
             }
         }
-        if (EventSkillFinished()) {} // don't care
-        if (EventMoveEnd()) {} // don't care
-        if (EventTradeDone()) {} // don't care
-        if (EventCraftingDone()) {} // don't care
-        if (EventRespawn()) {} // don't care
-        if (EventTargetDied()) {} // don't care
-        if (EventTargetDisappeared()) {} // don't care
+        if (EventSkillFinished()) { } // don't care
+        if (EventMoveEnd()) { } // don't care
+        if (EventTradeDone()) { } // don't care
+        if (EventCraftingDone()) { } // don't care
+        if (EventRespawn()) { } // don't care
+        if (EventTargetDied()) { } // don't care
+        if (EventTargetDisappeared()) { } // don't care
 
         return "IDLE"; // nothing interesting happened
     }
@@ -811,13 +822,13 @@ public partial class Player : Entity
                 return "MOVING";
             }
         }
-        if (EventMoveStart()) {} // don't care
-        if (EventSkillFinished()) {} // don't care
-        if (EventTradeDone()) {} // don't care
-        if (EventCraftingDone()) {} // don't care
-        if (EventRespawn()) {} // don't care
-        if (EventTargetDied()) {} // don't care
-        if (EventTargetDisappeared()) {} // don't care
+        if (EventMoveStart()) { } // don't care
+        if (EventSkillFinished()) { } // don't care
+        if (EventTradeDone()) { } // don't care
+        if (EventCraftingDone()) { } // don't care
+        if (EventRespawn()) { } // don't care
+        if (EventTargetDied()) { } // don't care
+        if (EventTargetDisappeared()) { } // don't care
 
         return "MOVING"; // nothing interesting happened
     }
@@ -838,7 +849,7 @@ public partial class Player : Entity
     string UpdateServer_CASTING()
     {
         // keep looking at the target for server & clients (only Y rotation)
-        if(!isFirstPerson)
+        if (!isFirstPerson)
             if (target) LookAtY(target.transform.position);
 
         // events sorted by priority (e.g. target doesn't matter if we died)
@@ -941,12 +952,12 @@ public partial class Player : Entity
             // go back to IDLE
             return "IDLE";
         }
-        if (EventMoveEnd()) {} // don't care
-        if (EventTradeDone()) {} // don't care
-        if (EventCraftingStarted()) {} // don't care
-        if (EventCraftingDone()) {} // don't care
-        if (EventRespawn()) {} // don't care
-        if (EventSkillRequest()) {} // don't care
+        if (EventMoveEnd()) { } // don't care
+        if (EventTradeDone()) { } // don't care
+        if (EventCraftingStarted()) { } // don't care
+        if (EventCraftingDone()) { } // don't care
+        if (EventRespawn()) { } // don't care
+        if (EventSkillRequest()) { } // don't care
 
         return "CASTING"; // nothing interesting happened
     }
@@ -1020,13 +1031,13 @@ public partial class Player : Entity
             TradeCleanup();
             return "IDLE";
         }
-        if (EventMoveEnd()) {} // don't care
-        if (EventSkillFinished()) {} // don't care
-        if (EventCraftingStarted()) {} // don't care
-        if (EventCraftingDone()) {} // don't care
-        if (EventRespawn()) {} // don't care
-        if (EventTradeStarted()) {} // don't care
-        if (EventSkillRequest()) {} // don't care
+        if (EventMoveEnd()) { } // don't care
+        if (EventSkillFinished()) { } // don't care
+        if (EventCraftingStarted()) { } // don't care
+        if (EventCraftingDone()) { } // don't care
+        if (EventRespawn()) { } // don't care
+        if (EventTradeStarted()) { } // don't care
+        if (EventSkillRequest()) { } // don't care
 
         return "TRADING"; // nothing interesting happened
     }
@@ -1059,16 +1070,16 @@ public partial class Player : Entity
             Craft();
             return "IDLE";
         }
-        if (EventCancelAction()) {} // don't care. user pressed craft, we craft.
-        if (EventTargetDisappeared()) {} // don't care
-        if (EventTargetDied()) {} // don't care
-        if (EventMoveEnd()) {} // don't care
-        if (EventSkillFinished()) {} // don't care
-        if (EventRespawn()) {} // don't care
-        if (EventTradeStarted()) {} // don't care
-        if (EventTradeDone()) {} // don't care
-        if (EventCraftingStarted()) {} // don't care
-        if (EventSkillRequest()) {} // don't care
+        if (EventCancelAction()) { } // don't care. user pressed craft, we craft.
+        if (EventTargetDisappeared()) { } // don't care
+        if (EventTargetDied()) { } // don't care
+        if (EventMoveEnd()) { } // don't care
+        if (EventSkillFinished()) { } // don't care
+        if (EventRespawn()) { } // don't care
+        if (EventTradeStarted()) { } // don't care
+        if (EventTradeDone()) { } // don't care
+        if (EventCraftingStarted()) { } // don't care
+        if (EventSkillRequest()) { } // don't care
 
         return "CRAFTING"; // nothing interesting happened
     }
@@ -1092,17 +1103,17 @@ public partial class Player : Entity
             Debug.LogWarning("Player " + name + " moved while dead. This should not happen.");
             return "DEAD";
         }
-        if (EventMoveEnd()) {} // don't care
-        if (EventSkillFinished()) {} // don't care
-        if (EventDied()) {} // don't care
-        if (EventCancelAction()) {} // don't care
-        if (EventTradeStarted()) {} // don't care
-        if (EventTradeDone()) {} // don't care
-        if (EventCraftingStarted()) {} // don't care
-        if (EventCraftingDone()) {} // don't care
-        if (EventTargetDisappeared()) {} // don't care
-        if (EventTargetDied()) {} // don't care
-        if (EventSkillRequest()) {} // don't care
+        if (EventMoveEnd()) { } // don't care
+        if (EventSkillFinished()) { } // don't care
+        if (EventDied()) { } // don't care
+        if (EventCancelAction()) { } // don't care
+        if (EventTradeStarted()) { } // don't care
+        if (EventTradeDone()) { } // don't care
+        if (EventCraftingStarted()) { } // don't care
+        if (EventCraftingDone()) { } // don't care
+        if (EventTargetDisappeared()) { } // don't care
+        if (EventTargetDied()) { } // don't care
+        if (EventSkillRequest()) { } // don't care
 
         return "DEAD"; // nothing interesting happened
     }
@@ -1110,13 +1121,13 @@ public partial class Player : Entity
     [Server]
     protected override string UpdateServer()
     {
-        if (state == "IDLE")     return UpdateServer_IDLE();
-        if (state == "MOVING")   return UpdateServer_MOVING();
-        if (state == "CASTING")  return UpdateServer_CASTING();
-        if (state == "STUNNED")  return UpdateServer_STUNNED();
-        if (state == "TRADING")  return UpdateServer_TRADING();
+        if (state == "IDLE") return UpdateServer_IDLE();
+        if (state == "MOVING") return UpdateServer_MOVING();
+        if (state == "CASTING") return UpdateServer_CASTING();
+        if (state == "STUNNED") return UpdateServer_STUNNED();
+        //if (state == "TRADING") return UpdateServer_TRADING();
         if (state == "CRAFTING") return UpdateServer_CRAFTING();
-        if (state == "DEAD")     return UpdateServer_DEAD();
+        if (state == "DEAD") return UpdateServer_DEAD();
         Debug.LogError("invalid state:" + state);
         return "IDLE";
     }
@@ -1131,7 +1142,8 @@ public partial class Player : Entity
             if (isLocalPlayer)
             {
                 // simply accept input
-                if(agent != null) {
+                if (agent != null)
+                {
                     SelectionHandling();
                     WASDHandling();
                     TargetNearest();
@@ -1171,7 +1183,9 @@ public partial class Player : Entity
 
                     // canel action if escape key was pressed
                     if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
-                } else {
+                }
+                else
+                {
                     UpdateJumping();
                     UpdateMovement();
                     UpdateAttack();
@@ -1181,20 +1195,23 @@ public partial class Player : Entity
         else if (state == "CASTING")
         {
             // keep looking at the target for server & clients (only Y rotation)
-            if(!isFirstPerson)
+            if (!isFirstPerson)
                 if (target) LookAtY(target.transform.position);
 
             if (isLocalPlayer)
             {
                 // simply accept input and reset any client sided movement
-                if(agent != null) {
+                if (agent != null)
+                {
                     SelectionHandling();
                     WASDHandling();
                     TargetNearest();
                     agent.ResetMovement();
 
                     if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
-                } else {
+                }
+                else
+                {
                     UpdateJumping();
                     UpdateMovement();
                     UpdateAttack();
@@ -1214,9 +1231,9 @@ public partial class Player : Entity
                 if (Input.GetKeyDown(KeyCode.Escape)) CmdCancelAction();
             }
         }
-        else if (state == "TRADING") {}
-        else if (state == "CRAFTING") {}
-        else if (state == "DEAD") {}
+        else if (state == "TRADING") { }
+        else if (state == "CRAFTING") { }
+        else if (state == "DEAD") { }
         else Debug.LogError("invalid state:" + state);
 
         if (nameOverlay != null)
@@ -1225,18 +1242,18 @@ public partial class Player : Entity
             Player player = Utils.ClientLocalPlayer();
             if (player != null)
             {
-               /*  // note: murderer has higher priority (a player can be a murderer and an
-                // offender at the same time)
-                /* if (IsMurderer())
-                    nameOverlay.color = nameOverlayMurdererColor;
-                else if (IsOffender())
-                    nameOverlay.color = nameOverlayOffenderColor;
-                // member of the same party
-                else if (player.InParty() && player.party.GetMemberIndex(name) != -1)
-                    nameOverlay.color = nameOverlayPartyColor;
-                // otherwise default
-                else
-                    nameOverlay.color = nameOverlayDefaultColor; */
+                /*  // note: murderer has higher priority (a player can be a murderer and an
+                 // offender at the same time)
+                 /* if (IsMurderer())
+                     nameOverlay.color = nameOverlayMurdererColor;
+                 else if (IsOffender())
+                     nameOverlay.color = nameOverlayOffenderColor;
+                 // member of the same party
+                 else if (player.InParty() && player.party.GetMemberIndex(name) != -1)
+                     nameOverlay.color = nameOverlayPartyColor;
+                 // otherwise default
+                 else
+                     nameOverlay.color = nameOverlayDefaultColor; */
             }
         }
         if (guildOverlay != null)
@@ -1252,15 +1269,22 @@ public partial class Player : Entity
     [SerializeField] private bool autoFire = false;
 
     [Client]
-    void UpdateAttack() {
-        if(equipmentInfo[0].requiredCategory == "WeaponBow") {
-            if(autoFire) {
-                if(Input.GetButtonDown("Fire1") && Time.time >= nextTimeToFire) {
+    void UpdateAttack()
+    {
+        if (equipmentInfo[0].requiredCategory == "WeaponBow")
+        {
+            if (autoFire)
+            {
+                if (Input.GetButtonDown("Fire1") && Time.time >= nextTimeToFire)
+                {
                     nextTimeToFire = Time.time + 1f / fireRate;
-                    Shoot();  
-                } 
-            } else {
-                if(Input.GetButtonDown("Fire1") ) {
+                    Shoot();
+                }
+            }
+            else
+            {
+                if (Input.GetButtonDown("Fire1"))
+                {
                     Shoot();
                 }
             }
@@ -1268,16 +1292,20 @@ public partial class Player : Entity
     }
 
     [Client]
-    void Shoot() {
+    void Shoot()
+    {
         RaycastHit hit;
 
-        if(Physics.Raycast(m_Camera.transform.position, m_Camera.transform.forward, out hit, range)) {
+        if (Physics.Raycast(m_Camera.transform.position, m_Camera.transform.forward, out hit, range))
+        {
             Entity entity = hit.transform.GetComponent<Entity>();
-            if(entity != null && CanAttack(entity)) {
-                if(entity.health != 0 && target != entity) {
+            if (entity != null && CanAttack(entity))
+            {
+                if (entity.health != 0 && target != entity)
+                {
                     CmdSetTarget(entity.netIdentity);
                 }
-                
+
                 if (skills.Count > 0)
                 {
                     TryUseSkill(0);
@@ -1288,7 +1316,8 @@ public partial class Player : Entity
     }
 
     [Client]
-    void UpdateMovement() {
+    void UpdateMovement()
+    {
 
         float speed;
         GetInput(out speed);
@@ -1299,7 +1328,7 @@ public partial class Player : Entity
         // get a normal for the surface that is being touched to move along it
         RaycastHit hitInfo;
         Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
-                        m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+                        m_CharacterController.height / 2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
         desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
         m_MoveDir.x = desiredMove.x * speed;
@@ -1320,7 +1349,7 @@ public partial class Player : Entity
         }
         else
         {
-            m_MoveDir += Physics.gravity*m_GravityMultiplier*Time.fixedDeltaTime;
+            m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
         }
         m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
 
@@ -1331,19 +1360,21 @@ public partial class Player : Entity
     }
 
     [Client]
-    void UpdateJumping() {
+    void UpdateJumping()
+    {
 
-        RotateView();
-        
-        if(UIUtils.AnyInputActive() && !isClient)
+
+
+        if (UIUtils.AnyInputActive() && !isClient)
             return;
 
-        
+        RotateView();
+
         // the jump state needs to read here to make sure it is not missed
         if (!m_Jump)
         {
             m_Jump = Input.GetKeyDown(KeyCode.Space);
-            
+
         }
 
         if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
@@ -1373,7 +1404,7 @@ public partial class Player : Entity
         {
             m_Camera.transform.localPosition =
                 m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
-                                    (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
+                                    (speed * (m_IsWalking ? 1f : m_RunstepLenghten)));
             newCameraPosition = m_Camera.transform.localPosition;
             newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
         }
@@ -1411,7 +1442,7 @@ public partial class Player : Entity
     {
         if (m_CharacterController.velocity.sqrMagnitude > 0 && (m_Input.x != 0 || m_Input.y != 0))
         {
-            m_StepCycle += (m_CharacterController.velocity.magnitude + (speed*(m_IsWalking ? 1f : m_RunstepLenghten)))*
+            m_StepCycle += (m_CharacterController.velocity.magnitude + (speed * (m_IsWalking ? 1f : m_RunstepLenghten))) *
                             Time.fixedDeltaTime;
         }
 
@@ -1442,13 +1473,13 @@ public partial class Player : Entity
         m_FootstepSounds[0] = m_AudioSource.clip;
     }
 
-    
+
 
     [Client]
     private void GetInput(out float speed)
-    {   
+    {
         speed = 0;
-        if(UIUtils.AnyInputActive())
+        if (UIUtils.AnyInputActive())
             return;
         // Read input
         float horizontal = Input.GetAxisRaw("Horizontal");
@@ -1480,7 +1511,8 @@ public partial class Player : Entity
         }
     }
 
-    public void StartLocation(Vector3 position) {
+    public void StartLocation(Vector3 position)
+    {
         transform.position = position;
     }
 
@@ -1498,7 +1530,7 @@ public partial class Player : Entity
         {
             return;
         }
-        body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+        body.AddForceAtPosition(m_CharacterController.velocity * 0.1f, hit.point, ForceMode.Impulse);
     }
 
 
@@ -1577,7 +1609,7 @@ public partial class Player : Entity
     public static long CalculatePartyExperienceShare(long total, int memberCount, float bonusPercentagePerMember, int memberLevel, int killedLevel)
     {
         // bonus percentage based on how many members there are
-        float bonusPercentage = (memberCount-1) * bonusPercentagePerMember;
+        float bonusPercentage = (memberCount - 1) * bonusPercentagePerMember;
 
         // calculate the share via ceil, so that uneven numbers still result in
         // at least 'total' in the end.
@@ -1684,7 +1716,7 @@ public partial class Player : Entity
     // custom DealDamageAt function that also rewards experience if we killed
     // the monster
     [Server]
-    public override void DealDamageAt(Entity entity, int amount, float stunChance=0, float stunTime=0)
+    public override void DealDamageAt(Entity entity, int amount, float stunChance = 0, float stunTime = 0)
     {
         // deal damage with the default function
         base.DealDamageAt(entity, amount, stunChance, stunTime);
@@ -1887,7 +1919,8 @@ public partial class Player : Entity
     }
 
     [Command]
-    public void CmdSwapInventoryInventory(int fromIndex, int toIndex) {
+    public void CmdSwapInventoryInventory(int fromIndex, int toIndex)
+    {
         // note: should never send a command with complex types!
         // validate: make sure that the slots actually exist in the inventory
         // and that they are not equal
@@ -2111,7 +2144,7 @@ public partial class Player : Entity
 
     // helper function: try to use a skill and walk into range if necessary
     [Client]
-    public void TryUseSkill(int skillIndex, bool ignoreState=false)
+    public void TryUseSkill(int skillIndex, bool ignoreState = false)
     {
         // only if not casting already
         // (might need to ignore that when coming from pending skill where
@@ -2122,6 +2155,7 @@ public partial class Player : Entity
             if (CastCheckSelf(skill) /* && CastCheckTarget(skill) */)
             {
                 CmdUseSkill(skillIndex);
+
                 // check distance between self and target
                 /* Vector3 destination;
                 if (CastCheckDistance(skill, out destination))
@@ -2139,6 +2173,8 @@ public partial class Player : Entity
                     // use skill when there
                     useSkillWhenCloser = skillIndex;
                 } */
+
+
             }
         }
         else
@@ -2309,7 +2345,7 @@ public partial class Player : Entity
             // fulfilled?
             Quest quest = quests[index];
             int gathered = quest.gatherItem != null ? InventoryCount(new Item(quest.gatherItem)) : 0;
-            if(quest.IsFulfilled(gathered))
+            if (quest.IsFulfilled(gathered))
             {
                 // enough space for reward item (if any)?
                 return quest.rewardItem == null || InventoryCanAdd(new Item(quest.rewardItem), 1);
@@ -3229,7 +3265,7 @@ public partial class Player : Entity
                 sender.party.AddMember(name);
                 BroadcastPartyChanges(sender.party);
                 print(sender.name + " added " + name + " to " + sender.party.members[0] + "'s party");
-            // -> or he is not in a party and forms a new one
+                // -> or he is not in a party and forms a new one
             }
             else if (!sender.InParty())
             {
@@ -3380,7 +3416,7 @@ public partial class Player : Entity
     {
         // only while pet and owner aren't fighting
         return activePet != null &&
-               (          state == "IDLE" ||           state == "MOVING") &&
+               (state == "IDLE" || state == "MOVING") &&
                (activePet.state == "IDLE" || activePet.state == "MOVING");
     }
 
@@ -3452,8 +3488,8 @@ public partial class Player : Entity
             // can directly change it, or change it after casting?
             if (state == "IDLE" || state == "MOVING" || state == "STUNNED")
                 target = ni.GetComponent<Entity>();
-            else if (state == "CASTING")
-                nextTarget = ni.GetComponent<Entity>();
+            /* else if (state == "CASTING")
+                nextTarget = ni.GetComponent<Entity>(); */
         }
     }
 
@@ -3818,9 +3854,9 @@ public partial class Player : Entity
         // -> otherwise it overwrites player's WASD velocity for local player
         //    hosts
         // -> there might be away around it, but a warning is good for now
-/*         Component[] components = GetComponents<Component>();
-        if (Array.IndexOf(components, GetComponent<NetworkNavMeshAgentRubberbanding>()) >
-            Array.IndexOf(components, this))
-            Debug.LogWarning(name + "'s NetworkNavMeshAgentRubberbanding component is below the Player component. Please drag it above the Player component in the Inspector, otherwise there might be WASD movement issues due to the Update order."); */
+        /*         Component[] components = GetComponents<Component>();
+                if (Array.IndexOf(components, GetComponent<NetworkNavMeshAgentRubberbanding>()) >
+                    Array.IndexOf(components, this))
+                    Debug.LogWarning(name + "'s NetworkNavMeshAgentRubberbanding component is below the Player component. Please drag it above the Player component in the Inspector, otherwise there might be WASD movement issues due to the Update order."); */
     }
 }

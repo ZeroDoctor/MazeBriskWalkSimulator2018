@@ -42,9 +42,9 @@ public partial class UITarget : MonoBehaviour
             {
                 tradeButton.gameObject.SetActive(true);
                 tradeButton.interactable = player.CanStartTradeWith(target);
-                tradeButton.onClick.SetListener(() => {
+                /* tradeButton.onClick.SetListener(() => {
                     player.CmdTradeRequestSend();
-                });
+                }); */
             }
             else tradeButton.gameObject.SetActive(false);
 
@@ -56,7 +56,8 @@ public partial class UITarget : MonoBehaviour
                                                  player.guild.CanInvite(player.name, target.name) &&
                                                  NetworkTime.time >= player.nextRiskyActionTime &&
                                                  distance <= player.interactionRange;
-                guildInviteButton.onClick.SetListener(() => {
+                guildInviteButton.onClick.SetListener(() =>
+                {
                     player.CmdGuildInviteTarget();
                 });
             }
@@ -70,7 +71,8 @@ public partial class UITarget : MonoBehaviour
                                                  !((Player)target).InParty() &&
                                                  NetworkTime.time >= player.nextRiskyActionTime &&
                                                  distance <= player.interactionRange;
-                partyInviteButton.onClick.SetListener(() => {
+                partyInviteButton.onClick.SetListener(() =>
+                {
                     player.CmdPartyInvite(target.name);
                 });
             }

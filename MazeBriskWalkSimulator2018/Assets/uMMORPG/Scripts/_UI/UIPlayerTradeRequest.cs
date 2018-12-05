@@ -20,12 +20,12 @@ public partial class UIPlayerTradeRequest : MonoBehaviour
         {
             panel.SetActive(true);
             nameText.text = player.tradeRequestFrom;
-            acceptButton.onClick.SetListener(() => {
+            /* acceptButton.onClick.SetListener(() => {
                 player.CmdTradeRequestAccept();
-            });
-            declineButton.onClick.SetListener(() => {
+            }); */
+            /* declineButton.onClick.SetListener(() => {
                 player.CmdTradeRequestDecline();
-            });
+            }); */
         }
         else panel.SetActive(false); // hide
     }

@@ -35,14 +35,14 @@ public class ProjectileSkillEffect : SkillEffect
                 transform.position = Vector3.MoveTowards(transform.position, goal, speed);
                 transform.LookAt(goal);
 
-                if(target.collider.bounds.Contains(transform.position)) {
+                /* if(target.collider.bounds.Contains(transform.position)) {
                     transform.parent = target.transform;
                     if(!once && target.agent != null) {
                         //caster.hit.rigidbody.AddForce(-caster.hit.normal * caster.knockBack); // Does not work on navmesh agents
                         //target.agent.GetComponent<Rigidbody>().AddForce(-caster.hit.normal * caster.knockBack); // Didn't work either
                         once = true;
                     }
-                }
+                } */
 
                 if(isServer && transform.position == goal) {
                     if(target.health > 0 && !hasSetTime) {

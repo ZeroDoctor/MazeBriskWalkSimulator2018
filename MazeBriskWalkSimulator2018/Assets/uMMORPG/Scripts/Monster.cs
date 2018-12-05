@@ -556,12 +556,14 @@ public partial class Monster : Entity
     [Server]
     protected override string UpdateServer()
     {
-        if (state == "IDLE")    return UpdateServer_IDLE();
-        if (state == "MOVING")  return UpdateServer_MOVING();
-        if (state == "CASTING") return UpdateServer_CASTING();
-        if (state == "STUNNED") return UpdateServer_STUNNED();
-        if (state == "DEAD")    return UpdateServer_DEAD();
-        Debug.LogError("invalid state:" + state);
+        if(agent) {
+            if (state == "IDLE")    return UpdateServer_IDLE();
+            if (state == "MOVING")  return UpdateServer_MOVING();
+            if (state == "CASTING") return UpdateServer_CASTING();
+            if (state == "STUNNED") return UpdateServer_STUNNED();
+            if (state == "DEAD")    return UpdateServer_DEAD();
+            Debug.LogError("invalid state:" + state);
+        }
         return "IDLE";
     }
 

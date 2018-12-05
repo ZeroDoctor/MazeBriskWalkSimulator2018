@@ -31,6 +31,7 @@ public partial class UIRespawn : MonoBehaviour
             }
 
             go.GetComponent<GhostFlyCamera>().enabled = true;
+            player.m_MouseLook.SetCursorLock(true);
 
             go = GameObject.Find("MenuEnvironment");
             if(go != null) {

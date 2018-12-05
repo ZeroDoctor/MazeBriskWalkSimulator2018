@@ -36,7 +36,8 @@ public partial class UINpcDialogue : MonoBehaviour
 
             // trading button
             tradingButton.gameObject.SetActive(npc.saleItems.Length > 0);
-            tradingButton.onClick.SetListener(() => {
+            tradingButton.onClick.SetListener(() =>
+            {
                 npcTradingPanel.SetActive(true);
                 inventoryPanel.SetActive(true); // better feedback
                 panel.SetActive(false);
@@ -46,28 +47,31 @@ public partial class UINpcDialogue : MonoBehaviour
             teleportButton.gameObject.SetActive(npc.teleportTo != null);
             if (npc.teleportTo != null)
                 teleportButton.GetComponentInChildren<Text>().text = "Teleport: " + npc.teleportTo.name;
-            teleportButton.onClick.SetListener(() => {
+            /* teleportButton.onClick.SetListener(() => {
                 player.CmdNpcTeleport();
-            });
+            }); */
 
             // filter out the quests that are available for the player
             List<ScriptableQuest> questsAvailable = npc.QuestsVisibleFor(player);
             questsButton.gameObject.SetActive(questsAvailable.Count > 0);
-            questsButton.onClick.SetListener(() => {
+            questsButton.onClick.SetListener(() =>
+            {
                 npcQuestPanel.SetActive(true);
                 panel.SetActive(false);
             });
 
             // guild
             guildButton.gameObject.SetActive(npc.offersGuildManagement);
-            guildButton.onClick.SetListener(() => {
+            guildButton.onClick.SetListener(() =>
+            {
                 npcGuildPanel.SetActive(true);
                 panel.SetActive(false);
             });
 
             // pet revive
             petReviveButton.gameObject.SetActive(npc.offersPetRevive);
-            petReviveButton.onClick.SetListener(() => {
+            petReviveButton.onClick.SetListener(() =>
+            {
                 npcPetRevivePanel.SetActive(true);
                 inventoryPanel.SetActive(true); // better feedback
                 panel.SetActive(false);

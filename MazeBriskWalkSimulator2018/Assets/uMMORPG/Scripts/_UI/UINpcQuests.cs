@@ -51,10 +51,10 @@ public partial class UINpcQuests : MonoBehaviour
 
                     slot.actionButton.interactable = player.CanCompleteQuest(quest.name);
                     slot.actionButton.GetComponentInChildren<Text>().text = "Complete";
-                    slot.actionButton.onClick.SetListener(() => {
+                    /* slot.actionButton.onClick.SetListener(() => {
                         player.CmdCompleteQuest(npcIndex);
                         panel.SetActive(false);
-                    });
+                    }); */
                 }
                 else
                 {
@@ -62,9 +62,9 @@ public partial class UINpcQuests : MonoBehaviour
                     slot.descriptionText.text = new Quest(npc.quests[npcIndex]).ToolTip();
                     slot.actionButton.interactable = true;
                     slot.actionButton.GetComponentInChildren<Text>().text = "Accept";
-                    slot.actionButton.onClick.SetListener(() => {
+                    /* slot.actionButton.onClick.SetListener(() => {
                         player.CmdAcceptQuest(npcIndex);
-                    });
+                    }); */
                 }
             }
         }

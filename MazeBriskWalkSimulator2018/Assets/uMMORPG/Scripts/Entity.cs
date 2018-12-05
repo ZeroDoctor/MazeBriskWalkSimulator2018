@@ -656,7 +656,7 @@ public abstract partial class Entity : NetworkBehaviour
             mana -= skill.manaCosts;
 
             // start the cooldown (and save it in the struct)
-            //skill.cooldownEnd = NetworkTime.time + skill.cooldown;
+            skill.cooldownEnd = NetworkTime.time + skill.cooldown;
 
             // save any skill modifications in any case
             skills[currentSkill] = skill;
